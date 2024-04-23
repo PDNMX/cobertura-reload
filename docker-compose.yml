@@ -1,0 +1,40 @@
+version: "3"
+services:
+  api:
+    image: directus/directus:10
+    ports:
+      - 8055:8055
+    depends_on:
+      - db
+    environment:
+      KEY: "replace-with-random-value"
+      SECRET: "replace-with-random-value"
+      ADMIN_EMAIL: "admin@admin.com"
+      ADMIN_PASSWORD: "directus"
+      DB_CLIENT: "postgres"
+      DB_HOST: "db"
+      DB_PORT: "5432"
+      DB_DATABASE: ${DATABASE_NAME}
+      DB_USER: ${DATABASE_USERNAME}
+      DB_PASSWORD: ${DATABASE_PASSWORD}
+      DB_VERSION: "14"
+      WEBSOCKETS_ENABLED: false
+      TELEMETRY: false
+      GRAPHQL_INTROSPECTION: false
+      CACHE_ENABLED: false
+      WEBSOCKETS_GRAPHQL_ENABLED: false
+      CORS_CREDENTIALS: true
+      CORS_ENABLED: true
+
+  db:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+volumes:
+  postgres: {}
