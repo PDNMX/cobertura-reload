@@ -8,7 +8,7 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { columns } from "./columns";
 
-export const EmployeesTable = ({ data }: any) => {
+export const EntesTable = ({ data }: any) => {
   const router = useRouter();
 
   return (
