@@ -2,6 +2,7 @@ version: "3"
 services:
   api:
     image: directus/directus:10
+    restart: always
     ports:
       - 8055:8055
     depends_on:
