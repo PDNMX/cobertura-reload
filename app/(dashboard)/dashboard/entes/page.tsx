@@ -10,13 +10,13 @@ import { useEffect, useState } from "react";
 const breadcrumbItems = [{ title: "Entes Públicos", link: "/dashboard/entes" }];
 
 export default function page() {
-  const [entes_publicos, setEntes_publicos] = useState([]);
+  const [entes, setEntes] = useState([]);
 
   useEffect(() => {
     async function fetchData() {
       try {
         const result: any = await directus.request(
-          readItems("entes_publicos", {
+          readItems("Entes", {
             fields: ["*"],
           }),
         );
@@ -28,7 +28,7 @@ export default function page() {
           poderGobierno: item.poderGobierno,
         }));
 
-        setEntes_publicos(processedData);
+        setEntes(processedData);
       } catch (error) {
         console.error("Error fetching articles:", error);
       }
@@ -37,13 +37,13 @@ export default function page() {
     fetchData();
   }, []);
 
-  console.log({ entes_publicos });
+  console.log({ entes });
 
   return (
     <>
       <div className="flex-1 space-y-4  p-4 md:p-8 pt-6">
         <BreadCrumb items={breadcrumbItems} />
-        <EntesTable data={entes_publicos} />
+        <EntesTable data={entes} />
       </div>
     </>
   );

@@ -29,7 +29,7 @@ export const columns: ColumnDef<User>[] = [
     header: "Nombre",
   },
   {
-    accessorKey: "poderGobierno",
+    accessorKey: "poder_de_gobierno",
     header: "Poder Gobierno",
   },
   {

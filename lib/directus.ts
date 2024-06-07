@@ -1,3 +1,4 @@
+// src/lib/directus.ts
 import { createDirectus, rest, authentication } from "@directus/sdk";
 
 // Declare the type for process.env to include NEXT_PUBLIC_BACKEND_URL
