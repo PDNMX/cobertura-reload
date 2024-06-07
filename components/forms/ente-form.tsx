@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/form";
 import { Heading } from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -26,9 +25,10 @@ import { useParams, useRouter } from "next/navigation";
 import { useForm, FormProvider } from "react-hook-form";
 import * as z from "zod";
 import { useToast } from "@/components/ui/use-toast";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import directus from "@/lib/directus";
-import { readItems, createItem } from "@directus/sdk";
+import { createItem } from "@directus/sdk";
+import { Switch } from "@/components/ui/switch";
 
 const formSchema = z.object({
   nombre: z
@@ -40,24 +40,12 @@ const formSchema = z.object({
   poderGobierno: z.enum(["Ejecutivo", "Judicial", "Legislativo", "Autonomo"], {
     message: "Selecciona una opción válida",
   }),
-  controlOIC: z
-    .string()
-    .min(3, { message: "Employee name must be at least 3 characters" }),
-  controlTribunal: z
-    .string()
-    .min(3, { message: "Employee name must be at least 3 characters" }),
-  sistema1: z
-    .string()
-    .min(3, { message: "Employee name must be at least 3 characters" }),
-  sistema2: z
-    .string()
-    .min(3, { message: "Employee name must be at least 3 characters" }),
-  sistema3: z
-    .string()
-    .min(3, { message: "Employee name must be at least 3 characters" }),
-  sistema6: z
-    .string()
-    .min(3, { message: "Employee name must be at least 3 characters" }),
+  controlOIC: z.boolean().optional(),
+  controlTribunal: z.boolean().optional(),
+  sistema1: z.boolean().optional(),
+  sistema2: z.boolean().optional(),
+  sistema3: z.boolean().optional(),
+  sistema6: z.boolean().optional(),
   entidad: z
     .string()
     .min(3, { message: "Employee name must be at least 3 characters" }),
@@ -98,12 +86,12 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
         nombre: "",
         ambitoGobierno: "",
         poderGobierno: "",
-        controlOIC: "",
-        controlTribunal: "",
-        sistema1: "",
-        sistema2: "",
-        sistema3: "",
-        sistema6: "",
+        controlOIC: false,
+        controlTribunal: false,
+        sistema1: false,
+        sistema2: false,
+        sistema3: false,
+        sistema6: false,
         entidad: "",
         municipio: "",
         status: "Published",
@@ -161,6 +149,25 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
     ambito === "Municipal"
       ? ["Ejecutivo"]
       : ["Ejecutivo", "Judicial", "Legislativo", "Autonomo"];
+
+  useEffect(() => {
+    const controlOIC = form.watch("controlOIC");
+    const controlTribunal = form.watch("controlTribunal");
+
+    if (controlOIC) {
+      form.setValue("sistema1", false);
+      form.setValue("sistema2", false);
+      form.setValue("sistema6", false);
+    }
+
+    if (controlTribunal) {
+      form.setValue("controlOIC", false);
+    }
+
+    if (!controlOIC && !controlTribunal) {
+      form.setValue("sistema3", false);
+    }
+  }, [form.watch("controlOIC"), form.watch("controlTribunal")]);
 
   return (
     <>
@@ -282,13 +289,24 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
               control={form.control}
               name="controlOIC"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Organo Interno de Control</FormLabel>
+                <FormItem className="flex flex-col items-center">
+                  <FormLabel className="text-center">
+                    Órgano Interno de Control
+                  </FormLabel>
                   <FormControl>
-                    <Input
+                    <Switch
+                      checked={field.value ?? false}
+                      onCheckedChange={(checked) => {
+                        form.setValue("controlOIC", checked);
+                        if (checked) {
+                          form.setValue("controlTribunal", false);
+                          form.setValue("sistema1", false);
+                          form.setValue("sistema2", false);
+                          form.setValue("sistema3", false);
+                          form.setValue("sistema6", false);
+                        }
+                      }}
                       disabled={loading}
-                      placeholder="TRUE/FALSE"
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -299,13 +317,20 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
               control={form.control}
               name="controlTribunal"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tribunal de Justicia Administrativa</FormLabel>
+                <FormItem className="flex flex-col items-center">
+                  <FormLabel className="text-center">
+                    Tribunal de Justicia Administrativa
+                  </FormLabel>
                   <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="TRUE/FALSE"
-                      {...field}
+                    <Switch
+                      checked={field.value ?? false}
+                      onCheckedChange={(checked) => {
+                        form.setValue("controlTribunal", checked);
+                        if (checked) {
+                          form.setValue("controlOIC", false);
+                        }
+                      }}
+                      disabled={loading || form.watch("controlOIC")}
                     />
                   </FormControl>
                   <FormMessage />
@@ -316,13 +341,13 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
               control={form.control}
               name="sistema1"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Sistema 1</FormLabel>
+                <FormItem className="flex flex-col items-center">
+                  <FormLabel className="text-center">Sistema 1</FormLabel>
                   <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="TRUE/FALSE"
-                      {...field}
+                    <Switch
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                      disabled={loading || form.watch("controlOIC")}
                     />
                   </FormControl>
                   <FormMessage />
@@ -333,13 +358,13 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
               control={form.control}
               name="sistema2"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Sistema 2</FormLabel>
+                <FormItem className="flex flex-col items-center">
+                  <FormLabel className="text-center">Sistema 2</FormLabel>
                   <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="TRUE/FALSE"
-                      {...field}
+                    <Switch
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                      disabled={loading || form.watch("controlOIC")}
                     />
                   </FormControl>
                   <FormMessage />
@@ -350,13 +375,17 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
               control={form.control}
               name="sistema3"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Sistema 3</FormLabel>
+                <FormItem className="flex flex-col items-center">
+                  <FormLabel className="text-center">Sistema 3</FormLabel>
                   <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="TRUE/FALSE"
-                      {...field}
+                    <Switch
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                      disabled={
+                        loading ||
+                        (!form.watch("controlOIC") &&
+                          !form.watch("controlTribunal"))
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -367,13 +396,13 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
               control={form.control}
               name="sistema6"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Sistema 6</FormLabel>
+                <FormItem className="flex flex-col items-center">
+                  <FormLabel className="text-center">Sistema 6</FormLabel>
                   <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="TRUE/FALSE"
-                      {...field}
+                    <Switch
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                      disabled={loading || form.watch("controlOIC")}
                     />
                   </FormControl>
                   <FormMessage />
