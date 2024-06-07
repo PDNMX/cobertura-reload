@@ -23,11 +23,10 @@ import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import * as z from "zod";
-import { useToast } from "../ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { useEffect, useState } from "react";
-
 import directus from "@/lib/directus";
 import { readItems, createItem } from "@directus/sdk";
 
@@ -35,12 +34,12 @@ const formSchema = z.object({
   nombre: z
     .string()
     .min(3, { message: "Employee name must be at least 3 characters" }),
-  ambitoGobierno: z
-    .string()
-    .min(3, { message: "Employee name must be at least 3 characters" }),
-  poderGobierno: z
-    .string()
-    .min(3, { message: "Employee name must be at least 3 characters" }),
+  ambitoGobierno: z.enum(["Estatal", "Federal", "Municipal"], {
+    message: "Selecciona una opción válida",
+  }),
+  poderGobierno: z.enum(["Ejecutivo", "Judicial", "Legislativo", "Autonomo"], {
+    message: "Selecciona una opción válida",
+  }),
   controlOIC: z
     .string()
     .min(3, { message: "Employee name must be at least 3 characters" }),
@@ -74,17 +73,23 @@ interface ProductFormProps {
   initialData: any | null;
 }
 
-export const EnteForm: React.FC<ProductFormProps> = ({
-  initialData
-}) => {
+export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const title = initialData ? "Editar ente públicos" : "Crear ente público";
-  const description = initialData ? "Edit a employee." : "Agregar un nuevo ente público";
-  const toastMessage = initialData ? "Employee updated." : "Ente público creado.";
+  const [ambito, setAmbito] = useState(
+    initialData ? initialData.ambitoGobierno : ""
+  );
+
+  const title = initialData ? "Editar ente público" : "Crear ente público";
+  const description = initialData
+    ? "Edit a employee."
+    : "Agregar un nuevo ente público";
+  const toastMessage = initialData
+    ? "Employee updated."
+    : "Ente público creado.";
   const action = initialData ? "Save changes" : "Crear";
 
   const defaultValues = initialData
@@ -113,12 +118,8 @@ export const EnteForm: React.FC<ProductFormProps> = ({
     try {
       setLoading(true);
       if (initialData) {
-        // await axios.post(`/api/products/edit-product/${initialData._id}`, data);
         await directus.request(createItem("entes2", data));
       } else {
-        // const res = await axios.post(`/api/products/create-product`, data);
-        // console.log("product", res);
-
         await directus.request(createItem("entes2", data));
       }
       router.refresh();
@@ -142,7 +143,6 @@ export const EnteForm: React.FC<ProductFormProps> = ({
   const onDelete = async () => {
     try {
       setLoading(true);
-      //   await axios.delete(`/api/${params.storeId}/products/${params.productId}`);
       router.refresh();
       router.push(`/${params.storeId}/products`);
     } catch (error: any) {
@@ -152,14 +152,18 @@ export const EnteForm: React.FC<ProductFormProps> = ({
     }
   };
 
+  const handleAmbitoChange = (value: "Estatal" | "Federal" | "Municipal") => {
+    setAmbito(value);
+    form.setValue("ambitoGobierno", value);
+  };
+
+  const poderOptions =
+    ambito === "Municipal"
+      ? ["Ejecutivo"]
+      : ["Ejecutivo", "Judicial", "Legislativo", "Autonomo"];
+
   return (
     <>
-      {/* <AlertModal
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        onConfirm={onDelete}
-        loading={loading}
-      /> */}
       <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
         {initialData && (
@@ -167,18 +171,19 @@ export const EnteForm: React.FC<ProductFormProps> = ({
             disabled={loading}
             variant="destructive"
             size="sm"
-            onClick={() => setOpen(true)}>
+            onClick={() => setOpen(true)}
+          >
             <Trash className="h-4 w-4" />
           </Button>
         )}
       </div>
       <Separator />
-      <Form {...form}>
+      <FormProvider {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-full">
+          className="space-y-8 w-full"
+        >
           <div className="md:grid md:grid-cols-3 gap-8">
-            {/* Hidden status field */}
             <FormField
               control={form.control}
               name="status"
@@ -219,14 +224,28 @@ export const EnteForm: React.FC<ProductFormProps> = ({
               name="ambitoGobierno"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Ambito de Gobierno</FormLabel>
-                  <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="Selecciona"
-                      {...field}
-                    />
-                  </FormControl>
+                  <FormLabel>Ámbito de Gobierno</FormLabel>
+                  <Select
+                    disabled={loading}
+                    onValueChange={(value) => {
+                      handleAmbitoChange(
+                        value as "Estatal" | "Federal" | "Municipal"
+                      );
+                      field.onChange(value);
+                    }}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un ámbito" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Estatal">Estatal</SelectItem>
+                      <SelectItem value="Federal">Federal</SelectItem>
+                      <SelectItem value="Municipal">Municipal</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -237,13 +256,24 @@ export const EnteForm: React.FC<ProductFormProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Poder de Gobierno</FormLabel>
-                  <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="Selecciona"
-                      {...field}
-                    />
-                  </FormControl>
+                  <Select
+                    disabled={loading}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un poder" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {poderOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -359,7 +389,7 @@ export const EnteForm: React.FC<ProductFormProps> = ({
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Automatico del usuario"
+                      placeholder="Automático del usuario"
                       {...field}
                     />
                   </FormControl>
@@ -376,7 +406,7 @@ export const EnteForm: React.FC<ProductFormProps> = ({
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Condicional solo si ambito es MUNICIPAL"
+                      placeholder="Condicional solo si ámbito es MUNICIPAL"
                       {...field}
                     />
                   </FormControl>
@@ -389,8 +419,7 @@ export const EnteForm: React.FC<ProductFormProps> = ({
             {action}
           </Button>
         </form>
-      </Form>
+      </FormProvider>
     </>
   );
 };
- 
