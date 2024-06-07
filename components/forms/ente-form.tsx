@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Heading } from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -26,52 +27,45 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useToast } from "../ui/use-toast";
 import { useEffect, useState } from "react";
-import { Switch } from "@/components/ui/switch"; // Importa el nuevo componente Switch
-import directus from "@/lib/directus"; // Importa el cliente Directus
 
-// Define los tipos para entidades, municipios y regiones
-interface Entidad {
-  id_entidad: string;
-  nombre: string;
-  id_region: number;
-}
-
-interface Municipio {
-  id_municipio: string;
-  nombre: string;
-  id_entidad: string;
-}
-
-interface Region {
-  id: number;
-  nombre: string;
-}
+import directus from "@/lib/directus";
+import { readItems, createItem } from "@directus/sdk";
 
 const formSchema = z.object({
   nombre: z
     .string()
-    .min(3, { message: "El nombre debe tener al menos 3 caracteres" }),
-  ambito_de_gobierno: z.enum(["Estatal", "Federal", "Municipal"], {
-    message: "Selecciona una opción válida",
-  }),
-  poder_de_gobierno: z.enum(
-    ["Ejecutivo", "Judicial", "Legislativo", "Autonomo"],
-    {
-      message: "Selecciona una opción válida",
-    }
-  ),
-  control_oic: z.boolean().optional(),
-  control_tribunal: z.boolean().optional(),
-  sistema_1: z.boolean().optional(),
-  sistema_2: z.boolean().optional(),
-  sistema_3: z.boolean().optional(),
-  sistema_6: z.boolean().optional(),
-  id_entidad: z.string().min(2, { message: "Selecciona una entidad válida" }),
-  id_municipio: z
+    .min(3, { message: "Employee name must be at least 3 characters" }),
+  ambitoGobierno: z
     .string()
-    .min(3, { message: "Selecciona un municipio válido" })
-    .optional(),
-  status: z.string().min(3, { message: "Selecciona un estado" }),
+    .min(3, { message: "Employee name must be at least 3 characters" }),
+  poderGobierno: z
+    .string()
+    .min(3, { message: "Employee name must be at least 3 characters" }),
+  controlOIC: z
+    .string()
+    .min(3, { message: "Employee name must be at least 3 characters" }),
+  controlTribunal: z
+    .string()
+    .min(3, { message: "Employee name must be at least 3 characters" }),
+  sistema1: z
+    .string()
+    .min(3, { message: "Employee name must be at least 3 characters" }),
+  sistema2: z
+    .string()
+    .min(3, { message: "Employee name must be at least 3 characters" }),
+  sistema3: z
+    .string()
+    .min(3, { message: "Employee name must be at least 3 characters" }),
+  sistema6: z
+    .string()
+    .min(3, { message: "Employee name must be at least 3 characters" }),
+  entidad: z
+    .string()
+    .min(3, { message: "Employee name must be at least 3 characters" }),
+  municipio: z
+    .string()
+    .min(3, { message: "Employee name must be at least 3 characters" }),
+  status: z.string().min(3, { message: "Select status" }),
 });
 
 type ProductFormValues = z.infer<typeof formSchema>;
@@ -80,79 +74,33 @@ interface ProductFormProps {
   initialData: any | null;
 }
 
-export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
+export const EnteForm: React.FC<ProductFormProps> = ({
+  initialData
+}) => {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const title = initialData ? "Editar ente públicos" : "Crear ente público";
-  const description = initialData
-    ? "Edit a employee."
-    : "Agregar un nuevo ente público";
-  const toastMessage = initialData
-    ? "Employee updated."
-    : "Ente público creado.";
+  const description = initialData ? "Edit a employee." : "Agregar un nuevo ente público";
+  const toastMessage = initialData ? "Employee updated." : "Ente público creado.";
   const action = initialData ? "Save changes" : "Crear";
-
-  const [entidades, setEntidades] = useState<Entidad[]>([]);
-  const [municipios, setMunicipios] = useState<Municipio[]>([]);
-  const [regiones, setRegiones] = useState<Region[]>([]);
-
-  useEffect(() => {
-    const fetchCatalogs = async () => {
-      try {
-        const entidadesResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/items/Entidad`,
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
-        const entidadesData = await entidadesResponse.json();
-        setEntidades(entidadesData.data);
-
-        const municipiosResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/items/Municipio`,
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
-        const municipiosData = await municipiosResponse.json();
-        setMunicipios(municipiosData.data);
-
-        const regionesResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/items/Region`,
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
-        const regionesData = await regionesResponse.json();
-        setRegiones(regionesData.data);
-      } catch (error) {
-        console.error("Error fetching catalogs:", error);
-      }
-    };
-
-    fetchCatalogs();
-  }, []);
 
   const defaultValues = initialData
     ? initialData
     : {
         nombre: "",
-        ambito_de_gobierno: "",
-        poder_de_gobierno: "",
-        control_oic: false,
-        control_tribunal: false,
-        sistema_1: false,
-        sistema_2: false,
-        sistema_3: false,
-        sistema_6: false,
-        id_entidad: "",
-        id_municipio: "",
+        ambitoGobierno: "",
+        poderGobierno: "",
+        controlOIC: "",
+        controlTribunal: "",
+        sistema1: "",
+        sistema2: "",
+        sistema3: "",
+        sistema6: "",
+        entidad: "",
+        municipio: "",
         status: "Published",
       };
 
@@ -164,43 +112,27 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setLoading(true);
-      const response = initialData
-        ? await fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/items/Entes/${initialData.id}`,
-            {
-              method: "PATCH",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              credentials: "include",
-              body: JSON.stringify(data),
-            }
-          )
-        : await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/items/Entes`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify(data),
-          });
+      if (initialData) {
+        // await axios.post(`/api/products/edit-product/${initialData._id}`, data);
+        await directus.request(createItem("entes2", data));
+      } else {
+        // const res = await axios.post(`/api/products/create-product`, data);
+        // console.log("product", res);
 
-      if (!response.ok) {
-        throw new Error("Failed to save data");
+        await directus.request(createItem("entes2", data));
       }
-
       router.refresh();
       router.push(`/dashboard/entes`);
       toast({
         variant: "default",
         title: "Created Successfully",
-        description: "Ente público creado exitosamente.",
+        description: "Hurry! Employee created successfully.",
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Uh oh! Algo salió mal.",
-        description: "Hubo un problema con tu solicitud.",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your request.",
       });
     } finally {
       setLoading(false);
@@ -210,22 +142,10 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
   const onDelete = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/items/Entes/${initialData.id}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete data");
-      }
-
+      //   await axios.delete(`/api/${params.storeId}/products/${params.productId}`);
       router.refresh();
-      router.push(`/dashboard/entes`);
+      router.push(`/${params.storeId}/products`);
     } catch (error: any) {
-      console.error("Failed to delete data:", error);
     } finally {
       setLoading(false);
       setOpen(false);
@@ -234,6 +154,12 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
 
   return (
     <>
+      {/* <AlertModal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        onConfirm={onDelete}
+        loading={loading}
+      /> */}
       <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
         {initialData && (
@@ -241,8 +167,7 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
             disabled={loading}
             variant="destructive"
             size="sm"
-            onClick={() => setOpen(true)}
-          >
+            onClick={() => setOpen(true)}>
             <Trash className="h-4 w-4" />
           </Button>
         )}
@@ -251,9 +176,27 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-full"
-        >
+          className="space-y-8 w-full">
           <div className="md:grid md:grid-cols-3 gap-8">
+            {/* Hidden status field */}
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem className="hidden">
+                  <FormLabel>Status</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Employee name"
+                      value={"Published"}
+                      readOnly
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="nombre"
@@ -273,70 +216,15 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
             />
             <FormField
               control={form.control}
-              name="ambito_de_gobierno"
+              name="ambitoGobierno"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Ámbito de Gobierno</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un ámbito" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Estatal">Estatal</SelectItem>
-                      <SelectItem value="Federal">Federal</SelectItem>
-                      <SelectItem value="Municipal">Municipal</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="poder_de_gobierno"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Poder de Gobierno</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un poder" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Ejecutivo">Ejecutivo</SelectItem>
-                      <SelectItem value="Judicial">Judicial</SelectItem>
-                      <SelectItem value="Legislativo">Legislativo</SelectItem>
-                      <SelectItem value="Autonomo">Autonomo</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="control_oic"
-              render={({ field }) => (
-                <FormItem className="flex flex-col items-center">
-                  <FormLabel className="text-center">
-                    Órgano Interno de Control
-                  </FormLabel>
+                  <FormLabel>Ambito de Gobierno</FormLabel>
                   <FormControl>
-                    <Switch
-                      checked={field.value ?? false}
-                      onCheckedChange={field.onChange}
+                    <Input
                       disabled={loading}
+                      placeholder="Selecciona"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -345,15 +233,49 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
             />
             <FormField
               control={form.control}
-              name="control_tribunal"
+              name="poderGobierno"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Poder de Gobierno</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Selecciona"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="controlOIC"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Organo Interno de Control</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="TRUE/FALSE"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="controlTribunal"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tribunal de Justicia Administrativa</FormLabel>
                   <FormControl>
-                    <Switch
-                      checked={field.value ?? false}
-                      onCheckedChange={field.onChange}
+                    <Input
                       disabled={loading}
+                      placeholder="TRUE/FALSE"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -362,15 +284,15 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
             />
             <FormField
               control={form.control}
-              name="sistema_1"
+              name="sistema1"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sistema 1</FormLabel>
                   <FormControl>
-                    <Switch
-                      checked={field.value ?? false}
-                      onCheckedChange={field.onChange}
+                    <Input
                       disabled={loading}
+                      placeholder="TRUE/FALSE"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -379,15 +301,15 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
             />
             <FormField
               control={form.control}
-              name="sistema_2"
+              name="sistema2"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sistema 2</FormLabel>
                   <FormControl>
-                    <Switch
-                      checked={field.value ?? false}
-                      onCheckedChange={field.onChange}
+                    <Input
                       disabled={loading}
+                      placeholder="TRUE/FALSE"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -396,15 +318,15 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
             />
             <FormField
               control={form.control}
-              name="sistema_3"
+              name="sistema3"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sistema 3</FormLabel>
                   <FormControl>
-                    <Switch
-                      checked={field.value ?? false}
-                      onCheckedChange={field.onChange}
+                    <Input
                       disabled={loading}
+                      placeholder="TRUE/FALSE"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -413,15 +335,15 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
             />
             <FormField
               control={form.control}
-              name="sistema_6"
+              name="sistema6"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sistema 6</FormLabel>
                   <FormControl>
-                    <Switch
-                      checked={field.value ?? false}
-                      onCheckedChange={field.onChange}
+                    <Input
                       disabled={loading}
+                      placeholder="TRUE/FALSE"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -430,62 +352,34 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
             />
             <FormField
               control={form.control}
-              name="id_entidad"
+              name="entidad"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Entidad</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona una entidad" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {entidades.map((entidad) => (
-                        <SelectItem
-                          key={entidad.id_entidad}
-                          value={entidad.id_entidad}
-                        >
-                          {entidad.nombre}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Automatico del usuario"
+                      {...field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
-              name="id_municipio"
+              name="municipio"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Municipio</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un municipio" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {municipios.map((municipio) => (
-                        <SelectItem
-                          key={municipio.id_municipio}
-                          value={municipio.id_municipio}
-                        >
-                          {municipio.nombre}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Condicional solo si ambito es MUNICIPAL"
+                      {...field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -499,3 +393,4 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
     </>
   );
 };
+ 
