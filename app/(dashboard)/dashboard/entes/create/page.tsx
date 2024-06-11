@@ -13,15 +13,6 @@ export default function Page() {
       <div className="flex-1 space-y-4 p-5">
         <BreadCrumb items={breadcrumbItems} />
         <EnteForm
-          companies={[
-            { _id: "Uplers", name: "Uplers" },
-            { _id: "Apple", name: "Apple" },
-            { _id: "Google", name: "Google" },
-          ]}
-          genders={[
-            { _id: "male", name: "Male" },
-            { _id: "female", name: "Female" },
-          ]}
           initialData={null}
           key={null}
         />

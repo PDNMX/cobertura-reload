@@ -27,7 +27,7 @@ export const EntesTable = ({ data }: any) => {
       </div>
       <Separator />
 
-      <DataTable searchKey="Name" columns={columns} data={data} />
+      <DataTable searchKey="nombre" columns={columns} data={data} />
     </>
   );
 };
