@@ -11,12 +11,12 @@ export const authOptions: NextAuthOptions = {
     CredentialProvider({
       credentials: {
         email: {
-          label: "email",
+          label: "Correo Electrónico",
           type: "email",
           placeholder: "user@gmail.com",
         },
         password: {
-          label: "password",
+          label: "Contraseña",
           type: "password",
           placeholder: "",
         },
@@ -34,7 +34,7 @@ export const authOptions: NextAuthOptions = {
         const user = await res.json();
         // If no error and we have user data, return it
         if (!res.ok && user) {
-          throw new Error("Email address or password is invalid");
+          throw new Error("Datos incorrectos");
         }
         if (res.ok && user) {
           return user;

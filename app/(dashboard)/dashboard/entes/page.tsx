@@ -30,7 +30,7 @@ export default function page() {
 
         setEntes(processedData);
       } catch (error) {
-        console.error("Error fetching articles:", error);
+        console.error("Error al cargar los datos:", error);
       }
     }
 
