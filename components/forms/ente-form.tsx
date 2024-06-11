@@ -37,21 +37,20 @@ const formSchema = z.object({
   ambitoGobierno: z.enum(["Estatal", "Federal", "Municipal"], {
     message: "Selecciona una opción válida",
   }),
-  poderGobierno: z.enum(["Ejecutivo", "Judicial", "Legislativo", "Autonomo"], {
-    message: "Selecciona una opción válida",
-  }),
+  poderGobierno: z.enum(
+    ["Ejecutivo", "Judicial", "Legislativo", "Autonomo"],
+    {
+      message: "Selecciona una opción válida",
+    }
+  ),
   controlOIC: z.boolean().optional(),
   controlTribunal: z.boolean().optional(),
   sistema1: z.boolean().optional(),
   sistema2: z.boolean().optional(),
   sistema3: z.boolean().optional(),
   sistema6: z.boolean().optional(),
-  entidad: z
-    .string()
-    .min(3, { message: "Employee name must be at least 3 characters" }),
-  municipio: z
-    .string()
-    .min(3, { message: "Employee name must be at least 3 characters" }),
+  entidad: z.string(),
+  municipio: z.string(),
   status: z.string().min(3, { message: "Select status" }),
 });
 
@@ -285,6 +284,8 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
                 </FormItem>
               )}
             />
+          </div>
+          <div className="md:grid md:grid-cols-2 gap-8">
             <FormField
               control={form.control}
               name="controlOIC"
@@ -337,6 +338,8 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
                 </FormItem>
               )}
             />
+          </div>
+          <div className="md:grid md:grid-cols-4 gap-8">
             <FormField
               control={form.control}
               name="sistema1"
@@ -409,6 +412,8 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
                 </FormItem>
               )}
             />
+          </div>
+          <div className="md:grid md:grid-cols-2 gap-8">
             <FormField
               control={form.control}
               name="entidad"
