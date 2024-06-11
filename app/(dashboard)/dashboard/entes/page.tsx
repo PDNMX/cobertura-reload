@@ -16,7 +16,7 @@ export default function page() {
     async function fetchData() {
       try {
         const result: any = await directus.request(
-          readItems("Entes", {
+          readItems("entes", {
             fields: ["*"],
           }),
         );

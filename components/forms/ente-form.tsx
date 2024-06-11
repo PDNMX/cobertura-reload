@@ -106,9 +106,9 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
     try {
       setLoading(true);
       if (initialData) {
-        await directus.request(createItem("entes2", data));
+        await directus.request(createItem("entes", data));
       } else {
-        await directus.request(createItem("entes2", data));
+        await directus.request(createItem("entes", data));
       }
       router.refresh();
       router.push(`/dashboard/entes`);
