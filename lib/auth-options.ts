@@ -9,17 +9,10 @@ import { readMe, withToken } from "@directus/sdk";
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialProvider({
+      name: 'Credentials',
       credentials: {
-        email: {
-          label: "Correo Electrónico",
-          type: "email",
-          placeholder: "user@gmail.com",
-        },
-        password: {
-          label: "Contraseña",
-          type: "password",
-          placeholder: "",
-        },
+        email: {},
+        password: {},
       },
       async authorize(credentials) {
         // Add logic here to look up the user from the credentials supplied

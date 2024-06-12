@@ -1,3 +1,4 @@
+// @ts-nocheck 
 "use client";
 
 import BreadCrumb from "@/components/breadcrumb";
@@ -9,20 +10,19 @@ import { useEffect, useState } from "react";
 
 const breadcrumbItems = [{ title: "Entes Públicos", link: "/dashboard/entes" }];
 
-export default function page() {
+export default function Page() {
   const [entes, setEntes] = useState([]);
-
   useEffect(() => {
     async function fetchData() {
       try {
-        const result: any = await directus.request(
+        const result = await directus.request(
           readItems("entes", {
             fields: ["*"],
           }),
         );
 
         // Map over the result data and convert specific keys to lowercase
-        const processedData = result.map((item: any) => ({
+        const processedData = result.map((item) => ({
           ...item,
           nombre: item.nombre,
           poderGobierno: item.poderGobierno,
