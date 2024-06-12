@@ -1,3 +1,4 @@
+version: "3"
 services:
 
   frontend:
@@ -6,7 +7,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - 3030:3000
+      - 3060:3000
 
   api:
     image: directus/directus:10
@@ -20,6 +21,7 @@ services:
       SECRET: ${DIRECTUS_SECRET}
       ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL}
       ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
+      PUBLIC_URL: ${NEXT_PUBLIC_BACKEND_URL}
       DB_CLIENT: "postgres"
       DB_HOST: "db"
       DB_PORT: "5432"
@@ -27,13 +29,13 @@ services:
       DB_USER: ${DATABASE_USERNAME}
       DB_PASSWORD: ${DATABASE_PASSWORD}
       DB_VERSION: "14"
-      WEBSOCKETS_ENABLED: false
-      TELEMETRY: false
-      GRAPHQL_INTROSPECTION: false
-      CACHE_ENABLED: false
-      WEBSOCKETS_GRAPHQL_ENABLED: false
-      CORS_CREDENTIALS: true
-      CORS_ENABLED: true
+      WEBSOCKETS_ENABLED: 0
+      TELEMETRY: 0
+      GRAPHQL_INTROSPECTION: 0
+      CACHE_ENABLED: 0
+      WEBSOCKETS_GRAPHQL_ENABLED: 0
+      CORS_CREDENTIALS: 1
+      CORS_ENABLED: 1
 
   db:
     image: postgres:14-alpine
