@@ -29,8 +29,21 @@ export const columns: ColumnDef<User>[] = [
     header: "Nombre",
   },
   {
+    accessorKey: "ambitoGobierno",
+    header: "Ambito Gobierno",
+  },
+
+  {
     accessorKey: "poderGobierno",
     header: "Poder Gobierno",
+  },
+  {
+    accessorKey: "entidad",
+    header: "ID Entidad",
+  },
+  {
+    accessorKey: "municipio",
+    header: "ID Municipio",
   },
   {
     id: "actions",
