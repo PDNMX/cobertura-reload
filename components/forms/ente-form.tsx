@@ -37,12 +37,9 @@ const formSchema = z.object({
   ambitoGobierno: z.enum(["Estatal", "Federal", "Municipal"], {
     message: "Selecciona una opción válida",
   }),
-  poderGobierno: z.enum(
-    ["Ejecutivo", "Judicial", "Legislativo", "Autonomo"],
-    {
-      message: "Selecciona una opción válida",
-    }
-  ),
+  poderGobierno: z.enum(["Ejecutivo", "Judicial", "Legislativo", "Autonomo"], {
+    message: "Selecciona una opción válida",
+  }),
   controlOIC: z.boolean().optional(),
   controlTribunal: z.boolean().optional(),
   sistema1: z.boolean().optional(),
@@ -50,7 +47,7 @@ const formSchema = z.object({
   sistema3: z.boolean().optional(),
   sistema6: z.boolean().optional(),
   entidad: z.string(),
-  municipio: z.string(),
+  municipio: z.string().nullable(), // Permitir valores nulos
   status: z.string().min(3, { message: "Select status" }),
 });
 
@@ -92,7 +89,7 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
         sistema3: false,
         sistema6: false,
         entidad: "",
-        municipio: "",
+        municipio: "", // Cadena vacía por defecto
         status: "Published",
       };
 
@@ -104,6 +101,9 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setLoading(true);
+      if (data.municipio === "") {
+        data.municipio = null; // Convertir cadena vacía a null antes de enviar
+      }
       if (initialData) {
         await directus.request(createItem("entes", data));
       } else {
@@ -142,6 +142,9 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
   const handleAmbitoChange = (value: "Estatal" | "Federal" | "Municipal") => {
     setAmbito(value);
     form.setValue("ambitoGobierno", value);
+    if (value !== "Municipal") {
+      form.setValue("municipio", ""); // Limpiar el campo municipio si no es Municipal
+    }
   };
 
   const poderOptions =
@@ -339,6 +342,7 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
               )}
             />
           </div>
+
           <div className="md:grid md:grid-cols-4 gap-8">
             <FormField
               control={form.control}
@@ -413,6 +417,7 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
               )}
             />
           </div>
+
           <div className="md:grid md:grid-cols-2 gap-8">
             <FormField
               control={form.control}
@@ -439,9 +444,10 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
                   <FormLabel>Municipio</FormLabel>
                   <FormControl>
                     <Input
-                      disabled={loading}
+                      disabled={loading || ambito !== "Municipal"}
                       placeholder="Condicional solo si ámbito es MUNICIPAL"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -449,6 +455,7 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
               )}
             />
           </div>
+
           <Button disabled={loading} className="ml-auto" type="submit">
             {action}
           </Button>
