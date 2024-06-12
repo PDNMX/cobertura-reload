@@ -59,7 +59,7 @@ export function DashboardNav({ items, setOpen }: DashboardNavProps) {
           )}
         >
           <LogoutIcon className="mr-2 h-4 w-4" />
-          <span>Logout</span>
+          <span>Cerrar Sesión</span>
         </span>
       </a>
     </nav>
