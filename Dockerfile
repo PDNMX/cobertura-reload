@@ -1,4 +1,4 @@
-FROM node:18-alpine AS base
+FROM node:22-alpine AS base
 
 FROM base AS deps
 
@@ -8,10 +8,6 @@ WORKDIR /app
 COPY package.json ./
 
 RUN npm update && npm install
-
-# If you want yarn update and  install uncomment the bellow
-
-# RUN yarn install &&  yarn upgrade
 
 FROM base AS builder
 WORKDIR /app

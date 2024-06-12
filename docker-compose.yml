@@ -1,5 +1,13 @@
-version: "3"
 services:
+
+  frontend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 3030:3000
+
   api:
     image: directus/directus:10
     restart: always
@@ -8,10 +16,10 @@ services:
     depends_on:
       - db
     environment:
-      KEY: "replace-with-random-value"
-      SECRET: "replace-with-random-value"
-      ADMIN_EMAIL: "admin@admin.com"
-      ADMIN_PASSWORD: "directus"
+      KEY: ${DIRECTUS_KEY}
+      SECRET: ${DIRECTUS_SECRET}
+      ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
       DB_CLIENT: "postgres"
       DB_HOST: "db"
       DB_PORT: "5432"
@@ -36,7 +44,8 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     volumes:
       - postgres:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
+    #ports:
+      #- 5432:5432
+      
 volumes:
   postgres: {}
