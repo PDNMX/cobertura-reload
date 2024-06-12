@@ -16,7 +16,7 @@ export function LoginNav() {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="">
+          <Button className="text-xs md:text-sm">
             Ingresar
           </Button>
         </DropdownMenuTrigger>

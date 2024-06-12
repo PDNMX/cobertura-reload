@@ -1,19 +1,32 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { CoberturaTable } from "@/components/tables/cobertura-table/table";
+
 import { useSession } from "next-auth/react";
+import directus from "@/lib/directus";
+import { aggregate } from "@directus/sdk";
 
 export default function AuthenticationPage() {
-  const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
+  const [entes, setEntes] = useState([]);
 
   useEffect(() => {
-    if (status === "authenticated") {
-      router.replace("/dashboard"); // Redirect to dashboard if user is authenticated
+    async function fetchData() {
+      try {
+        const result: any = await directus.request(
+          aggregate("entes", {
+            aggregate: { count: '*' },
+          }),
+        );
+        setEntes(result);
+      } catch (error) {
+        console.error("Error al cargar los datos:", error);
+      }
     }
-  }, [router, status]);
+    fetchData();
+  }, []);
 
   if (status === "loading") {
     // Render loading state if session status is still loading
@@ -22,14 +35,11 @@ export default function AuthenticationPage() {
 
   return (
     <ScrollArea className="h-full">
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">
-          Hi, Welcome back 👋
-        </h2>
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-1 lg:grid-cols-1">
+          <CoberturaTable data={entes} />
+        </div>
       </div>
-
-    </div>
-  </ScrollArea>
+    </ScrollArea>
   );
 }
