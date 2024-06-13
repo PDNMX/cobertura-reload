@@ -38,12 +38,12 @@ export const CellAction = ({ data }: any) => {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
           <DropdownMenuItem
-            onClick={() => router.push(`/dashboard/companies/${data.id}`)}
+            onClick={() => router.push(`/dashboard/entes/${data.id}`)}
           >
-            <Edit className="mr-2 h-4 w-4" /> Update
+            <Edit className="mr-2 h-4 w-4" /> Editar
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
-            <Trash className="mr-2 h-4 w-4" /> Delete
+            <Trash className="mr-2 h-4 w-4" /> Eliminar
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
