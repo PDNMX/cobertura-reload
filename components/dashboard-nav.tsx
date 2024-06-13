@@ -24,7 +24,7 @@ export function DashboardNav({ items, setOpen }: DashboardNavProps) {
   const LogoutIcon: any = Icons["login"];
 
   return (
-    <nav className="grid items-start gap-2">
+    <nav className="grid items-start gap-3">
       {items.map((item, index) => {
         const Icon = Icons[item.icon || "arrowRight"];
         return (

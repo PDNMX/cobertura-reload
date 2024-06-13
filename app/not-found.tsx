@@ -28,7 +28,7 @@ export default function NotFound() {
           variant="ghost"
           size="lg"
         >
-          Back to Home
+          Regresar
         </Button>
       </div>
     </div>

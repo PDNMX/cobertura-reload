@@ -9,7 +9,7 @@ import { getServerSession } from "next-auth";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Cobertura",
+  title: "PDN - Cobertura",
   description: "",
 };
 
@@ -20,7 +20,7 @@ export default async function RootLayout({
 }) {
   const session = await getServerSession();
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
       <body className={`${inter.className} overflow-hidden`}>
         <Providers session={session}>
           <Toaster />
