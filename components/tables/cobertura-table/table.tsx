@@ -6,6 +6,8 @@ import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { columns } from "./columns";
 
+import dataEjemplo from "./data-ejemplo";
+
 export const CoberturaTable = ({ data }: any) => {
   const router = useRouter();
 
@@ -14,12 +16,12 @@ export const CoberturaTable = ({ data }: any) => {
       <div className="flex items-start justify-between">
         <Heading
           title={`Tablero Estadístico de Cobertura Nacional de Interconexión`}
-          description={`${data.length} entes registrados`}
+          /* description={`${dataEjemplo.length} entes registrados`} */
         />
       </div>
       <Separator />
 
-      <DataTable searchKey="nombre" columns={columns} data={data} />
+      <DataTable searchKey="entFed" columns={columns} data={dataEjemplo} />
     </>
   );
 };
