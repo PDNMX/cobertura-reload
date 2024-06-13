@@ -1,6 +1,14 @@
 "use client";
 
 import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { ChevronDownIcon } from "@radix-ui/react-icons";
+import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
@@ -42,14 +50,41 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
-      <Input
-        placeholder={`Buscar...`}
-        value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
-        onChange={(event) =>
-          table.getColumn(searchKey)?.setFilterValue(event.target.value)
-        }
-        className="w-full md:max-w-sm"
-      />
+      <div className="flex items-center py-4">
+        <Input
+          placeholder={`Buscar...`}
+          value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn(searchKey)?.setFilterValue(event.target.value)
+          }
+          className="w-full md:max-w-sm"
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto">
+              Columnas <ChevronDownIcon className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }>
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       <ScrollArea className="rounded-md border h-[calc(80vh-220px)]">
         <Table className="relative">
           <TableHeader>
@@ -75,8 +110,7 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
+                  data-state={row.getIsSelected() && "selected"}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
@@ -91,8 +125,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                  className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>
