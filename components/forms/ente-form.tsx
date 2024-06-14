@@ -31,6 +31,8 @@ import directus from "@/lib/directus";
 import { createItem, readItems } from "@directus/sdk";
 import { Switch } from "@/components/ui/switch";
 
+import { useSession } from "next-auth/react";
+
 const formSchema = z.object({
   nombre: z
     .string()
@@ -59,6 +61,8 @@ interface ProductFormProps {
 }
 
 export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
+  const { data: session } = useSession();
+  console.log(session.user.entidad)
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
@@ -77,7 +81,7 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
             fields: ["*"],
             filter: {
               "id_entidad": {
-                "_eq": "01"
+                "_eq": session.user.entidad
             },
             }
               
