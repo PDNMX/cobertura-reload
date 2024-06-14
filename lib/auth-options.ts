@@ -56,7 +56,7 @@ export const authOptions: NextAuthOptions = {
           withToken(
             user.data.access_token as string,
             readMe({
-              fields: ["id", "first_name", "last_name", "email"],
+              fields: ["id", "first_name", "last_name", "email","rol_enlace","entidad"],
             }),
           ),
         );
@@ -66,6 +66,8 @@ export const authOptions: NextAuthOptions = {
           id: userData.id,
           name: `${userData.first_name} ${userData.last_name}`,
           email: userData.email,
+          entidad: userData.entidad,
+          rol: userData.rol_enlace
         };
 
         return {
