@@ -5,7 +5,6 @@ import { User } from "@/constants/data";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export const columns: ColumnDef<User>[] = [
-
   {
     accessorKey: "nombre",
     header: "Nombre",
@@ -20,12 +19,20 @@ export const columns: ColumnDef<User>[] = [
     header: "Poder Gobierno",
   },
   {
-    accessorKey: "entidad",
-    header: "ID Entidad",
+    accessorKey: "sistema1",
+    header: "S1",
   },
   {
-    accessorKey: "municipio",
-    header: "ID Municipio",
+    accessorKey: "sistema2",
+    header: "S2",
+  },
+  {
+    accessorKey: "sistema3",
+    header: "S3",
+  },
+  {
+    accessorKey: "sistema6",
+    header: "S6",
   },
   {
     id: "actions",
