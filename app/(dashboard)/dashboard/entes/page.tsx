@@ -20,6 +20,7 @@ export default function Page() {
         try {
           const result = await directus.request(
             readItems("entes", {
+              limit: "-1",
               fields: ["*"],
               filter: {
                 entidad: {
