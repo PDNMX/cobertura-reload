@@ -5,17 +5,13 @@ import React from "react";
 
 export default function Page() {
   const breadcrumbItems = [
-    { title: "Entes Públicos", link: "/dashboard/entes" },
-    { title: "Create", link: "/dashboard/entes/create" },
+    { title: "Crear", link: "/dashboard/entes/create" },
   ];
   return (
     <ScrollArea className="h-full">
       <div className="flex-1 space-y-4 p-5">
         <BreadCrumb items={breadcrumbItems} />
-        <EnteForm
-          initialData={null}
-          key={null}
-        />
+        <EnteForm initialData={null} key={null} />
       </div>
     </ScrollArea>
   );
