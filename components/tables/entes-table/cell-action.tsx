@@ -10,29 +10,45 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import directus from "@/lib/directus"; // Importa directus
+import { useToast } from "@/components/ui/use-toast";
 import { deleteItem } from "@directus/sdk"; // Importa deleteItem
 
 export const CellAction = ({ data }: any) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const { toast } = useToast();
   const router = useRouter();
 
+  useEffect(() => {
+    if (localStorage.getItem("deleted") === "true") {
+      toast({
+        variant: "default",
+        title: "Deleted Successfully",
+        description: "Ente público eliminado exitosamente.",
+      });
+      localStorage.removeItem("deleted"); // Elimina el estado después de mostrar el toast
+    }
+  }, []);
+
   const onConfirm = async () => {
-    setLoading(true);
     try {
-      // Aquí puedes agregar la lógica para eliminar el registro
-      // Por ejemplo, una llamada a una API para eliminar el registro
-      await directus.request(deleteItem("entes", data.id));
-      // Después de eliminar, redirige y refresca la tabla
-      router.push(`/dashboard/entes`);
-      router.refresh();
-      setOpen(false);
-    } catch (error) {
-      console.error("Error al eliminar el registro:", error);
+      setLoading(true);
+      if (data) {
+        await directus.request(deleteItem("entes",data.id));
+        localStorage.setItem("deleted", "true"); // Almacena el estado
+        window.location.reload();
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your request.",
+      });
     } finally {
       setLoading(false);
+      setOpen(false);
     }
   };
 
