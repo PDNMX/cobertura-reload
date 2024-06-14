@@ -1,6 +1,7 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
 import { User } from "@/constants/data";
+/* import { ChevronDownIcon } from "@radix-ui/react-icons"; */
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -8,7 +9,12 @@ export const columns: ColumnDef<User>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-  { accessorKey: "entFed", header: "Entidad Federativa" },
+  { accessorKey: "entFed",     header: () => (
+    <div className="flex items-center">
+      {/* <ChevronDownIcon className="h-4 w-4" /> */}
+      <span className="ml-2">Entidad Federativa</span>
+    </div>
+  ),},
   { accessorKey: "totEnt", header: "Total de Entes" },
   { accessorKey: "s1Con", header: "S1 Conectados" },
   { accessorKey: "s1Por", header: "S1 Porcentaje" },

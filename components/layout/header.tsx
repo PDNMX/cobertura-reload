@@ -21,7 +21,7 @@ export default function Header() {
             className="mr-2" // Agrega margen derecho para separar del texto
           />
           <Link
-            className="ml-2"
+            className="ml-2 text-white"
             href="https://www.plataformadigitalnacional.org/"
             target="_blank"
           >

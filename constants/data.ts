@@ -7,6 +7,7 @@ export type User = {
   role: string;
   verified: boolean;
   status: string;
+  loquesea: string;
 };
 export const users: User[] = [];
 
