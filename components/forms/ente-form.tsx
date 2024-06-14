@@ -28,7 +28,7 @@ import * as z from "zod";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, useEffect } from "react";
 import directus from "@/lib/directus";
-import { createItem } from "@directus/sdk";
+import { createItem, readItems } from "@directus/sdk";
 import { Switch } from "@/components/ui/switch";
 
 const formSchema = z.object({
@@ -67,6 +67,37 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
   const [ambito, setAmbito] = useState(
     initialData ? initialData.ambitoGobierno : ""
   );
+
+  const [entes, setEntes] = useState([]);
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const result = await directus.request(
+          readItems("municipio", {
+            fields: ["*"],
+            filter: {
+              "id_entidad": {
+                "_eq": "01"
+            },
+            }
+              
+          }),
+        );
+        console.log(JSON.stringify(result))
+        // Map over the result data and convert specific keys to lowercase
+        const processedData = result.map((item) => ({
+          ...item,
+        }));
+
+        setEntes(processedData);
+      } catch (error) {
+        console.error("Error al cargar los datos:", error);
+      }
+    }
+
+    fetchData();
+  }, []);
+
 
   const title = initialData ? "Editar ente público" : "Crear ente público";
   const description = initialData
