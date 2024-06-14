@@ -6,8 +6,9 @@ import React from "react";
 
 export default function Page() {
   const breadcrumbItems = [
-    { title: "Employees", link: "/dashboard/employees" },
-    { title: "Create", link: "/dashboard/employees/create" },
+    { title: "Entes Públicos", link: "/dashboard/entes" },
+    { title: "Editar", link: "/dashboard/entes/editar" },
+
   ];
   return (
     <ScrollArea className="h-full">
