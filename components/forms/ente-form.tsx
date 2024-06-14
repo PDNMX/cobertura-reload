@@ -3,12 +3,12 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription
 } from "@/components/ui/form";
 import { Heading } from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
@@ -75,7 +75,7 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
   const toastMessage = initialData
     ? "Employee updated."
     : "Ente público creado.";
-  const action = initialData ? "Save changes" : "Crear";
+  const action = initialData ? "Guardar Cambios" : "Crear";
 
   const defaultValues = initialData
     ? initialData
@@ -114,21 +114,21 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
       router.push(`/dashboard/entes`);
       toast({
         variant: "default",
-        title: "Created Successfully",
-        description: "Hurry! Employee created successfully.",
+        title: "Creado con exito",
+        description: "Nuevo ente público creado con éxito",
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "There was a problem with your request.",
+        title: "Error",
+        description: "Error al intentar guardar",
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const onDelete = async () => {
+  /* const onDelete = async () => {
     try {
       setLoading(true);
       router.refresh();
@@ -139,7 +139,7 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
       setOpen(false);
     }
   };
-
+ */
   const handleAmbitoChange = (value: "Estatal" | "Federal" | "Municipal") => {
     setAmbito(value);
     form.setValue("ambitoGobierno", value);
@@ -193,7 +193,7 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 w-full"
         >
-          <div className="md:grid md:grid-cols-3 gap-8">
+          <div className="md:grid md:grid-cols-1 gap-8">
             <FormField
               control={form.control}
               name="status"
@@ -289,43 +289,51 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
               )}
             />
           </div>
-          <div className="md:grid md:grid-cols-2 gap-8">
+          <div className="md:grid md:grid-cols-1 gap-8">
+            {/* SWITCH OIC */}
             <FormField
               control={form.control}
               name="controlOIC"
               render={({ field }) => (
-                <FormItem className="flex flex-col items-center">
-                  <FormLabel className="text-center">
-                    Órgano Interno de Control
-                  </FormLabel>
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Órgano Interno de Control</FormLabel>
+                    <FormDescription>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </FormDescription>
+                  </div>
                   <FormControl>
                     <Switch
                       checked={field.value ?? false}
                       onCheckedChange={(checked) => {
-                        form.setValue("controlOIC", checked);
-                        if (checked) {
-                          form.setValue("controlTribunal", false);
-                          form.setValue("sistema1", false);
-                          form.setValue("sistema2", false);
-                          form.setValue("sistema3", false);
-                          form.setValue("sistema6", false);
-                        }
-                      }}
-                      disabled={loading}
-                    />
+                          form.setValue("controlOIC", checked);
+                          if (checked) {
+                            form.setValue("controlTribunal", false);
+                            form.setValue("sistema1", false);
+                            form.setValue("sistema2", false);
+                            form.setValue("sistema3", false);
+                            form.setValue("sistema6", false);
+                          }
+                        }}
+                        disabled={loading}
+                      />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
-            />
+            /> 
+            
+            {/* SWITCH Tribunal */}
             <FormField
               control={form.control}
               name="controlTribunal"
               render={({ field }) => (
-                <FormItem className="flex flex-col items-center">
-                  <FormLabel className="text-center">
-                    Tribunal de Justicia Administrativa
-                  </FormLabel>
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Tribunal de Justicia Administrativa</FormLabel>
+                    <FormDescription>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </FormDescription>
+                  </div>
                   <FormControl>
                     <Switch
                       checked={field.value ?? false}
@@ -338,19 +346,25 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
                       disabled={loading || form.watch("controlOIC")}
                     />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
           </div>
 
-          <div className="md:grid md:grid-cols-4 gap-8">
+          <div className="md:grid md:grid-cols-2 gap-8">
+
+            {/* SWITCH S1 */}
             <FormField
               control={form.control}
               name="sistema1"
               render={({ field }) => (
-                <FormItem className="flex flex-col items-center">
-                  <FormLabel className="text-center">Sistema 1</FormLabel>
+                <FormItem className="items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Sistema 1</FormLabel>
+                    <FormDescription>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </FormDescription>
+                  </div>
                   <FormControl>
                     <Switch
                       checked={field.value ?? false}
@@ -358,16 +372,22 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
                       disabled={loading || form.watch("controlOIC")}
                     />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
-            />
+            />   
+
+            {/* SWITCH S2 */}
             <FormField
               control={form.control}
               name="sistema2"
               render={({ field }) => (
-                <FormItem className="flex flex-col items-center">
-                  <FormLabel className="text-center">Sistema 2</FormLabel>
+                <FormItem className="items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Sistema 2</FormLabel>
+                    <FormDescription>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </FormDescription>
+                  </div>
                   <FormControl>
                     <Switch
                       checked={field.value ?? false}
@@ -375,16 +395,22 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
                       disabled={loading || form.watch("controlOIC")}
                     />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
-            />
+            />    
+
+            {/* SWITCH S3 */}
             <FormField
               control={form.control}
               name="sistema3"
               render={({ field }) => (
-                <FormItem className="flex flex-col items-center">
-                  <FormLabel className="text-center">Sistema 3</FormLabel>
+                <FormItem className="items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Sistema 3</FormLabel>
+                    <FormDescription>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </FormDescription>
+                  </div>
                   <FormControl>
                     <Switch
                       checked={field.value ?? false}
@@ -396,16 +422,22 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
                       }
                     />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
-            />
+            />            
+
+            {/* SWITCH S6 */}
             <FormField
               control={form.control}
               name="sistema6"
               render={({ field }) => (
-                <FormItem className="flex flex-col items-center">
-                  <FormLabel className="text-center">Sistema 6</FormLabel>
+                <FormItem className="items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Sistema 6</FormLabel>
+                    <FormDescription>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </FormDescription>
+                  </div>
                   <FormControl>
                     <Switch
                       checked={field.value ?? false}
@@ -413,13 +445,12 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
                       disabled={loading || form.watch("controlOIC")}
                     />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
           </div>
 
-          <div className="md:grid md:grid-cols-2 gap-8">
+          <div className="md:grid md:grid-cols-1 gap-8">
             <FormField
               control={form.control}
               name="entidad"
