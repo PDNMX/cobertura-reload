@@ -15,7 +15,7 @@ export default function Page() {
   const [entes, setEntes] = useState([]);
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status === "authenticated" && session?.user?.entidad) {
       async function fetchData() {
         try {
           const result = await directus.request(
