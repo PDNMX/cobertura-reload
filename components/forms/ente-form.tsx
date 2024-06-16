@@ -8,7 +8,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription
+  FormDescription,
 } from "@/components/ui/form";
 import { Heading } from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
@@ -30,13 +30,13 @@ import { useState, useEffect } from "react";
 import directus from "@/lib/directus";
 import { createItem, readItems } from "@directus/sdk";
 import { Switch } from "@/components/ui/switch";
-
+import clsx from 'clsx';
 import { useSession } from "next-auth/react";
 
 const formSchema = z.object({
-  nombre: z
-    .string()
-    .min(3, { message: "Employee name must be at least 3 characters" }),
+  nombre: z.string().min(3, {
+    message: "El nombre del ente público debe tener al menos 3 caracteres.",
+  }),
   ambitoGobierno: z.enum(["Estatal", "Federal", "Municipal"], {
     message: "Selecciona una opción válida",
   }),
@@ -62,7 +62,7 @@ interface ProductFormProps {
 
 export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
   const { data: session } = useSession();
-  console.log(session.user.entidad)
+  console.log(session.user.entidad);
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
@@ -80,14 +80,13 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
           readItems("municipio", {
             fields: ["*"],
             filter: {
-              "id_entidad": {
-                "_eq": session.user.entidad
+              id_entidad: {
+                _eq: session.user.entidad,
+              },
             },
-            }
-              
-          }),
+          })
         );
-        console.log(JSON.stringify(result))
+        console.log(JSON.stringify(result));
         // Map over the result data and convert specific keys to lowercase
         const processedData = result.map((item) => ({
           ...item,
@@ -101,7 +100,6 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
 
     fetchData();
   }, []);
-
 
   const title = initialData ? "Editar ente público" : "Crear ente público";
   const description = initialData
@@ -252,7 +250,9 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
               name="nombre"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nombre</FormLabel>
+                  <FormLabel>
+                    Nombre: <span className="text-red-500">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}
@@ -269,7 +269,9 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
               name="ambitoGobierno"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Ámbito de Gobierno</FormLabel>
+                  <FormLabel>
+                    Ámbito de Gobierno: <span className="text-red-500">*</span>
+                  </FormLabel>
                   <Select
                     disabled={loading}
                     onValueChange={(value) => {
@@ -300,7 +302,9 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
               name="poderGobierno"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Poder de Gobierno</FormLabel>
+                  <FormLabel>
+                    Poder de Gobierno: <span className="text-red-500">*</span>
+                  </FormLabel>
                   <Select
                     disabled={loading}
                     onValueChange={field.onChange}
@@ -330,43 +334,56 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
               control={form.control}
               name="controlOIC"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                <FormItem
+                  className={clsx(
+                    "flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm",
+                    { disabled: loading }
+                  )}
+                  data-tooltip="Habilitará solo el sistema S3"
+                >
                   <div className="space-y-0.5">
                     <FormLabel>Órgano Interno de Control</FormLabel>
                     <FormDescription>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                      Al activar el Órgano Interno de Control, solo el sistema
+                      S3 estará disponible.
                     </FormDescription>
                   </div>
                   <FormControl>
                     <Switch
                       checked={field.value ?? false}
                       onCheckedChange={(checked) => {
-                          form.setValue("controlOIC", checked);
-                          if (checked) {
-                            form.setValue("controlTribunal", false);
-                            form.setValue("sistema1", false);
-                            form.setValue("sistema2", false);
-                            form.setValue("sistema3", false);
-                            form.setValue("sistema6", false);
-                          }
-                        }}
-                        disabled={loading}
-                      />
+                        form.setValue("controlOIC", checked);
+                        if (checked) {
+                          form.setValue("controlTribunal", false);
+                          form.setValue("sistema1", false);
+                          form.setValue("sistema2", false);
+                          form.setValue("sistema3", false);
+                          form.setValue("sistema6", false);
+                        }
+                      }}
+                      disabled={loading}
+                    />
                   </FormControl>
                 </FormItem>
               )}
-            /> 
-            
-            {/* SWITCH Tribunal */}
+            />
+
             <FormField
               control={form.control}
               name="controlTribunal"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                <FormItem
+                  className={clsx(
+                    "flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm",
+                    { disabled: loading || form.watch("controlOIC") }
+                  )}
+                  data-tooltip="Deshabilita la opción de Órgano Interno de Control"
+                >
                   <div className="space-y-0.5">
                     <FormLabel>Tribunal de Justicia Administrativa</FormLabel>
                     <FormDescription>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                      Al activar el Tribunal de Justicia Administrativa, podrás
+                      activar o desactivar todos los sistemas.
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -387,17 +404,22 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
           </div>
 
           <div className="md:grid md:grid-cols-2 gap-8">
-
-            {/* SWITCH S1 */}
             <FormField
               control={form.control}
               name="sistema1"
               render={({ field }) => (
-                <FormItem className="items-center justify-between rounded-lg border p-3 shadow-sm">
+                <FormItem
+                  className={clsx(
+                    "items-center justify-between rounded-lg border p-3 shadow-sm",
+                    { disabled: loading || form.watch("controlOIC") }
+                  )}
+                  data-tooltip="Deshabilitado si Órgano Interno de Control está activado"
+                >
                   <div className="space-y-0.5">
                     <FormLabel>Sistema 1</FormLabel>
                     <FormDescription>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                      Este sistema estará deshabilitado si la opción de Órgano
+                      Interno de Control está activada.
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -409,18 +431,24 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
                   </FormControl>
                 </FormItem>
               )}
-            />   
+            />
 
-            {/* SWITCH S2 */}
             <FormField
               control={form.control}
               name="sistema2"
               render={({ field }) => (
-                <FormItem className="items-center justify-between rounded-lg border p-3 shadow-sm">
+                <FormItem
+                  className={clsx(
+                    "items-center justify-between rounded-lg border p-3 shadow-sm",
+                    { disabled: loading || form.watch("controlOIC") }
+                  )}
+                  data-tooltip="Deshabilitado si Órgano Interno de Control está activado"
+                >
                   <div className="space-y-0.5">
                     <FormLabel>Sistema 2</FormLabel>
                     <FormDescription>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                      Este sistema estará deshabilitado si la opción de Órgano
+                      Interno de Control está activada.
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -432,18 +460,30 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
                   </FormControl>
                 </FormItem>
               )}
-            />    
+            />
 
-            {/* SWITCH S3 */}
             <FormField
               control={form.control}
               name="sistema3"
               render={({ field }) => (
-                <FormItem className="items-center justify-between rounded-lg border p-3 shadow-sm">
+                <FormItem
+                  className={clsx(
+                    "items-center justify-between rounded-lg border p-3 shadow-sm",
+                    {
+                      disabled:
+                        loading ||
+                        (!form.watch("controlOIC") &&
+                          !form.watch("controlTribunal")),
+                    }
+                  )}
+                  data-tooltip="Disponible si se activa Órgano Interno de Control o Tribunal de Justicia Administrativa"
+                >
                   <div className="space-y-0.5">
                     <FormLabel>Sistema 3</FormLabel>
                     <FormDescription>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                      Este sistema estará disponible si se activa el Órgano
+                      Interno de Control o el Tribunal de Justicia
+                      Administrativa.
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -459,18 +499,24 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
                   </FormControl>
                 </FormItem>
               )}
-            />            
+            />
 
-            {/* SWITCH S6 */}
             <FormField
               control={form.control}
               name="sistema6"
               render={({ field }) => (
-                <FormItem className="items-center justify-between rounded-lg border p-3 shadow-sm">
+                <FormItem
+                  className={clsx(
+                    "items-center justify-between rounded-lg border p-3 shadow-sm",
+                    { disabled: loading || form.watch("controlOIC") }
+                  )}
+                  data-tooltip="Deshabilitado si Órgano Interno de Control está activado"
+                >
                   <div className="space-y-0.5">
                     <FormLabel>Sistema 6</FormLabel>
                     <FormDescription>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                      Este sistema estará deshabilitado si la opción de Órgano
+                      Interno de Control está activada.
                     </FormDescription>
                   </div>
                   <FormControl>
