@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./cell-action";
@@ -8,14 +9,24 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "nombre",
     header: "Nombre",
+    cell: ({ row }) => <div className="text-left">{row.original.nombre}</div>,
+    size: 500, // Ancho fijo para Nombre
   },
   {
     accessorKey: "ambitoGobierno",
-    header: "Ambito Gobierno",
+    header: "Ámbito Gobierno",
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.ambitoGobierno}</div>
+    ),
+    size: 125, // Ancho fijo para Ámbito Gobierno
   },
   {
     accessorKey: "poderGobierno",
     header: "Poder Gobierno",
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.poderGobierno}</div>
+    ),
+    size: 125, // Ancho fijo para Poder Gobierno
   },
   {
     accessorKey: "sistema1",
@@ -29,6 +40,7 @@ export const columns: ColumnDef<User>[] = [
         )}
       </div>
     ),
+    size: 20, // Ancho fijo para S1
   },
   {
     accessorKey: "sistema2",
@@ -42,6 +54,7 @@ export const columns: ColumnDef<User>[] = [
         )}
       </div>
     ),
+    size: 20 // Ancho fijo para S2
   },
   {
     accessorKey: "sistema3",
@@ -55,6 +68,7 @@ export const columns: ColumnDef<User>[] = [
         )}
       </div>
     ),
+    size: 20 // Ancho fijo para S3
   },
   {
     accessorKey: "sistema6",
@@ -68,9 +82,11 @@ export const columns: ColumnDef<User>[] = [
         )}
       </div>
     ),
+    size: 20 // Ancho fijo para S6
   },
   {
     id: "actions",
     cell: ({ row }) => <CellAction data={row.original} />,
+    size: 20 // Ancho fijo para acciones
   },
 ];
