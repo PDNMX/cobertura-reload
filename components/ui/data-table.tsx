@@ -46,7 +46,7 @@ export function DataTable<TData, TValue>({
         onChange={(event) =>
           table.getColumn(searchKey)?.setFilterValue(event.target.value)
         }
-        className="w-full md:max-w-sm"
+        className="w-full"
       />
       <ScrollArea className="rounded-md border h-[calc(80vh-150px)]">
         <Table className="relative">

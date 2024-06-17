@@ -5,12 +5,10 @@ import { useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CoberturaTable } from "@/components/tables/cobertura-table/table";
 
-import { useSession } from "next-auth/react";
 import directus from "@/lib/directus";
 import { aggregate } from "@directus/sdk";
 
 export default function AuthenticationPage() {
-  const { status } = useSession();
   const [entes, setEntes] = useState([]);
 
   useEffect(() => {
@@ -28,11 +26,6 @@ export default function AuthenticationPage() {
     }
     fetchData();
   }, []);
-
-  if (status === "loading") {
-    // Render loading state if session status is still loading
-    return <div>Loading...</div>;
-  }
 
   return (
     <ScrollArea className="h-full">

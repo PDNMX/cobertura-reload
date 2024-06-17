@@ -11,7 +11,7 @@ import {
 import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { directus } from "@/lib/directus"; // Importa directus
+import directus from "@/lib/directus"; // Importa directus
 import { useToast } from "@/components/ui/use-toast";
 import { deleteItem } from "@directus/sdk"; // Importa deleteItem
 
@@ -36,7 +36,7 @@ export const CellAction = ({ data }: any) => {
     try {
       setLoading(true);
       if (data) {
-        //await directus.request(deleteItem("entes",data.id));
+        await directus.request(deleteItem("entes",data.id));
         localStorage.setItem("deleted", "true"); // Almacena el estado
         window.location.reload();
       }

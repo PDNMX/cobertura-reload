@@ -1,43 +1,18 @@
-import {
-  authentication,
-  createDirectus,
-  rest,
-  staticToken,
-} from "@directus/sdk"
+// src/lib/directus.ts
+import { createDirectus, rest, authentication } from "@directus/sdk";
 
-export const directus = (token: string = "") => {
-  if (token) {
-    return createDirectus(process.env.NEXT_PUBLIC_BACKEND_URL ?? "")
-      .with(staticToken(token))
-      .with(rest())
-  }
-  return createDirectus(process.env.NEXT_PUBLIC_BACKEND_URL ?? "")
-    .with(
-      authentication("cookie", { credentials: "include", autoRefresh: true })
-    )
-    .with(rest())
-}
-
-export const login = async ({
-  email,
-  password,
-}: {
-  email: string
-  password: string
-}) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
-    {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-      headers: { "Content-Type": "application/json" },
+// Declare the type for process.env to include NEXT_PUBLIC_BACKEND_URL
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      NEXT_PUBLIC_BACKEND_URL: string;
+      // Add other environment variables here if needed
     }
-  )
-  const user = await res.json()
-  if (!res.ok && user) {
-    throw new Error("Email address or password is invalid")
-  }
-  if (res.ok && user) {
-    return user?.data
   }
 }
+
+const directus = createDirectus(process.env.NEXT_PUBLIC_BACKEND_URL)
+  .with(authentication("cookie", { credentials: "include", autoRefresh: true }))
+  .with(rest());
+
+export default directus;
