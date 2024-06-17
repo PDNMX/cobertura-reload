@@ -12,10 +12,14 @@ import {
   /* DropdownMenuShortcut, */
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
+import { useCurrentSession } from "@/hooks/useCurrentSession";
 
 export function UserNav() {
-  const { data: session } = useSession();
+  const { session, status } = useCurrentSession();
+  if (status === "loading") {
+    return <h1>Cargando...</h1>;
+  }
   if (session) {
     return (
       <DropdownMenu>
