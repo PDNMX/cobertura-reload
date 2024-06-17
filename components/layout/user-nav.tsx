@@ -16,10 +16,10 @@ import { signOut } from "next-auth/react";
 import { useCurrentSession } from "@/hooks/useCurrentSession";
 
 export function UserNav() {
-  const { session, status } = useCurrentSession();
-  if (status === "loading") {
+  const { session } = useCurrentSession();
+  /* if (status === "loading") {
     return <h1>Cargando...</h1>;
-  }
+  } */
   if (session) {
     return (
       <DropdownMenu>
