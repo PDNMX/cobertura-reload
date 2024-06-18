@@ -66,7 +66,8 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
   const [ambito, setAmbito] = useState(
     initialData ? initialData.ambitoGobierno : ""
   );
-  console.log(initialData)
+
+  //console.log(initialData)
 
   const title = initialData ? "Actualizar ente público" : "Crear ente público";
   const description = initialData
@@ -228,6 +229,7 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                       disabled={loading}
                       placeholder="Nombre del Ente Público"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -251,6 +253,7 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                       field.onChange(value);
                     }}
                     defaultValue={field.value}
+                    value={field.value ?? ""}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -279,6 +282,7 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                     disabled={loading}
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    value={field.value ?? ""}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -513,6 +517,7 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                       disabled={loading}
                       placeholder="Automático del usuario"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
