@@ -13,6 +13,12 @@ import {
 import { Heading } from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -26,10 +32,11 @@ import { useForm, FormProvider } from "react-hook-form";
 import * as z from "zod";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, useEffect, useMemo } from "react";
+import { useCurrentSession } from "@/hooks/useCurrentSession";
 import directus from "@/lib/directus";
-import { createItem, updateItem } from "@directus/sdk";
+import { createItem, updateItem, readItems } from "@directus/sdk";
 import { Switch } from "@/components/ui/switch";
-import clsx from 'clsx';
+import clsx from "clsx";
 
 const formSchema = z.object({
   nombre: z.string().min(3, {
@@ -63,8 +70,10 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [ambito, setAmbito] = useState(
-    initialData ? initialData.ambitoGobierno : ""
+    initialData ? initialData.ambitoGobierno : "",
   );
+  const [municipiosData, setMunicipiosData] = useState([]);
+  const { session, status } = useCurrentSession();
 
   const title = initialData ? "Actualizar ente público" : "Crear ente público";
   const description = initialData
@@ -76,20 +85,22 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
   const action = initialData ? "Actualizar" : "Crear";
 
   const defaultValues = useMemo(() => {
-    return initialData ?? {
-      nombre: "",
-      ambitoGobierno: "",
-      poderGobierno: "",
-      controlOIC: "",
-      controlTribunal: "",
-      sistema1: "",
-      sistema2: "",
-      sistema3: "",
-      sistema6: "",
-      entidad: "",
-      municipio: "",
-      status: "Published",
-    };
+    return (
+      initialData ?? {
+        nombre: "",
+        ambitoGobierno: "",
+        poderGobierno: "",
+        controlOIC: "",
+        controlTribunal: "",
+        sistema1: "",
+        sistema2: "",
+        sistema3: "",
+        sistema6: "",
+        entidad: "",
+        municipio: "",
+        status: "Published",
+      }
+    );
   }, [initialData]);
 
   const form = useForm<EnteFormValues>({
@@ -108,6 +119,42 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
     }
   }, [initialData, form.setValue]);
 
+  useEffect(() => {
+    // Check if session and session.user.entidad exist before fetching
+    if (session && session.user?.entidad) {
+      const fetchMunicipiosData = async () => {
+        try {
+          console.log(session?.user?.entidad);
+          const response = await directus.request(
+            readItems("municipio", {
+              sort: [ "nombre" ],
+              limit: "-1",
+              fields: ["*"],
+              filter: {
+                id_entidad: {
+                  _eq: session?.user?.entidad,
+                },
+              },
+            }),
+          );
+          //const data = await response.json();
+          console.log(response);
+          localStorage.setItem("municipiosData", JSON.stringify(response));
+          setMunicipiosData(response);
+        } catch (error) {
+          console.error("Error al cargar los municipios", error);
+        }
+      };
+
+      const storedMunicipiosData = localStorage.getItem("municipiosData");
+      if (storedMunicipiosData) {
+        setMunicipiosData(JSON.parse(storedMunicipiosData));
+      } else {
+        fetchMunicipiosData();
+      }
+    }
+  }, [session]); // Dependency array includes session
+
   const onSubmit = async (data: EnteFormValues) => {
     try {
       setLoading(true);
@@ -125,7 +172,7 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
         variant: "default",
         className: "bg-green-600",
         title: "",
-        description: toastMessage
+        description: toastMessage,
       });
     } catch (error: any) {
       toast({
@@ -179,8 +226,7 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
       <FormProvider {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-full"
-        >
+          className="space-y-8 w-full">
           <div className="md:grid md:grid-cols-1 gap-8">
             <FormField
               control={form.control}
@@ -232,13 +278,12 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                     disabled={loading}
                     onValueChange={(value) => {
                       handleAmbitoChange(
-                        value as "Estatal" | "Federal" | "Municipal"
+                        value as "Estatal" | "Federal" | "Municipal",
                       );
                       field.onChange(value);
                     }}
                     defaultValue={field.value}
-                    value={field.value ?? ""}
-                  >
+                    value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona un ámbito" />
@@ -266,15 +311,14 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                     disabled={loading}
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    value={field.value ?? ""}
-                  >
+                    value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona un poder" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                    {poderOptions.map((option) => (
+                      {poderOptions.map((option) => (
                         <SelectItem key={option} value={option}>
                           {option}
                         </SelectItem>
@@ -295,10 +339,9 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                 <FormItem
                   className={clsx(
                     "flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm",
-                    { disabled: loading }
+                    { disabled: loading },
                   )}
-                  data-tooltip="Habilitará solo el sistema S3"
-                >
+                  data-tooltip="Habilitará solo el sistema S3">
                   <div className="space-y-0.5">
                     <FormLabel>Órgano Interno de Control</FormLabel>
                     <FormDescription>
@@ -333,10 +376,9 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                 <FormItem
                   className={clsx(
                     "flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm",
-                    { disabled: loading || form.watch("controlOIC") }
+                    { disabled: loading || form.watch("controlOIC") },
                   )}
-                  data-tooltip="Deshabilita la opción de Órgano Interno de Control"
-                >
+                  data-tooltip="Deshabilita la opción de Órgano Interno de Control">
                   <div className="space-y-0.5">
                     <FormLabel>Tribunal de Justicia Administrativa</FormLabel>
                     <FormDescription>
@@ -369,10 +411,9 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                 <FormItem
                   className={clsx(
                     "items-center justify-between rounded-lg border p-3 shadow-sm",
-                    { disabled: loading || form.watch("controlOIC") }
+                    { disabled: loading || form.watch("controlOIC") },
                   )}
-                  data-tooltip="Deshabilitado si Órgano Interno de Control está activado"
-                >
+                  data-tooltip="Deshabilitado si Órgano Interno de Control está activado">
                   <div className="space-y-0.5">
                     <FormLabel>Sistema 1</FormLabel>
                     <FormDescription>
@@ -398,10 +439,9 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                 <FormItem
                   className={clsx(
                     "items-center justify-between rounded-lg border p-3 shadow-sm",
-                    { disabled: loading || form.watch("controlOIC") }
+                    { disabled: loading || form.watch("controlOIC") },
                   )}
-                  data-tooltip="Deshabilitado si Órgano Interno de Control está activado"
-                >
+                  data-tooltip="Deshabilitado si Órgano Interno de Control está activado">
                   <div className="space-y-0.5">
                     <FormLabel>Sistema 2</FormLabel>
                     <FormDescription>
@@ -432,10 +472,9 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                         loading ||
                         (!form.watch("controlOIC") &&
                           !form.watch("controlTribunal")),
-                    }
+                    },
                   )}
-                  data-tooltip="Disponible si se activa Órgano Interno de Control o Tribunal de Justicia Administrativa"
-                >
+                  data-tooltip="Disponible si se activa Órgano Interno de Control o Tribunal de Justicia Administrativa">
                   <div className="space-y-0.5">
                     <FormLabel>Sistema 3</FormLabel>
                     <FormDescription>
@@ -466,10 +505,9 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                 <FormItem
                   className={clsx(
                     "items-center justify-between rounded-lg border p-3 shadow-sm",
-                    { disabled: loading || form.watch("controlOIC") }
+                    { disabled: loading || form.watch("controlOIC") },
                   )}
-                  data-tooltip="Deshabilitado si Órgano Interno de Control está activado"
-                >
+                  data-tooltip="Deshabilitado si Órgano Interno de Control está activado">
                   <div className="space-y-0.5">
                     <FormLabel>Sistema 6</FormLabel>
                     <FormDescription>
@@ -512,16 +550,36 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
               control={form.control}
               name="municipio"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="relative">
+                  {" "}
+                  {/* Clase 'relative' para posicionar el menú */}
                   <FormLabel>Municipio</FormLabel>
-                  <FormControl>
-                    <Input
-                      disabled={loading || ambito !== "Municipal"}
-                      placeholder="Condicional solo si ámbito es MUNICIPAL"
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
+                  <Select
+                    disabled={loading || ambito !== "Municipal"}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    value={field.value ?? ""}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un municipio">
+                          {municipiosData.find(
+                            (m) => m.id_municipio === field.value,
+                          )?.nombre || ""}
+                        </SelectValue>
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="max-h-[200px] overflow-y-auto">
+                      {" "}
+                      {/* Clase para habilitar el scroll */}
+                      {municipiosData.map((municipio) => (
+                        <SelectItem
+                          key={municipio.id_municipio}
+                          value={municipio.id_municipio}>
+                          {municipio.nombre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

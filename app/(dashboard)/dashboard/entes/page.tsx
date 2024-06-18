@@ -20,6 +20,7 @@ export default function Page() {
         try {
           const result = await directus.request(
             readItems("entes", {
+              sort: [ "nombre" ],
               limit: "-1",
               fields: ["*"],
               filter: {
@@ -29,16 +30,8 @@ export default function Page() {
               },
             })
           );
-          //console.log(JSON.stringify(result));
 
-          // Map over the result data and convert specific keys to lowercase
-          const processedData = result.map((item) => ({
-            ...item,
-            nombre: item.nombre,
-            poderGobierno: item.poderGobierno,
-          }));
-
-          setEntes(processedData);
+          setEntes(result);
         } catch (error) {
           console.error("Error al cargar los datos:", error);
         }
