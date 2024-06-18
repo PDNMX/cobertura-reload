@@ -90,14 +90,14 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
         nombre: "",
         ambitoGobierno: "",
         poderGobierno: "",
-        controlOIC: "",
-        controlTribunal: "",
-        sistema1: "",
-        sistema2: "",
-        sistema3: "",
-        sistema6: "",
+        controlOIC: false,
+        controlTribunal: false,
+        sistema1: false,
+        sistema2: false,
+        sistema3: false,
+        sistema6: false,
         entidad: "",
-        municipio: "",
+        municipio: "", // Cadena vacía por defecto
         status: "Published",
       }
     );
