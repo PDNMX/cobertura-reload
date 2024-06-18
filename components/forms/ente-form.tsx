@@ -59,15 +59,12 @@ interface EnteFormProps {
 }
 
 export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
-  //console.log(session.user.entidad);
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [ambito, setAmbito] = useState(
     initialData ? initialData.ambitoGobierno : ""
   );
-
-  //console.log(initialData)
 
   const title = initialData ? "Actualizar ente público" : "Crear ente público";
   const description = initialData
@@ -78,7 +75,6 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
     : "Nuevo ente público creado.";
   const action = initialData ? "Actualizar" : "Crear";
 
-  // Calcular defaultValues usando useMemo
   const defaultValues = useMemo(() => {
     return initialData ?? {
       nombre: "",
@@ -94,8 +90,7 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
       municipio: "",
       status: "Published",
     };
-  }, [initialData]); // Solo recalcular si initialData cambia
-
+  }, [initialData]);
 
   const form = useForm<EnteFormValues>({
     resolver: zodResolver(formSchema),
@@ -109,8 +104,9 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
           form.setValue(key, initialData[key]);
         }
       }
+      setAmbito(initialData.ambitoGobierno);
     }
-  }, [initialData, form.setValue]); 
+  }, [initialData, form.setValue]);
 
   const onSubmit = async (data: EnteFormValues) => {
     try {
@@ -142,18 +138,6 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
     }
   };
 
-  /* const onDelete = async () => {
-    try {
-      setLoading(true);
-      router.refresh();
-      router.push(`/${params.storeId}/products`);
-    } catch (error: any) {
-    } finally {
-      setLoading(false);
-      setOpen(false);
-    }
-  };
- */
   const handleAmbitoChange = (value: "Estatal" | "Federal" | "Municipal") => {
     setAmbito(value);
     form.setValue("ambitoGobierno", value);
@@ -290,7 +274,7 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {poderOptions.map((option) => (
+                    {poderOptions.map((option) => (
                         <SelectItem key={option} value={option}>
                           {option}
                         </SelectItem>
