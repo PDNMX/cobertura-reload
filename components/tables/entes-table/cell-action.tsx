@@ -68,12 +68,15 @@ export const CellAction = ({ data }: any) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-          <DropdownMenuItem
-          >
-            <Edit className="mr-2 h-4 w-4" />  
-            <Link href={`/dashboard/entes/${data.id}`}>Editar</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setOpen(true)}>
+            <Link href={`/dashboard/entes/${data.id}`}>
+              <DropdownMenuItem
+              className="cursor-pointer"
+              >
+                <Edit className="mr-2 h-4 w-4" />  
+                Editar
+              </DropdownMenuItem>
+            </Link>
+          <DropdownMenuItem onClick={() => setOpen(true)} className="cursor-pointer">
             <Trash className="mr-2 h-4 w-4" /> Eliminar
           </DropdownMenuItem>
         </DropdownMenuContent>

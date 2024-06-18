@@ -83,12 +83,12 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
       nombre: "",
       ambitoGobierno: "",
       poderGobierno: "",
-      controlOIC: false,
-      controlTribunal: false,
-      sistema1: false,
-      sistema2: false,
-      sistema3: false,
-      sistema6: false,
+      controlOIC: "",
+      controlTribunal: "",
+      sistema1: "",
+      sistema2: "",
+      sistema3: "",
+      sistema6: "",
       entidad: "",
       municipio: "",
       status: "Published",
@@ -126,6 +126,7 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
       router.push(`/dashboard/entes`);
       toast({
         variant: "default",
+        className: "bg-green-600",
         title: "",
         description: toastMessage
       });
