@@ -25,9 +25,9 @@ import { useRouter } from "next/navigation";
 import { useForm, FormProvider } from "react-hook-form";
 import * as z from "zod";
 import { useToast } from "@/components/ui/use-toast";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import directus from "@/lib/directus";
-import { createItem, readItems, updateItem } from "@directus/sdk";
+import { createItem, updateItem } from "@directus/sdk";
 import { Switch } from "@/components/ui/switch";
 import clsx from 'clsx';
 
@@ -77,27 +77,39 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
     : "Nuevo ente público creado.";
   const action = initialData ? "Actualizar" : "Crear";
 
-  const defaultValues = initialData
-    ? initialData
-    : {
-        nombre: "",
-        ambitoGobierno: "",
-        poderGobierno: "",
-        controlOIC: false,
-        controlTribunal: false,
-        sistema1: false,
-        sistema2: false,
-        sistema3: false,
-        sistema6: false,
-        entidad: "",
-        municipio: "", // Cadena vacía por defecto
-        status: "Published",
-      };
+  // Calcular defaultValues usando useMemo
+  const defaultValues = useMemo(() => {
+    return initialData ?? {
+      nombre: "",
+      ambitoGobierno: "",
+      poderGobierno: "",
+      controlOIC: false,
+      controlTribunal: false,
+      sistema1: false,
+      sistema2: false,
+      sistema3: false,
+      sistema6: false,
+      entidad: "",
+      municipio: "",
+      status: "Published",
+    };
+  }, [initialData]); // Solo recalcular si initialData cambia
+
 
   const form = useForm<EnteFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
+
+  useEffect(() => {
+    if (initialData) {
+      for (const key in initialData) {
+        if (formSchema.shape.hasOwnProperty(key)) {
+          form.setValue(key, initialData[key]);
+        }
+      }
+    }
+  }, [initialData, form.setValue]); 
 
   const onSubmit = async (data: EnteFormValues) => {
     try {
