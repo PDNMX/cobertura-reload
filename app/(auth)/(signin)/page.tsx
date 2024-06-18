@@ -20,6 +20,7 @@ export default function AuthenticationPage() {
           }),
         );
         setEntes(result);
+        localStorage.removeItem('municipiosData');
       } catch (error) {
         console.error("Error al cargar los datos:", error);
       }
