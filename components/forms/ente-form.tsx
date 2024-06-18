@@ -21,17 +21,15 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Trash } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm, FormProvider } from "react-hook-form";
 import * as z from "zod";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, useEffect } from "react";
 import directus from "@/lib/directus";
-import { createItem, readItems } from "@directus/sdk";
+import { createItem, readItems, updateItem } from "@directus/sdk";
 import { Switch } from "@/components/ui/switch";
 import clsx from 'clsx';
-import { useSession } from "next-auth/react";
 
 const formSchema = z.object({
   nombre: z.string().min(3, {
@@ -54,61 +52,30 @@ const formSchema = z.object({
   status: z.string().min(3, { message: "Select status" }),
 });
 
-type ProductFormValues = z.infer<typeof formSchema>;
+type EnteFormValues = z.infer<typeof formSchema>;
 
-interface ProductFormProps {
+interface EnteFormProps {
   initialData: any | null;
 }
 
-export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
-  const { data: session } = useSession();
-  console.log(session.user.entidad);
-  const params = useParams();
+export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
+  //console.log(session.user.entidad);
   const router = useRouter();
   const { toast } = useToast();
-  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [ambito, setAmbito] = useState(
     initialData ? initialData.ambitoGobierno : ""
   );
+  console.log(initialData)
 
-  const [entes, setEntes] = useState([]);
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const result = await directus.request(
-          readItems("municipio", {
-            fields: ["*"],
-            filter: {
-              id_entidad: {
-                _eq: session.user.entidad,
-              },
-            },
-          })
-        );
-        console.log(JSON.stringify(result));
-        // Map over the result data and convert specific keys to lowercase
-        const processedData = result.map((item) => ({
-          ...item,
-        }));
-
-        setEntes(processedData);
-      } catch (error) {
-        console.error("Error al cargar los datos:", error);
-      }
-    }
-
-    fetchData();
-  }, []);
-
-  const title = initialData ? "Editar ente público" : "Crear ente público";
+  const title = initialData ? "Actualizar ente público" : "Crear ente público";
   const description = initialData
-    ? "Edit a employee."
-    : "Agregar un nuevo ente público";
+    ? "Edita la información del ente público"
+    : "Agrega un nuevo ente público";
   const toastMessage = initialData
-    ? "Employee updated."
-    : "Ente público creado.";
-  const action = initialData ? "Guardar Cambios" : "Crear";
+    ? "Ente público actualizado"
+    : "Nuevo ente público creado.";
+  const action = initialData ? "Actualizar" : "Crear";
 
   const defaultValues = initialData
     ? initialData
@@ -127,19 +94,19 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
         status: "Published",
       };
 
-  const form = useForm<ProductFormValues>({
+  const form = useForm<EnteFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
 
-  const onSubmit = async (data: ProductFormValues) => {
+  const onSubmit = async (data: EnteFormValues) => {
     try {
       setLoading(true);
       if (data.municipio === "") {
         data.municipio = null; // Convertir cadena vacía a null antes de enviar
       }
       if (initialData) {
-        await directus.request(createItem("entes", data));
+        await directus.request(updateItem("entes", initialData.id, data));
       } else {
         await directus.request(createItem("entes", data));
       }
@@ -147,8 +114,8 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
       router.push(`/dashboard/entes`);
       toast({
         variant: "default",
-        title: "Creado con exito",
-        description: "Nuevo ente público creado con éxito",
+        title: "",
+        description: toastMessage
       });
     } catch (error: any) {
       toast({
@@ -209,16 +176,6 @@ export const EnteForm: React.FC<ProductFormProps> = ({ initialData }) => {
     <>
       <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
-        {initialData && (
-          <Button
-            disabled={loading}
-            variant="destructive"
-            size="sm"
-            onClick={() => setOpen(true)}
-          >
-            <Trash className="h-4 w-4" />
-          </Button>
-        )}
       </div>
       <Separator />
       <FormProvider {...form}>
