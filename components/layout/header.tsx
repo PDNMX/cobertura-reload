@@ -13,18 +13,18 @@ export default function Header() {
     <div className="header-gradient fixed top-0 left-0 right-0 supports-backdrop-blur:bg-background/60 border-b bg-background/95 backdrop-blur z-20">
       <nav className="h-14 flex items-center justify-between px-4">
         <div className="hidden lg:flex items-center">
-        <Image 
+        
+          <Link
+            className="flex items-center text-white"
+            href="https://www.plataformadigitalnacional.org"
+            target="_blank"
+          >
+            <Image 
             src={logo} 
             alt="Logo PDN" 
             width={60} // Ajusta el ancho según tu logo
-            height={60} // Ajusta la altura según tu logo
-            className="mr-2" // Agrega margen derecho para separar del texto
+            className="mr-3" // Agrega margen derecho para separar del texto
           />
-          <Link
-            className="ml-2 text-white"
-            href="https://www.plataformadigitalnacional.org/"
-            target="_blank"
-          >
             Plataforma Digital Nacional
           </Link>
           
