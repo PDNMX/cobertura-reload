@@ -78,23 +78,19 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
     : "Nuevo ente público creado.";
   const action = initialData ? "Actualizar" : "Crear";
 
-  const defaultValues = useMemo(() => {
-    return (
-      initialData ?? {
-        nombre: "",
-        ambitoGobierno: "",
-        poderGobierno: "",
-        controlOIC: false,
-        controlTribunal: false,
-        sistema1: false,
-        sistema2: false,
-        sistema3: false,
-        sistema6: false,
-        entidad: session?.user?.entidad || "",
-        municipio: "", // Cadena vacía por defecto
-      }
-    );
-  }, [initialData, session?.user?.entidad]);
+  const defaultValues = useMemo(() => ({
+    nombre: initialData?.nombre ?? "", // Define como cadena vacía si no hay valor inicial
+    ambitoGobierno: initialData?.ambitoGobierno ?? "", 
+    poderGobierno: initialData?.poderGobierno ?? "",
+    controlOIC: initialData?.controlOIC ?? false,
+    controlTribunal: initialData?.controlTribunal ?? false,
+    sistema1: initialData?.sistema1 ?? false,
+    sistema2: initialData?.sistema2 ?? false,
+    sistema3: initialData?.sistema3 ?? false,
+    sistema6: initialData?.sistema6 ?? false,
+    entidad: session?.user?.entidad || "",
+    municipio: initialData?.municipio ?? "", // Define como cadena vacía o null
+  }), [initialData, session?.user?.entidad]);
 
   const form = useForm<EnteFormValues>({
     resolver: zodResolver(formSchema),
@@ -239,8 +235,8 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                     <Input
                       disabled={loading}
                       placeholder="Nombre del Ente Público"
+                      value={field.value || ""}
                       {...field}
-                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -267,7 +263,7 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                     value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un ámbito" />
+                        <SelectValue placeholder="Selecciona un ámbito" value={field.value ?? ""}/>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
