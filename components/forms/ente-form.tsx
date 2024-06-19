@@ -67,7 +67,7 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
     initialData ? initialData.ambitoGobierno : "",
   );
   const [municipiosData, setMunicipiosData] = useState([]);
-  const { session, status } = useCurrentSession();
+  const { session } = useCurrentSession();
 
   const title = initialData ? "Actualizar ente público" : "Crear ente público";
   const description = initialData
@@ -90,12 +90,12 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
         sistema2: false,
         sistema3: false,
         sistema6: false,
-        entidad: "",
+        entidad: session?.user?.entidad || "",
         municipio: "", // Cadena vacía por defecto
         status: "Published",
       }
     );
-  }, [initialData]);
+  }, [initialData, session?.user?.entidad]);
 
   const form = useForm<EnteFormValues>({
     resolver: zodResolver(formSchema),
@@ -110,8 +110,13 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
         }
       }
       setAmbito(initialData.ambitoGobierno);
+    } else {
+      // Set entidad from session for new entries
+      if (session && session.user?.entidad) {
+        form.setValue("entidad", session.user.entidad);
+      }
     }
-  }, [initialData, form.setValue]);
+  }, [initialData, form.setValue, session]);
 
   useEffect(() => {
     // Check if session and session.user.entidad exist before fetching
@@ -121,7 +126,7 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
           console.log(session?.user?.entidad);
           const response = await directus.request(
             readItems("municipio", {
-              sort: [ "nombre" ],
+              sort: ["nombre"],
               limit: "-1",
               fields: ["*"],
               filter: {
@@ -225,7 +230,7 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
             <FormField
               control={form.control}
               name="status"
-              render={({ field }) => (
+              render={({ }) => (
                 <FormItem className="hidden">
                   <FormLabel>Status</FormLabel>
                   <FormControl>
@@ -526,14 +531,15 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
               control={form.control}
               name="entidad"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="hidden">
                   <FormLabel>Entidad</FormLabel>
                   <FormControl>
+                    {/* Make the entidad field read-only */}
                     <Input
-                      disabled={loading}
+                      disabled
+                      readOnly
                       placeholder="Automático del usuario"
-                      {...field}
-                      value={field.value ?? ""}
+                      {...field} // This will automatically set the value from the defaultValues
                     />
                   </FormControl>
                   <FormMessage />
