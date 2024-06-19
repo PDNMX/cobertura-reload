@@ -31,6 +31,7 @@ import directus from "@/lib/directus";
 import { createItem, updateItem, readItems } from "@directus/sdk";
 import { Switch } from "@/components/ui/switch";
 import clsx from "clsx";
+import { log } from "console";
 
 const formSchema = z.object({
   nombre: z.string().min(3, {
@@ -50,7 +51,6 @@ const formSchema = z.object({
   sistema6: z.boolean().optional(),
   entidad: z.string(),
   municipio: z.string().nullable(), // Permitir valores nulos
-  status: z.string().min(3, { message: "Select status" }),
 });
 
 type EnteFormValues = z.infer<typeof formSchema>;
@@ -92,7 +92,6 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
         sistema6: false,
         entidad: session?.user?.entidad || "",
         municipio: "", // Cadena vacía por defecto
-        status: "Published",
       }
     );
   }, [initialData, session?.user?.entidad]);
@@ -160,6 +159,7 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
       if (data.municipio === "") {
         data.municipio = null; // Convertir cadena vacía a null antes de enviar
       }
+      console.log(data)
       if (initialData) {
         await directus.request(updateItem("entes", initialData.id, data));
       } else {
@@ -227,24 +227,6 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 w-full">
           <div className="md:grid md:grid-cols-1 gap-8">
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ }) => (
-                <FormItem className="hidden">
-                  <FormLabel>Status</FormLabel>
-                  <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="Employee name"
-                      value={"Published"}
-                      readOnly
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="nombre"
