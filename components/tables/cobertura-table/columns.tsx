@@ -1,6 +1,5 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
-import { User } from "@/constants/data";
 import Image from "next/image"; // Import Image component from Next.js
 
 import icoSujetosObligados from "./icons-thead/sujetosObligados.svg";
