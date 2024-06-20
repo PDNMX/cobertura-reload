@@ -10,7 +10,7 @@ import { columns } from "./columns";
 import dataEjemplo from "./data-ejemplo";
 
 export const CoberturaTable = ({ data }: any) => {
-  const router = useRouter();
+  //console.log(data)
 
   return (
     <>
