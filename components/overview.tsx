@@ -1,82 +1,108 @@
 "use client";
 
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Cell, Tooltip } from "recharts";
 
-const data = [
+type EntityData = {
+  entidad: string;
+  totalSO: number;
+  totalOIC: number;
+  s1: number;
+  s2: number;
+  s3: number;
+  s6: number;
+};
+
+const data: EntityData[] = [
   {
-    name: "Jan",
-    total: Math.floor(Math.random() * 5000) + 1000,
+    entidad: "01",
+    totalSO: 93,
+    totalOIC: 69,
+    s1: 92,
+    s2: 90,
+    s3: 69,
+    s6: 1,
   },
   {
-    name: "Feb",
-    total: Math.floor(Math.random() * 5000) + 1000,
+    entidad: "02",
+    totalSO: 127,
+    totalOIC: 89,
+    s1: 0,
+    s2: 0,
+    s3: 0,
+    s6: 0,
   },
   {
-    name: "Mar",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Apr",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "May",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Jun",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Jul",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Aug",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Sep",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Oct",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Nov",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Dec",
-    total: Math.floor(Math.random() * 5000) + 1000,
+    entidad: "03",
+    totalSO: 120,
+    totalOIC: 14,
+    s1: 73,
+    s2: 84,
+    s3: 14,
+    s6: 0,
   },
 ];
 
-export function Overview() {
-  const error = console.error;
-  console.error = (...args: any) => {
-    if (/defaultProps/.test(args[0])) return;
-    error(...args);
-  };
+const colors = {
+  S1: "#F29888",
+  S2: "#B25FAC",
+  S3: "#9085DA",
+  S6: "#42A5CC",
+};
+
+export function Overview({ entidad }: { entidad: string }) {
+  const entityData = data.find((item) => item.entidad === entidad);
+
+  if (!entityData) {
+    return <p className="pl-4">No hay información disponible para tu entidad.</p>;
+  }
+
+  const processedData = [
+    {
+      name: `S1: ${entityData.s1} de ${entityData.totalSO}`,
+      Total: (entityData.s1 / entityData.totalSO) * 100,
+      color: colors.S1,
+    },
+    {
+      name: `S2: ${entityData.s2} de ${entityData.totalSO}`,
+      Total: (entityData.s2 / entityData.totalSO) * 100,
+      color: colors.S2,
+    },
+    {
+      name: `S3: ${entityData.s3} de ${entityData.totalOIC}`,
+      Total: (entityData.s3 / entityData.totalOIC) * 100,
+      color: colors.S3,
+    },
+    {
+      name: `S6: ${entityData.s6} de ${entityData.totalSO}`,
+      Total: (entityData.s6 / entityData.totalSO) * 100,
+      color: colors.S6,
+    },
+  ];
+
   return (
     <ResponsiveContainer width="100%" height={350}>
-      <BarChart data={data}>
+      <BarChart data={processedData}>
         <XAxis
           dataKey="name"
           stroke="#888888"
           fontSize={12}
           tickLine={false}
           axisLine={false}
+          tickFormatter={(value) => value.split(":")[0]}
         />
         <YAxis
           stroke="#888888"
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => `$${value}`}
+          tickFormatter={(value) => `${Number(value).toFixed(2)}%`}
         />
-        <Bar dataKey="total" fill="#adfa1d" radius={[4, 4, 0, 0]} />
+        <Tooltip formatter={(value) => `${Number(value).toFixed(2)}%`} />
+        <Bar dataKey="Total" radius={[4, 4, 0, 0]}>
+          {processedData.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.color} />
+          ))}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   );

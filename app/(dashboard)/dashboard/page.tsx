@@ -16,6 +16,18 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Image from "next/image";
+import icoS1 from "@/components/tables/cobertura-table/icons-thead/s1.svg";
+import icoS2 from "@/components/tables/cobertura-table/icons-thead/s2.svg";
+import icoS3OIC from "@/components/tables/cobertura-table/icons-thead/s3OIC.svg";
+import icoS6 from "@/components/tables/cobertura-table/icons-thead/s6.svg";
+
+const colors = {
+  sistema1: "text-[#F29888]",
+  sistema2: "text-[#B25FAC]",
+  sistema3: "text-[#9085DA]",
+  sistema6: "text-[#42A5CC]",
+};
 
 export default function Page() {
   const { session, status } = useCurrentSession();
@@ -35,7 +47,7 @@ export default function Page() {
           const result = await directus.request(
             readItems("entes", {
               limit: "-1",
-              fields: ["*", "controlOIC"],
+              fields: ["*", "controlOIC", "controlTribunal"],
               filter: {
                 entidad: {
                   _eq: session?.user?.entidad,
@@ -47,7 +59,7 @@ export default function Page() {
           // Procesar datos
           const processedData = result.reduce(
             (acc, item) => {
-              if (!item.controlOIC) {
+              if (!item.controlOIC && !item.controlTribunal) {
                 if (item.sistema1) acc.sistema1 += 1;
                 if (item.sistema2) acc.sistema2 += 1;
                 if (item.sistema6) acc.sistema6 += 1;
@@ -92,118 +104,131 @@ export default function Page() {
           </h2>
         </div>
 
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-1">
+          <Card className="col-span-4">
+            <CardHeader>
+              <CardTitle>
+                Visualiza en tiempo real el avance de los Entes Públicos en la
+                interconexión a los siguientes sistemas de la{" "}
+                <strong>Plataforma Digital Nacional</strong>:
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="flex items-center">
+                <Image
+                  src={icoS1}
+                  alt="Icono S1"
+                  width={20}
+                  height={20}
+                  className="mr-2"
+                />{" "}
+                - Sistema de evolución patrimonial, de declaración de intereses
+                y constancia de presentación de declaración fiscal
+              </p>
+              <p className="flex items-center">
+                <Image
+                  src={icoS2}
+                  alt="Icono S2"
+                  width={20}
+                  height={20}
+                  className="mr-2"
+                />{" "}
+                - Sistema de los Servidores públicos que intervengan en
+                procedimientos de contrataciones públicas
+              </p>
+              <p className="flex items-center">
+                <Image
+                  src={icoS3OIC}
+                  alt="Icono S3OIC"
+                  width={20}
+                  height={20}
+                  className="mr-2"
+                />{" "}
+                - Sistema nacional de Servidores públicos y particulares
+                sancionados
+              </p>
+              <p className="flex items-center">
+                <Image
+                  src={icoS6}
+                  alt="Icono S6"
+                  width={20}
+                  height={20}
+                  className="mr-2"
+                />{" "}
+                - Sistema de Información Pública de Contrataciones
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle
+                className={`text-sm font-bold tracking-tight ${colors.sistema1}`}
+              >
                 Entes Públicos Conectados al Sistema 1
               </CardTitle>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                className="h-4 w-4 text-muted-foreground"
-              >
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-              </svg>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{data.sistema1}</div>
-              <p className="text-xs text-muted-foreground">
-                {calculatePercentage(
-                  data.sistema1,
-                  data.totalSujetosObligados
-                )}
+              <div className={`text-2xl font-bold ${colors.sistema1}`}>
+                {data.sistema1}
+              </div>
+              <p className={`text-xs ${colors.sistema1}`}>
+                {calculatePercentage(data.sistema1, data.totalSujetosObligados)}
                 % de los sujetos obligados
               </p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle
+                className={`text-sm font-bold tracking-tight ${colors.sistema2}`}
+              >
                 Entes Públicos Conectados al Sistema 2
               </CardTitle>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                className="h-4 w-4 text-muted-foreground"
-              >
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{data.sistema2}</div>
-              <p className="text-xs text-muted-foreground">
-                {calculatePercentage(
-                  data.sistema2,
-                  data.totalSujetosObligados
-                )}
+              <div className={`text-2xl font-bold ${colors.sistema2}`}>
+                {data.sistema2}
+              </div>
+              <p className={`text-xs ${colors.sistema2}`}>
+                {calculatePercentage(data.sistema2, data.totalSujetosObligados)}
                 % de los sujetos obligados
               </p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle
+                className={`text-sm font-bold tracking-tight ${colors.sistema3}`}
+              >
                 Entes Públicos Conectados al Sistema 3
               </CardTitle>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                className="h-4 w-4 text-muted-foreground"
-              >
-                <rect width="20" height="14" x="2" y="5" rx="2" />
-                <path d="M2 10h20" />
-              </svg>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{data.sistema3}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className={`text-2xl font-bold ${colors.sistema3}`}>
+                {data.sistema3}
+              </div>
+              <p className={`text-xs ${colors.sistema3}`}>
                 {calculatePercentage(data.sistema3, data.totalOIC)}% de los OIC
               </p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle
+                className={`text-sm font-bold tracking-tight ${colors.sistema6}`}
+              >
                 Entes Públicos Conectados al Sistema 6
               </CardTitle>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                className="h-4 w-4 text-muted-foreground"
-              >
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-              </svg>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{data.sistema6}</div>
-              <p className="text-xs text-muted-foreground">
-                {calculatePercentage(
-                  data.sistema6,
-                  data.totalSujetosObligados
-                )}
+              <div className={`text-2xl font-bold ${colors.sistema6}`}>
+                {data.sistema6}
+              </div>
+              <p className={`text-xs ${colors.sistema6}`}>
+                {calculatePercentage(data.sistema6, data.totalSujetosObligados)}
                 % de los sujetos obligados
               </p>
             </CardContent>
@@ -212,19 +237,33 @@ export default function Page() {
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
           <Card className="col-span-4">
             <CardHeader>
-              <CardTitle>Overview</CardTitle>
+              <CardTitle>Avance del Trimestre Anterior</CardTitle>
+              <CardDescription>
+                Última actualización: 31 de marzo de 2024
+              </CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
-              <Overview />
+              <Overview entidad={session?.user?.entidad} />
             </CardContent>
           </Card>
           <Card className="col-span-4 md:col-span-3">
             <CardHeader>
-              <CardTitle>Recent Sales</CardTitle>
+              <CardTitle>Sujetos Obligados</CardTitle>
               <CardDescription>You made 265 sales this month.</CardDescription>
             </CardHeader>
             <CardContent>
-              <RecentSales />
+            </CardContent>
+            <CardHeader>
+              <CardTitle>Organos Internos de Control</CardTitle>
+              <CardDescription>You made 265 sales this month.</CardDescription>
+            </CardHeader>
+            <CardContent>       
+            </CardContent>
+            <CardHeader>
+              <CardTitle>Tribunal de Justicia Administrativa</CardTitle>
+              <CardDescription>You made 265 sales this month.</CardDescription>
+            </CardHeader>
+            <CardContent>        
             </CardContent>
           </Card>
         </div>
