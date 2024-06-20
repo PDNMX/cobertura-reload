@@ -376,6 +376,7 @@ export function Overview({ entidad }: { entidad: string }) {
           tickLine={false}
           axisLine={false}
           tickFormatter={(value) => `${Number(value).toFixed(2)}%`}
+          domain={[0, 100]} // Establece el rango del eje Y de 0 a 100
         />
         <Tooltip formatter={(value) => `${Number(value).toFixed(2)}%`} />
         <Bar dataKey="Total" radius={[4, 4, 0, 0]}>
