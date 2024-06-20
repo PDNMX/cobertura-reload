@@ -1,16 +1,24 @@
-// @ts-nocheck 
+// @ts-nocheck
 "use client";
 
 import { DataTable } from "./data-table";
 import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
-import { useRouter } from "next/navigation";
 import { columns } from "./columns";
 
-import dataEjemplo from "./data-ejemplo";
+//import datosOriginales from "./data-ejemplo";
+import marcoGeoestadisticoInegi from "./data-entidades";
 
 export const CoberturaTable = ({ data }: any) => {
-  //console.log(data)
+  const datosConNombres = data.map((dato) => {
+    const entidadEncontrada = marcoGeoestadisticoInegi.find(
+      (entidad) => entidad.id === dato.entidad,
+    );
+    if (!entidadEncontrada) {
+      return { ...dato, nombreEntidad: "Entidad no encontrada" };
+    }
+    return { ...dato, nombreEntidad: entidadEncontrada.nombre };
+  });
 
   return (
     <>
@@ -22,7 +30,11 @@ export const CoberturaTable = ({ data }: any) => {
       </div>
       <Separator />
 
-      <DataTable searchKey="entFed" columns={columns} data={dataEjemplo} />
+      <DataTable
+        searchKey="nombreEntidad"
+        columns={columns}
+        data={datosConNombres}
+      />
     </>
   );
 };

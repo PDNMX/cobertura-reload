@@ -103,30 +103,31 @@ export default function AuthenticationPage() {
         const resultados = await Promise.all(Object.values(solicitudes));
 
         const combinedData = resultados.reduce((acumulador, result, index) => {
-          const sistema = Object.keys(solicitudes)[index];
+          const conteoAgrupamiento = Object.keys(solicitudes)[index];
           result.forEach((item) => {
             const { entidad, count } = item;
             acumulador[entidad] = {
               ...acumulador[entidad],
-              [sistema]: parseInt(count, 10) || 0, // Convertir a número o usar 0 si es undefined/NaN
+              [conteoAgrupamiento]: parseInt(count, 10) || 0, // Convertir a número o usar 0 si es undefined/NaN
             };
           });
           return acumulador;
         }, {});
 
-        // Asegurar que todas las entidades tengan conteos para todos los sistemas
+        // Asegurar que todas las entidades tengan conteos
         for (const entidad in combinedData) {
-          for (const sistema in solicitudes) {
-            combinedData[entidad][sistema] =
-              combinedData[entidad][sistema] || 0;
+          for (const conteoAgrupamiento in solicitudes) {
+            combinedData[entidad][conteoAgrupamiento] =
+              combinedData[entidad][conteoAgrupamiento] || 0;
           }
         }
-        console.log(combinedData);
-        setEntes(combinedData);
-        return Object.entries(combinedData).map(([entidad, count]) => ({
+        
+        const resultadoFinal = Object.entries(combinedData).map(([entidad, count]) => ({
           entidad,
-          count,
+          ...count,
         }));
+        //console.log(resultadoFinal);
+        setEntes(resultadoFinal);
       } catch (error) {
         setError(error); // Establecer mensaje de error
         console.error("Error al cargar los datos:", error.message);

@@ -107,13 +107,13 @@ export function DataTable<TData, TValue>({
         </DropdownMenu>
       </div>
       <ScrollArea className="rounded-md border h-[calc(80vh-100px)]">
-        <Table className="relative w-full text-xs">
+        <Table className="relative w-full">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="text-center pt-2 pb-2">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -156,7 +156,7 @@ export function DataTable<TData, TValue>({
                         hoveredColumnId === cell.column.id
                           ? "bg-gray-300 dark:bg-gray-500"
                           : ""
-                      }`}>
+                      } text-center` }>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),

@@ -1,53 +1,101 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
 import { User } from "@/constants/data";
-/* import { ChevronDownIcon } from "@radix-ui/react-icons"; */
+import Image from "next/image"; // Import Image component from Next.js
+
+import icoSujetosObligados from "./icons-thead/sujetosObligados.svg";
+import icoConexiones from "./icons-thead/conexiones.svg";
+import icoS1 from "./icons-thead/s1.svg";
+import icoS2 from "./icons-thead/s2.svg";
+import icoS3OIC from "./icons-thead/s3OIC.svg";
+import icoS3Tribunal from "./icons-thead/s3Tribunal.svg";
+import icoS6 from "./icons-thead/s6.svg";
 
 export const columns: ColumnDef<User>[] = [
   {
-    id: "select",
-    enableSorting: false,
-    enableHiding: false,
+    accessorKey: "nombreEntidad",
+    header: () => (
+      <div className="text-center">
+        <span className="ml-2">Entidad Federativa</span>
+      </div>
+    ),
   },
-  { accessorKey: "entFed",     header: () => (
+  {
+    accessorKey: "resultSujetosObligados",
+    header: () => (
+      <div className="flex items-center">
+        <Image
+          className="m-auto"
+          src={icoSujetosObligados}
+          alt="Sujetos Obligados"
+          width={35} 
+        />
+      </div>
+    ),
+  },
+  { accessorKey: "resultOIC", header: "OIC" },
+  { accessorKey: "resultSistema1", header: () => (
     <div className="flex items-center">
-      {/* <ChevronDownIcon className="h-4 w-4" /> */}
-      <span className="ml-2">Entidad Federativa</span>
+      <Image
+        className="m-auto"
+        src={icoS1}
+        alt="Sistema 1"
+        width={35} 
+      />
     </div>
-  ),},
-  { accessorKey: "totEnt", header: "Total de Entes" },
-  { accessorKey: "s1Con", header: "S1 Conectados" },
-  { accessorKey: "s1Por", header: "S1 Porcentaje" },
-  { accessorKey: "s2Con", header: "S2 Conectados" },
-  { accessorKey: "s2Por", header: "S2 Porcentaje" },
-  { accessorKey: "s3OICECon", header: "S3 OIC Estatal Conectados" },
-  { accessorKey: "s3OICEPor", header: "S3 OIC Estatal Porcentaje" },
-  { accessorKey: "s3OICMCon", header: "S3 OIC Municipal Conectados" },
-  { accessorKey: "s3OICMPor", header: "S3 OIC Municipal Porcentaje" },
-  { accessorKey: "s3TJACon", header: "S3 TJA Conectados" },
-  { accessorKey: "s3TJAPor", header: "S3 TJA Porcentaje" },
-  { accessorKey: "s3PJCon", header: "S3 PJ Conectados" },
-  { accessorKey: "s3PJPor", header: "S3 PJ Porcentaje" },
-  { accessorKey: "s6Con", header: "S6 Conectados" },
-  { accessorKey: "s6Por", header: "S6 Porcentaje" },
-  { accessorKey: "ejecCon", header: "Ejecutivo Conectados" },
-  { accessorKey: "ejecPor", header: "Ejecutivo Porcentaje" },
-  { accessorKey: "legisCon", header: "Legislativo Conectados" },
-  { accessorKey: "legisPor", header: "Legislativo Porcentaje" },
-  { accessorKey: "judCon", header: "Judicial Conectados" },
-  { accessorKey: "judPor", header: "Judicial Porcentaje" },
+  ), },
+  { accessorKey: "resultSistema2", header: () => (
+    <div className="flex items-center">
+      <Image
+        className="m-auto"
+        src={icoS2}
+        alt="Sistema 2"
+        width={35} 
+      />
+    </div>
+  ) },
+  { accessorKey: "resultSistema3OIC", header: () => (
+    <div className="flex items-center">
+      <Image
+        className="m-auto"
+        src={icoS3OIC}
+        alt="Sistema 3 OIC"
+        width={35} 
+      />
+    </div>
+  ) },
+  { accessorKey: "resultSistema6", header: () => (
+    <div className="flex items-center">
+      <Image
+        className="m-auto"
+        src={icoS6}
+        alt="Sistema 6"
+        width={35} 
+      />
+    </div>
+  ) },
+  { accessorKey: "resultConexiones", header: () => (
+    <div className="flex items-center">
+      <Image
+        className="m-auto"
+        src={icoConexiones}
+        alt="Conexiones"
+        width={35} 
+      />
+    </div>
+  ) },
+  { accessorKey: "resultTribunal", header: "Tribunal" },
   {
-    accessorKey: "ocasCon",
-    header: "Órganos Constitucionales Autónomos Conectados",
+    accessorKey: "resultSistema3Tribunal",
+    header: () => (
+      <div className="flex items-center">
+        <Image
+          className="m-auto"
+          src={icoS3Tribunal}
+          alt="Sistema 3 Tribunal"
+          width={35} 
+        />
+      </div>
+    )
   },
-  {
-    accessorKey: "ocasPor",
-    header: "Órganos Constitucionales Autónomos Porcentaje",
-  },
-  { accessorKey: "cmCon", header: "Cabeceras Municipales Conectados" },
-  { accessorKey: "cmPor", header: "Cabeceras Municipales Porcentaje" },
-  { accessorKey: "emCon", header: "Entes Municipales Ejecutivo Conectados" },
-  { accessorKey: "emPor", header: "Entes Municipales Ejecutivo Porcentaje" },
-  { accessorKey: "totConex", header: "Total de Conexiones" },
-  { accessorKey: "calif", header: "Calificación" },
 ];
