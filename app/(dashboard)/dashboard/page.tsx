@@ -7,7 +7,6 @@ import { useCurrentSession } from "@/hooks/useCurrentSession";
 import directus from "@/lib/directus";
 import { readItems } from "@directus/sdk";
 import { Overview } from "@/components/overview";
-import { RecentSales } from "@/components/recent-sales";
 import {
   Card,
   CardContent,
@@ -234,7 +233,7 @@ export default function Page() {
             </CardContent>
           </Card>
         </div>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
+        <div className="grid gap-4 grid-cols-1">
           <Card className="col-span-4">
             <CardHeader>
               <CardTitle>Avance del Trimestre Anterior</CardTitle>
@@ -244,26 +243,6 @@ export default function Page() {
             </CardHeader>
             <CardContent className="pl-2">
               <Overview entidad={session?.user?.entidad} />
-            </CardContent>
-          </Card>
-          <Card className="col-span-4 md:col-span-3">
-            <CardHeader>
-              <CardTitle>Sujetos Obligados</CardTitle>
-              <CardDescription>You made 265 sales this month.</CardDescription>
-            </CardHeader>
-            <CardContent>
-            </CardContent>
-            <CardHeader>
-              <CardTitle>Organos Internos de Control</CardTitle>
-              <CardDescription>You made 265 sales this month.</CardDescription>
-            </CardHeader>
-            <CardContent>       
-            </CardContent>
-            <CardHeader>
-              <CardTitle>Tribunal de Justicia Administrativa</CardTitle>
-              <CardDescription>You made 265 sales this month.</CardDescription>
-            </CardHeader>
-            <CardContent>        
             </CardContent>
           </Card>
         </div>
