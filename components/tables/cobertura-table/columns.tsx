@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
 import { User } from "@/constants/data";
@@ -14,12 +13,17 @@ import icoS6 from "./icons-thead/s6.svg";
 import icoTribunal from "./icons-thead/tribunal.svg";
 import icoOIC from "./icons-thead/oic.svg";
 
-export const columns: ColumnDef<User>[] = [
+export const columns: ColumnDef<any>[] = [
   {
     accessorKey: "nombreEntidad",
     header: () => (
       <div className="text-center">
         <span className="ml-2">Entidad Federativa</span>
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div data-entidad={row.original.entidad}>
+        {row.original.nombreEntidad}
       </div>
     ),
   },
@@ -31,81 +35,142 @@ export const columns: ColumnDef<User>[] = [
           className="m-auto"
           src={icoSujetosObligados}
           alt="Sujetos Obligados"
-          width={35} 
+          width={35}
         />
       </div>
     ),
+    cell: ({ row }) => (
+      <div data-entidad={row.original.entidad}>
+        {row.original.resultSujetosObligados}
+      </div>
+    ),
   },
-  { accessorKey: "resultOIC", header: () => (
-    <div className="flex items-center">
-      <Image
-        className="m-auto"
-        src={icoOIC}
-        alt="OIC"
-        width={35} 
-      />
-    </div>
-  ) },
-  { accessorKey: "resultSistema1", header: () => (
-    <div className="flex items-center">
-      <Image
-        className="m-auto"
-        src={icoS1}
-        alt="Sistema 1"
-        width={35} 
-      />
-    </div>
-  ), },
-  { accessorKey: "resultSistema2", header: () => (
-    <div className="flex items-center">
-      <Image
-        className="m-auto"
-        src={icoS2}
-        alt="Sistema 2"
-        width={35} 
-      />
-    </div>
-  ) },
-  { accessorKey: "resultSistema3OIC", header: () => (
-    <div className="flex items-center">
-      <Image
-        className="m-auto"
-        src={icoS3OIC}
-        alt="Sistema 3 OIC"
-        width={35} 
-      />
-    </div>
-  ) },
-  { accessorKey: "resultSistema6", header: () => (
-    <div className="flex items-center">
-      <Image
-        className="m-auto"
-        src={icoS6}
-        alt="Sistema 6"
-        width={35} 
-      />
-    </div>
-  ) },
-  { accessorKey: "resultConexiones", header: () => (
-    <div className="flex items-center">
-      <Image
-        className="m-auto"
-        src={icoConexiones}
-        alt="Conexiones"
-        width={35} 
-      />
-    </div>
-  ) },
-  { accessorKey: "resultTribunal", header: () => (
-    <div className="flex items-center">
-      <Image
-        className="m-auto"
-        src={icoTribunal}
-        alt="Tribunal"
-        width={35} 
-      />
-    </div>
-  )},
+  {
+    accessorKey: "resultOIC",
+    header: () => (
+      <div className="flex items-center">
+        <Image
+          className="m-auto"
+          src={icoOIC}
+          alt="OIC"
+          width={35}
+        />
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div data-entidad={row.original.entidad}>
+        {row.original.resultOIC}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "resultSistema1",
+    header: () => (
+      <div className="flex items-center">
+        <Image
+          className="m-auto"
+          src={icoS1}
+          alt="Sistema 1"
+          width={35}
+        />
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div data-entidad={row.original.entidad}>
+        {row.original.resultSistema1}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "resultSistema2",
+    header: () => (
+      <div className="flex items-center">
+        <Image
+          className="m-auto"
+          src={icoS2}
+          alt="Sistema 2"
+          width={35}
+        />
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div data-entidad={row.original.entidad}>
+        {row.original.resultSistema2}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "resultSistema3OIC",
+    header: () => (
+      <div className="flex items-center">
+        <Image
+          className="m-auto"
+          src={icoS3OIC}
+          alt="Sistema 3 OIC"
+          width={35}
+        />
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div data-entidad={row.original.entidad}>
+        {row.original.resultSistema3OIC}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "resultSistema6",
+    header: () => (
+      <div className="flex items-center">
+        <Image
+          className="m-auto"
+          src={icoS6}
+          alt="Sistema 6"
+          width={35}
+        />
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div data-entidad={row.original.entidad}>
+        {row.original.resultSistema6}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "resultConexiones",
+    header: () => (
+      <div className="flex items-center">
+        <Image
+          className="m-auto"
+          src={icoConexiones}
+          alt="Conexiones"
+          width={35}
+        />
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div data-entidad={row.original.entidad}>
+        {row.original.resultConexiones}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "resultTribunal",
+    header: () => (
+      <div className="flex items-center">
+        <Image
+          className="m-auto"
+          src={icoTribunal}
+          alt="Tribunal"
+          width={35}
+        />
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div data-entidad={row.original.entidad}>
+        {row.original.resultTribunal}
+      </div>
+    ),
+  },
   {
     accessorKey: "resultSistema3Tribunal",
     header: () => (
@@ -114,9 +179,14 @@ export const columns: ColumnDef<User>[] = [
           className="m-auto"
           src={icoS3Tribunal}
           alt="Sistema 3 Tribunal"
-          width={35} 
+          width={35}
         />
       </div>
-    )
+    ),
+    cell: ({ row }) => (
+      <div data-entidad={row.original.entidad}>
+        {row.original.resultSistema3Tribunal}
+      </div>
+    ),
   },
 ];

@@ -46,12 +46,7 @@ export function DataTable<TData, TValue>({
   data,
   searchKey,
 }: DataTableProps<TData, TValue>) {
-  const [selectedCellValue, setSelectedCellValue] = useState<string | null>(
-    null,
-  );
-  const [selectedRowValues, setSelectedRowValues] = useState<{
-    [key: string]: any;
-  } | null>(null);
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hoveredColumnId, setHoveredColumnId] = useState<string | null>(null);
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
@@ -63,9 +58,12 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
   });
 
-  const handleCellClick = (cellValue: string, row: any) => {
-    setSelectedCellValue(cellValue);
-    setSelectedRowValues(row.original);
+  const handleCellClick = (cell: any) => {
+    const rowElement = cell.row.original; 
+    const entidad = rowElement.entidad; 
+    const tipoColumna = cell.column.id;        
+
+   // console.log("Entidad:", entidad, "Columna:", tipoColumna);
     setIsDialogOpen(true);
   };
 
@@ -143,7 +141,7 @@ export function DataTable<TData, TValue>({
                     <TableCell
                       key={cell.id}
                       onClick={() =>
-                        handleCellClick(cell.getValue<string>(), row)
+                        handleCellClick(cell)
                       }
                       onMouseEnter={() => setHoveredColumnId(cell.column.id)}
                       onMouseLeave={() => setHoveredColumnId(null)}
@@ -189,25 +187,7 @@ export function DataTable<TData, TValue>({
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-1 items-center gap-4">
-              {selectedCellValue && (
-                <p className="mb-4 text-gray-700 dark:text-gray-300">
-                  {selectedCellValue}
-                </p>
-              )}
-              <h3 className="text-lg font-bold mt-4 text-gray-900 dark:text-gray-100">
-                Valores de la Fila
-              </h3>
-              {selectedRowValues && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(selectedRowValues).map(([key, value]) => (
-                    <p key={key} className="text-gray-700 dark:text-gray-300">
-                      <strong>{key}:</strong> {value}
-                    </p>
-                  ))}
-                </div>
-              )}
-            </div>
+            
           </div>
           <DialogFooter>
             <Button onClick={() => setIsDialogOpen(false)} className="mt-4">
