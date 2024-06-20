@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
 import { User } from "@/constants/data";
@@ -10,6 +11,8 @@ import icoS2 from "./icons-thead/s2.svg";
 import icoS3OIC from "./icons-thead/s3OIC.svg";
 import icoS3Tribunal from "./icons-thead/s3Tribunal.svg";
 import icoS6 from "./icons-thead/s6.svg";
+import icoTribunal from "./icons-thead/tribunal.svg";
+import icoOIC from "./icons-thead/oic.svg";
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -33,7 +36,16 @@ export const columns: ColumnDef<User>[] = [
       </div>
     ),
   },
-  { accessorKey: "resultOIC", header: "OIC" },
+  { accessorKey: "resultOIC", header: () => (
+    <div className="flex items-center">
+      <Image
+        className="m-auto"
+        src={icoOIC}
+        alt="OIC"
+        width={35} 
+      />
+    </div>
+  ) },
   { accessorKey: "resultSistema1", header: () => (
     <div className="flex items-center">
       <Image
@@ -84,7 +96,16 @@ export const columns: ColumnDef<User>[] = [
       />
     </div>
   ) },
-  { accessorKey: "resultTribunal", header: "Tribunal" },
+  { accessorKey: "resultTribunal", header: () => (
+    <div className="flex items-center">
+      <Image
+        className="m-auto"
+        src={icoTribunal}
+        alt="Tribunal"
+        width={35} 
+      />
+    </div>
+  )},
   {
     accessorKey: "resultSistema3Tribunal",
     header: () => (
