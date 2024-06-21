@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,9 +16,13 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useRouter } from "next/navigation"
+import { Loader2 } from "lucide-react";
+import { CircleAlert } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Enter a valid email address" }),
+  email: z.string().email({ message: "Ingresa un email valido" }),
   password: z.string(),
 });
 
@@ -26,7 +31,12 @@ type UserFormValue = z.infer<typeof formSchema>;
 export default function UserAuthForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
-  const [loading, setLoading] = useState(false);
+
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string>("")
+
+  const router = useRouter()
+
   const defaultValues = {
     email: "",
     password: "",
@@ -37,11 +47,19 @@ export default function UserAuthForm() {
   });
 
   const onSubmit = async (data: UserFormValue) => {
-    signIn("credentials", {
+    setIsLoading(true)
+    const res = await signIn("credentials", {
       email: data.email,
       password: data.password,
       callbackUrl: callbackUrl ?? "/dashboard",
+      redirect: false,
     });
+    if (res?.error) {
+      setError(res?.error)
+      setIsLoading(false)
+    } else {
+      router.push("/dashboard")
+    }
   };
 
   return (
@@ -49,7 +67,7 @@ export default function UserAuthForm() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-2 w-full"
+          className="space-y-3 w-full"
         >
           <FormField
             control={form.control}
@@ -61,7 +79,7 @@ export default function UserAuthForm() {
                   <Input
                     type="email"
                     placeholder="Ingresa tu correo electrónico"
-                    disabled={loading}
+                    disabled={isLoading}
                     {...field}
                   />
                 </FormControl>
@@ -79,7 +97,7 @@ export default function UserAuthForm() {
                   <Input
                     type="password"
                     placeholder="Ingresa tu contraseña"
-                    disabled={loading}
+                    disabled={isLoading}
                     {...field}
                   />
                 </FormControl>
@@ -87,12 +105,19 @@ export default function UserAuthForm() {
               </FormItem>
             )}
           />
+          {error && (
+          <Alert variant="destructive">
+            <CircleAlert className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-          <Button disabled={loading} className="ml-auto w-full" type="submit">
-            Entrar
+          <Button disabled={isLoading} className="ml-auto w-full" type="submit">
+           Entrar{isLoading && <Loader2 className="animate-spin ml-1" />} 
           </Button>
         </form>
       </Form>
+      
     </>
   );
 }
