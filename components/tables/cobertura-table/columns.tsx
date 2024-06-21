@@ -31,7 +31,7 @@ export const columns: ColumnDef<any>[] = [
     header: () => (
       <div className="flex items-center">
         <Image
-          className="m-auto"
+          className="m-auto cursor-pointer"
           src={icoSujetosObligados}
           alt="Sujetos Obligados"
           width={35}
@@ -49,7 +49,7 @@ export const columns: ColumnDef<any>[] = [
     header: () => (
       <div className="flex items-center">
         <Image
-          className="m-auto"
+          className="m-auto cursor-pointer"
           src={icoOIC}
           alt="OIC"
           width={35}
@@ -67,7 +67,7 @@ export const columns: ColumnDef<any>[] = [
     header: () => (
       <div className="flex items-center">
         <Image
-          className="m-auto"
+          className="m-auto cursor-pointer"
           src={icoS1}
           alt="Sistema 1"
           width={35}
@@ -85,7 +85,7 @@ export const columns: ColumnDef<any>[] = [
     header: () => (
       <div className="flex items-center">
         <Image
-          className="m-auto"
+          className="m-auto cursor-pointer"
           src={icoS2}
           alt="Sistema 2"
           width={35}
@@ -103,7 +103,7 @@ export const columns: ColumnDef<any>[] = [
     header: () => (
       <div className="flex items-center">
         <Image
-          className="m-auto"
+          className="m-auto cursor-pointer"
           src={icoS3OIC}
           alt="Sistema 3 OIC"
           width={35}
@@ -121,7 +121,7 @@ export const columns: ColumnDef<any>[] = [
     header: () => (
       <div className="flex items-center">
         <Image
-          className="m-auto"
+          className="m-auto cursor-pointer"
           src={icoS6}
           alt="Sistema 6"
           width={35}
@@ -139,7 +139,7 @@ export const columns: ColumnDef<any>[] = [
     header: () => (
       <div className="flex items-center">
         <Image
-          className="m-auto"
+          className="m-auto cursor-pointer"
           src={icoConexiones}
           alt="Conexiones"
           width={35}
@@ -157,7 +157,7 @@ export const columns: ColumnDef<any>[] = [
     header: () => (
       <div className="flex items-center">
         <Image
-          className="m-auto"
+          className="m-auto cursor-pointer"
           src={icoTribunal}
           alt="Tribunal"
           width={35}
@@ -175,7 +175,7 @@ export const columns: ColumnDef<any>[] = [
     header: () => (
       <div className="flex items-center">
         <Image
-          className="m-auto"
+          className="m-auto cursor-pointer"
           src={icoS3Tribunal}
           alt="Sistema 3 Tribunal"
           width={35}

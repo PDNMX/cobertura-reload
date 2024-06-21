@@ -32,6 +32,7 @@ import { Input } from "@/components/ui/input";
 import directus from "@/lib/directus";
 import { readItems } from "@directus/sdk";
 import { EntesTable } from "@/components/tables/cell-entes-table/table";
+import { ConteoColumna } from "./conteo-columna"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -47,7 +48,10 @@ export function DataTable<TData, TValue>({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hoveredColumnId, setHoveredColumnId] = useState<string | null>(null);
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
-  const [entesCell, setEntesCell] = useState([]);
+
+  const [dialogContent, setDialogContent] = useState<React.ReactNode | null>(
+    null,
+  );
 
   const table = useReactTable({
     data,
@@ -56,70 +60,52 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
   });
 
-  const handleCellClick = (cell: any) => {
-    
-    const rowElement = cell.row.original;
-    const entidad = rowElement.entidad;
-    const tipoColumna = cell.column.id;
-
-    async function fetchDataCell() {
-      try {
-        setEntesCell('')
-        const result = await directus.request(
-          readItems("entes", {
-            sort: ["nombre"],
-            limit: "-1",
-            fields: ["*"],
-            filter: {
-              entidad: {
-                _eq: entidad,
-              },
-              ...(tipoColumna === "resultSujetosObligados" && {
-                controlOIC: { _eq: false },
-              }),
-              ...(tipoColumna === "resultOIC" && { controlOIC: { _eq: true } }), // Conditional filter
-              ...(tipoColumna === "resultTribunal" && {
-                controlTribunal: { _eq: true },
-              }),
-              ...(tipoColumna === "resultSistema1" && {
-                sistema1: { _eq: true },
-                controlOIC: { _eq: false },
-              }),
-              ...(tipoColumna === "resultSistema2" && {
-                sistema2: { _eq: true },
-                controlOIC: { _eq: false },
-              }),
-              ...(tipoColumna === "resultSistema3OIC" && {
-                sistema3: { _eq: true },
-                controlOIC: { _eq: true },
-              }),
-              ...(tipoColumna === "resultSistema3Tribunal" && {
-                sistema3: { _eq: true },
-                controlOIC: { _eq: false },
-                controlTribunal: { _eq: true },
-              }),
-              ...(tipoColumna === "resultSistema6" && {
-                sistema6: { _eq: true },
-                controlOIC: { _eq: false },
-              }),
-              ...(tipoColumna === "resultConexiones" && {
-                sistema1: { _eq: true },
-                sistema2: { _eq: true },
-                sistema6: { _eq: true },
-                controlOIC: { _eq: false },
-              })
-            },
-          }),
-        );
-        console.log(result);
-        setEntesCell(result);
-      } catch (error) {
-        console.error("Error al cargar los datos:", error);
-      }
+  async function fetchDataCell(entidad: string | null, tipoColumna: string) {
+    const filter = {
+      ...(entidad && { entidad: { _eq: entidad } }),  // Filtra por entidad si se proporciona
+      ...(tipoColumna === "resultSujetosObligados" && { controlOIC: { _eq: false } }),
+      ...(tipoColumna === "resultOIC" && { controlOIC: { _eq: true } }),
+      ...(tipoColumna === "resultTribunal" && { controlTribunal: { _eq: true } }),
+      ...(tipoColumna === "resultSistema1" && { sistema1: { _eq: true }, controlOIC: { _eq: false } }),
+      ...(tipoColumna === "resultSistema2" && { sistema2: { _eq: true }, controlOIC: { _eq: false } }),
+      ...(tipoColumna === "resultSistema3OIC" && { sistema3: { _eq: true }, controlOIC: { _eq: true } }),
+      ...(tipoColumna === "resultSistema3Tribunal" && { sistema3: { _eq: true }, controlOIC: { _eq: false }, controlTribunal: { _eq: true } }),
+      ...(tipoColumna === "resultSistema6" && { sistema6: { _eq: true }, controlOIC: { _eq: false } }),
+      ...(tipoColumna === "resultConexiones" && { sistema1: { _eq: true }, sistema2: { _eq: true }, sistema6: { _eq: true }, controlOIC: { _eq: false } }),
+    };
+  
+    const options = {
+      filter,
+      ...(entidad === null && { aggregate: { count: ["*"] }, groupBy: ["entidad"] }),
+      ...(entidad !== null && { sort: ["nombre"], limit: "-1", fields: ["*"] }),
+    };
+  
+    try {
+      const result = await directus.request(readItems("entes", options));
+      return result;
+    } catch (error) {
+      console.error("Error al cargar los datos:", error);
+      return null;
     }
+  }
 
-    fetchDataCell();
-    setIsDialogOpen(true);
+  const handleCellClick = async (cell: any) => {
+    if (cell.row) {
+      const rowElement = cell.row.original;
+      const entidad = rowElement.entidad;
+      const tipoColumna = cell.column.id;
+      const respuestaDirectus = await fetchDataCell(entidad, tipoColumna); 
+      setDialogContent(<EntesTable data={respuestaDirectus} />);
+      setIsDialogOpen(true);
+    } else if (cell.column) {
+      const entidad = null; // Ajustar según sea necesario
+      const tipoColumna = cell.column.id;
+      const respuestaDirectus = await fetchDataCell(entidad, tipoColumna); 
+      // Pasar los datos al nuevo componente
+      setIsDialogOpen(true);
+      setDialogContent(<ConteoColumna data={respuestaDirectus} />);
+      
+    }
   };
 
   return (
@@ -143,6 +129,7 @@ export function DataTable<TData, TValue>({
                   return (
                     <TableHead
                       key={header.id}
+                      onClick={() => handleCellClick(header)}
                       className="text-center pt-2 pb-2">
                       {header.isPlaceholder
                         ? null
@@ -216,9 +203,7 @@ export function DataTable<TData, TValue>({
             </DialogTitle>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            <EntesTable data={entesCell} />
-          </div>
+          <div className="grid gap-4 py-4">{dialogContent}</div>
           <DialogFooter>
             <Button onClick={() => setIsDialogOpen(false)} className="mt-4">
               Cerrar
