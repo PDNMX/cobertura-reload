@@ -20,33 +20,24 @@ export const ConteoColumna = ({ data }: any) => {
       return {
         ...dato,
         nombreEntidad: entidadEncontrada?.nombre || "Entidad no encontrada",
+        abreviacion: entidadEncontrada?.abreviacion || "NA",
         count: parseInt(dato.count, 10) // Convertir count a número entero (base 10)
       };
     });
+    console.log(datosConNombres)
     return (
-      <ResponsiveContainer width="100%" height={350}>
+      <ResponsiveContainer width="100%" height={400}>
         <BarChart
           data={datosConNombres}
-          width={500}
-          height={300}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}>
+          >
           <XAxis
-            dataKey="nombreEntidad"
+            dataKey="abreviacion"
             stroke="#888888"
             fontSize={12}
-            tickLine={false}
-            axisLine={true}
           />
           <YAxis
             stroke="#888888"
             fontSize={12}
-            tickLine={false}
-            axisLine={true}
             type="number"
             domain={[0, "dataMax"]}
           />
