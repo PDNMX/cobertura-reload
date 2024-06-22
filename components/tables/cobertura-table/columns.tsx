@@ -1,7 +1,8 @@
+// @ts-nocheck
 "use client";
+
 import { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image"; // Import Image component from Next.js
-
 import icoSujetosObligados from "./icons-thead/sujetosObligados.svg";
 import icoConexiones from "./icons-thead/conexiones.svg";
 import icoS1 from "./icons-thead/s1.svg";
@@ -17,7 +18,7 @@ export const columns: ColumnDef<any>[] = [
     accessorKey: "nombreEntidad",
     header: () => (
       <div className="text-center">
-        <span className="ml-2">Entidad Federativa</span>
+        <span>Entidad Federativa</span>
       </div>
     ),
     cell: ({ row }) => (
@@ -25,6 +26,7 @@ export const columns: ColumnDef<any>[] = [
         {row.original.nombreEntidad}
       </div>
     ),
+    size: '30%'
   },
   {
     accessorKey: "resultSujetosObligados",

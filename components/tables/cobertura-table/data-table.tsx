@@ -130,7 +130,10 @@ export function DataTable<TData, TValue>({
                     <TableHead
                       key={header.id}
                       onClick={() => handleCellClick(header)}
-                      className="text-center pt-2 pb-2">
+                      className="text-center py-2 px-0.5"
+                      style={{ width: header.column.columnDef.size }}
+                      >
+                      
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -158,6 +161,7 @@ export function DataTable<TData, TValue>({
                   }>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
+                      style={{ width: cell.column.columnDef.size }}
                       key={cell.id}
                       onClick={() => handleCellClick(cell)}
                       onMouseEnter={() => setHoveredColumnId(cell.column.id)}

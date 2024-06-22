@@ -8,6 +8,7 @@ export const columns: ColumnDef<any>[] = [
     accessorKey: "nombre",
     header: "Nombre",
     cell: ({ row }) => <div className="text-left">{row.original.nombre}</div>,
+    size: '55%'
   },
   {
     accessorKey: "ambitoGobierno",
