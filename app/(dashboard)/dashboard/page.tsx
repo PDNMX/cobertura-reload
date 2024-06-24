@@ -20,6 +20,14 @@ import icoS1 from "@/components/tables/cobertura-table/icons-thead/s1.svg";
 import icoS2 from "@/components/tables/cobertura-table/icons-thead/s2.svg";
 import icoS3OIC from "@/components/tables/cobertura-table/icons-thead/s3OIC.svg";
 import icoS6 from "@/components/tables/cobertura-table/icons-thead/s6.svg";
+import iconEjecutivo from "@/components/tables/cobertura-table/icons-thead/ejecutivo.svg";
+import iconJudicial from "@/components/tables/cobertura-table/icons-thead/judicial.svg";
+import iconLegislativo from "@/components/tables/cobertura-table/icons-thead/legislativo.svg";
+import iconAutonomo from "@/components/tables/cobertura-table/icons-thead/autonomo.svg";
+import iconEjecutivoMunicipal from "@/components/tables/cobertura-table/icons-thead/ejecutivo_municipal.svg";
+import iconOICE from "@/components/tables/cobertura-table/icons-thead/oice.svg";
+import iconOICM from "@/components/tables/cobertura-table/icons-thead/oicm.svg";
+import iconTJA from "@/components/tables/cobertura-table/icons-thead/tribunal.svg";
 
 const colors = {
   sistema1: "text-[#F29888]",
@@ -39,6 +47,17 @@ export default function Page() {
     totalOIC: 0,
   });
 
+  const [counts, setCounts] = useState({
+    ejecutivo: 0,
+    judicial: 0,
+    legislativo: 0,
+    autonomo: 0,
+    ejecutivoMunicipal: 0,
+    OIC: 0,
+    OICM: 0,
+    TJA: 0,
+  });
+
   useEffect(() => {
     if (status === "authenticated") {
       async function fetchData() {
@@ -46,7 +65,13 @@ export default function Page() {
           const result = await directus.request(
             readItems("entes", {
               limit: "-1",
-              fields: ["*", "controlOIC", "controlTribunal"],
+              fields: [
+                "*",
+                "controlOIC",
+                "controlTribunal",
+                "ambitoGobierno",
+                "poderGobierno",
+              ],
               filter: {
                 entidad: {
                   _eq: session?.user?.entidad,
@@ -63,9 +88,24 @@ export default function Page() {
                 if (item.sistema2) acc.sistema2 += 1;
                 if (item.sistema6) acc.sistema6 += 1;
                 acc.totalSujetosObligados += 1;
-              } else {
+
+                if (item.ambitoGobierno !== "Municipal") {
+                  if (item.poderGobierno === "Ejecutivo") acc.ejecutivo += 1;
+                  if (item.poderGobierno === "Judicial") acc.judicial += 1;
+                  if (item.poderGobierno === "Legislativo")
+                    acc.legislativo += 1;
+                  if (item.poderGobierno === "Autonomo") acc.autonomo += 1;
+                } else {
+                  if (item.poderGobierno === "Ejecutivo")
+                    acc.ejecutivoMunicipal += 1;
+                }
+              } else if (item.controlOIC) {
+                if (item.ambitoGobierno === "Estatal") acc.OIC += 1;
+                if (item.ambitoGobierno === "Municipal") acc.OICM += 1;
                 if (item.sistema3) acc.sistema3 += 1;
                 acc.totalOIC += 1;
+              } else if (item.controlTribunal) {
+                acc.TJA += 1;
               }
               return acc;
             },
@@ -76,10 +116,19 @@ export default function Page() {
               sistema6: 0,
               totalSujetosObligados: 0,
               totalOIC: 0,
+              ejecutivo: 0,
+              judicial: 0,
+              legislativo: 0,
+              autonomo: 0,
+              ejecutivoMunicipal: 0,
+              OIC: 0,
+              OICM: 0,
+              TJA: 0,
             }
           );
 
           setData(processedData);
+          setCounts(processedData);
         } catch (error) {
           console.error("Error al cargar los datos:", error);
         }
@@ -91,7 +140,7 @@ export default function Page() {
 
   const calculatePercentage = (value, total) => {
     if (total === 0) return 0;
-    return ((value / total) * 100).toFixed(1);
+    return ((value / total) * 100).toFixed(2);
   };
 
   return (
@@ -233,7 +282,7 @@ export default function Page() {
             </CardContent>
           </Card>
         </div>
-        <div className="grid gap-4 grid-cols-1">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
           <Card className="col-span-4">
             <CardHeader>
               <CardTitle>Avance del Trimestre Anterior</CardTitle>
@@ -244,6 +293,108 @@ export default function Page() {
             <CardContent className="pl-2">
               <Overview entidad={session?.user?.entidad} />
             </CardContent>
+          </Card>
+          <Card className="col-span-4 md:col-span-3">
+            <CardHeader>
+              <CardTitle>Clasificación Entes Públicos</CardTitle>
+              <CardDescription>Sujetos Obligados</CardDescription>
+              <CardContent>
+                <div className="flex flex-col">
+                  <div className="flex items-center mb-2">
+                    <Image
+                      src={iconEjecutivo}
+                      alt="Icono Ejecutivo"
+                      width={20}
+                      height={20}
+                      className="mr-2"
+                    />
+                    Ejecutivo - {counts.ejecutivo}
+                  </div>
+                  <div className="flex items-center mb-2">
+                    <Image
+                      src={iconJudicial}
+                      alt="Icono Judicial"
+                      width={20}
+                      height={20}
+                      className="mr-2"
+                    />
+                    Judicial - {counts.judicial}
+                  </div>
+                  <div className="flex items-center mb-2">
+                    <Image
+                      src={iconLegislativo}
+                      alt="Icono Legislativo"
+                      width={20}
+                      height={20}
+                      className="mr-2"
+                    />
+                    Legislativo - {counts.legislativo}
+                  </div>
+                  <div className="flex items-center mb-2">
+                    <Image
+                      src={iconAutonomo}
+                      alt="Icono Autonomo"
+                      width={20}
+                      height={20}
+                      className="mr-2"
+                    />
+                    Autonomo - {counts.autonomo}
+                  </div>
+                  <div className="flex items-center mb-2">
+                    <Image
+                      src={iconEjecutivoMunicipal}
+                      alt="Icono Ejecutivo Municipal"
+                      width={20}
+                      height={20}
+                      className="mr-2"
+                    />
+                    Ejecutivo Municipal - {counts.ejecutivoMunicipal}
+                  </div>
+                </div>
+              </CardContent>
+              <CardDescription>Órganos Internos de Control</CardDescription>
+              <CardContent>
+                <div className="flex flex-col">
+                  <div className="flex items-center mb-2">
+                    <Image
+                      src={iconOICE}
+                      alt="Icono OIC"
+                      width={20}
+                      height={20}
+                      className="mr-2"
+                    />
+                    OICE Órganos Internos de Control Estatales - {counts.OIC}
+                  </div>
+                  <div className="flex items-center mb-2">
+                    <Image
+                      src={iconOICM}
+                      alt="Icono OICM"
+                      width={20}
+                      height={20}
+                      className="mr-2"
+                    />
+                    OICM Órganos Internos de Control Municipales - {counts.OICM}
+                  </div>
+                </div>
+              </CardContent>
+              <CardDescription>
+                Tribunal de Justicia Administrativa
+              </CardDescription>
+              <CardContent>
+                <div className="flex flex-col">
+                  <div className="flex items-center mb-2">
+                    <Image
+                      src={iconTJA}
+                      alt="Icono TJA"
+                      width={20}
+                      height={20}
+                      className="mr-2"
+                    />
+                    Tribunal de Justicia Administrativa - {counts.TJA}
+                  </div>
+                </div>
+              </CardContent>
+            </CardHeader>
           </Card>
         </div>
       </div>
