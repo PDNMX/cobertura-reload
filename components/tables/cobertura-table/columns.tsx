@@ -18,7 +18,7 @@ export const columns: ColumnDef<any>[] = [
     accessorKey: "nombreEntidad",
     header: () => (
       <div className="text-center">
-        <span>Entidad Federativa</span>
+        <span className="cursor-pointer">Entidad Federativa</span>
       </div>
     ),
     cell: ({ row }) => (
