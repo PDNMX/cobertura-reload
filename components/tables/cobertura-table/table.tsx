@@ -24,8 +24,8 @@ export const CoberturaTable = ({ data }: any) => {
     <>
       <div className="flex items-start justify-between">
         <Heading
-          title={`Tablero Estadístico de Cobertura Nacional de Interconexión`}
-          /* description={`${dataEjemplo.length} entes registrados`} */
+          title={`Tablero Estadístico de Interconexión Nacional`}
+          description={'Visualiza en tiempo real el avance de los Entes Públicos en la interconexión con los sistemas de la Plataforma Digital Nacional.'}
         />
       </div>
       <Separator />

@@ -26,7 +26,7 @@ export const ConteoColumna = ({ data }: any) => {
     });
     console.log(datosConNombres)
     return (
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="100%" height={400} >
         <BarChart
           data={datosConNombres}
           >
@@ -34,12 +34,17 @@ export const ConteoColumna = ({ data }: any) => {
             dataKey="abreviacion"
             stroke="#888888"
             fontSize={12}
+            angle={-60}
+            textAnchor="end"
+            tickMargin={1}
           />
           <YAxis
             stroke="#888888"
             fontSize={12}
             type="number"
             domain={[0, "dataMax"]}
+            allowDecimals={false}
+            scale="linear"
           />
           <Bar
             dataKey="count"
