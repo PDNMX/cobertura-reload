@@ -1,6 +1,3 @@
-// @ts-nocheck
-"use client";
-
 import React from "react";
 import {
   BarChart,
@@ -24,19 +21,18 @@ export const ConteoColumna = ({ data }: any) => {
         count: parseInt(dato.count, 10) // Convertir count a número entero (base 10)
       };
     });
-    //console.log(datosConNombres)
+    console.log(datosConNombres);
     return (
       <ResponsiveContainer width="100%" height={400} >
-        <BarChart
-          data={datosConNombres}
-          >
+        <BarChart data={datosConNombres} margin={{ top: 10, right: 5, left: 5, bottom: 10 }}>
           <XAxis
             dataKey="abreviacion"
             stroke="#888888"
             fontSize={12}
-            angle={-60}
+            angle={-45} 
             textAnchor="end"
-            tickMargin={1}
+            interval={0} // Asegurar que todas las etiquetas se muestren
+            padding={{ left: 5, right: 5 }} // Ajustar el padding
           />
           <YAxis
             stroke="#888888"
