@@ -24,7 +24,7 @@ export const ConteoColumna = ({ data }: any) => {
         count: parseInt(dato.count, 10) // Convertir count a número entero (base 10)
       };
     });
-    console.log(datosConNombres)
+    //console.log(datosConNombres)
     return (
       <ResponsiveContainer width="100%" height={400} >
         <BarChart

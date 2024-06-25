@@ -48,13 +48,12 @@ export function DataTable<TData, TValue>({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hoveredColumnId, setHoveredColumnId] = useState<string | null>(null);
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
-
   const [dialogContent, setDialogContent] = useState<React.ReactNode | null>(
     null,
   );
 
   const table = useReactTable({
-    data,
+    data: data.sort((a, b) => a.entidad.localeCompare(b.entidad)), //ordenamos los datos
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
