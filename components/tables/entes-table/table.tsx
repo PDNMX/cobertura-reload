@@ -39,7 +39,7 @@ export const EntesTable = ({ data }: any) => {
             Sujetos Obligados ({sujetosObligados.length})
           </TabsTrigger>
           <TabsTrigger value="OIC">
-            Órgano Interno de Control ({organoInternoControl.length})
+            Autoridades Resolutoras ({organoInternoControl.length})
           </TabsTrigger>
         </TabsList>
 

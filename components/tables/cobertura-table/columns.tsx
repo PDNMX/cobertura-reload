@@ -65,6 +65,24 @@ export const columns: ColumnDef<any>[] = [
     ),
   },
   {
+    accessorKey: "resultTribunal",
+    header: () => (
+      <div className="flex items-center">
+        <Image
+          className="m-auto cursor-pointer"
+          src={icoTribunal}
+          alt="Tribunal"
+          width={35}
+        />
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div data-entidad={row.original.entidad}>
+        {row.original.resultTribunal}
+      </div>
+    ),
+  },
+  {
     accessorKey: "resultSistema1",
     header: () => (
       <div className="flex items-center">
@@ -119,6 +137,24 @@ export const columns: ColumnDef<any>[] = [
     ),
   },
   {
+    accessorKey: "resultSistema3Tribunal",
+    header: () => (
+      <div className="flex items-center">
+        <Image
+          className="m-auto cursor-pointer"
+          src={icoS3Tribunal}
+          alt="Sistema 3 Tribunal"
+          width={35}
+        />
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div data-entidad={row.original.entidad}>
+        {row.original.resultSistema3Tribunal}
+      </div>
+    ),
+  },
+  {
     accessorKey: "resultSistema6",
     header: () => (
       <div className="flex items-center">
@@ -151,42 +187,6 @@ export const columns: ColumnDef<any>[] = [
     cell: ({ row }) => (
       <div data-entidad={row.original.entidad}>
         {row.original.resultConexiones}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "resultTribunal",
-    header: () => (
-      <div className="flex items-center">
-        <Image
-          className="m-auto cursor-pointer"
-          src={icoTribunal}
-          alt="Tribunal"
-          width={35}
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div data-entidad={row.original.entidad}>
-        {row.original.resultTribunal}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "resultSistema3Tribunal",
-    header: () => (
-      <div className="flex items-center">
-        <Image
-          className="m-auto cursor-pointer"
-          src={icoS3Tribunal}
-          alt="Sistema 3 Tribunal"
-          width={35}
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div data-entidad={row.original.entidad}>
-        {row.original.resultSistema3Tribunal}
       </div>
     ),
   },

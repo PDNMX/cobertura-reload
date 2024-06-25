@@ -308,7 +308,7 @@ export default function Page() {
                       height={20}
                       className="mr-2"
                     />
-                    Ejecutivo - {counts.ejecutivo}
+                    Ejecutivo Estatal - {counts.ejecutivo}
                   </div>
                   <div className="flex items-center mb-2">
                     <Image
@@ -318,7 +318,7 @@ export default function Page() {
                       height={20}
                       className="mr-2"
                     />
-                    Judicial - {counts.judicial}
+                    Judicial Estatal - {counts.judicial}
                   </div>
                   <div className="flex items-center mb-2">
                     <Image
@@ -328,7 +328,7 @@ export default function Page() {
                       height={20}
                       className="mr-2"
                     />
-                    Legislativo - {counts.legislativo}
+                    Legislativo Estatal - {counts.legislativo}
                   </div>
                   <div className="flex items-center mb-2">
                     <Image
@@ -338,7 +338,7 @@ export default function Page() {
                       height={20}
                       className="mr-2"
                     />
-                    Autonomo - {counts.autonomo}
+                    Autónomo Estatal - {counts.autonomo}
                   </div>
                   <div className="flex items-center mb-2">
                     <Image
