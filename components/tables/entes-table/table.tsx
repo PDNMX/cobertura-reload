@@ -13,9 +13,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 export const EntesTable = ({ data }: any) => {
   const router = useRouter();
 
-  // Filtrar datos basados en el campo controlOIC
-  const sujetosObligados = data.filter((item: any) => !item.controlOIC);
-  const organoInternoControl = data.filter((item: any) => item.controlOIC);
+  // Filtrar datos basados en los campos controlOIC y controlTribunal
+  const sujetosObligados = data.filter((item: any) => !item.controlOIC || item.controlTribunal);
+  const organoInternoControl = data.filter((item: any) => item.controlOIC || item.controlTribunal);
 
   return (
     <>
