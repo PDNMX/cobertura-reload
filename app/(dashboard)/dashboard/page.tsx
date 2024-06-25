@@ -251,7 +251,7 @@ export default function Page() {
               <CardTitle
                 className={`text-sm font-bold tracking-tight ${colors.sistema3}`}
               >
-                Entes Públicos Conectados al Sistema 3
+                Autoridades Resolutoras Conectados al Sistema 3
               </CardTitle>
             </CardHeader>
             <CardContent>
