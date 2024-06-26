@@ -82,9 +82,9 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }: { session: Session | any; token: any }) {
       // Check if session.user is defined before accessing its properties
       if (session.user) {
+        session.user = token.user;
         session.user.accessToken = token.accessToken;
         session.user.refreshToken = token.refreshToken;
-        session.user = token.user;
       }
       return session;
     },
