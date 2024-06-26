@@ -28,10 +28,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { useState, useEffect, useMemo } from "react";
 import { useCurrentSession } from "@/hooks/useCurrentSession";
 import directus from "@/lib/directus";
-import { createItem, updateItem, readItems } from "@directus/sdk";
+import { createItem, updateItem, readItems, withToken } from "@directus/sdk";
 import { Switch } from "@/components/ui/switch";
 import clsx from "clsx";
-import { log } from "console";
 
 const formSchema = z.object({
   nombre: z.string().min(3, {
@@ -78,19 +77,22 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
     : "Nuevo ente público creado.";
   const action = initialData ? "Actualizar" : "Crear";
 
-  const defaultValues = useMemo(() => ({
-    nombre: initialData?.nombre ?? "", // Define como cadena vacía si no hay valor inicial
-    ambitoGobierno: initialData?.ambitoGobierno ?? "", 
-    poderGobierno: initialData?.poderGobierno ?? "",
-    controlOIC: initialData?.controlOIC ?? false,
-    controlTribunal: initialData?.controlTribunal ?? false,
-    sistema1: initialData?.sistema1 ?? false,
-    sistema2: initialData?.sistema2 ?? false,
-    sistema3: initialData?.sistema3 ?? false,
-    sistema6: initialData?.sistema6 ?? false,
-    entidad: session?.user?.entidad || "",
-    municipio: initialData?.municipio ?? "", // Define como cadena vacía o null
-  }), [initialData, session?.user?.entidad]);
+  const defaultValues = useMemo(
+    () => ({
+      nombre: initialData?.nombre ?? "", // Define como cadena vacía si no hay valor inicial
+      ambitoGobierno: initialData?.ambitoGobierno ?? "",
+      poderGobierno: initialData?.poderGobierno ?? "",
+      controlOIC: initialData?.controlOIC ?? false,
+      controlTribunal: initialData?.controlTribunal ?? false,
+      sistema1: initialData?.sistema1 ?? false,
+      sistema2: initialData?.sistema2 ?? false,
+      sistema3: initialData?.sistema3 ?? false,
+      sistema6: initialData?.sistema6 ?? false,
+      entidad: session?.user?.entidad || "",
+      municipio: initialData?.municipio ?? "", // Define como cadena vacía o null
+    }),
+    [initialData, session?.user?.entidad],
+  );
 
   const form = useForm<EnteFormValues>({
     resolver: zodResolver(formSchema),
@@ -115,37 +117,40 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
 
   useEffect(() => {
     // Check if session and session.user.entidad exist before fetching
-    if (session && session.user?.entidad) {
+    if (session) {
       const fetchMunicipiosData = async () => {
         try {
-          console.log(session?.user?.entidad);
           const response = await directus.request(
-            readItems("municipio", {
-              sort: ["nombre"],
-              limit: "-1",
-              fields: ["*"],
-              filter: {
-                id_entidad: {
-                  _eq: session?.user?.entidad,
+            withToken(
+              session?.access_token,
+              readItems("municipio", {
+                sort: ["nombre"],
+                limit: "-1",
+                fields: ["*"],
+                filter: {
+                  id_entidad: {
+                    _eq: session?.user?.entidad,
+                  },
                 },
-              },
-            }),
+              }),
+            ),
           );
           //const data = await response.json();
-          console.log(response);
-          localStorage.setItem("municipiosData", JSON.stringify(response));
+          //console.log(response);
+          //localStorage.setItem("municipiosData", JSON.stringify(response));
           setMunicipiosData(response);
         } catch (error) {
           console.error("Error al cargar los municipios", error);
         }
       };
 
-      const storedMunicipiosData = localStorage.getItem("municipiosData");
+      /* const storedMunicipiosData = localStorage.getItem("municipiosData");
       if (storedMunicipiosData) {
         setMunicipiosData(JSON.parse(storedMunicipiosData));
       } else {
         fetchMunicipiosData();
-      }
+      } */
+      fetchMunicipiosData();
     }
   }, [session]); // Dependency array includes session
 
@@ -155,11 +160,21 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
       if (data.municipio === "") {
         data.municipio = null; // Convertir cadena vacía a null antes de enviar
       }
-      console.log(data)
+      console.log(data);
       if (initialData) {
-        await directus.request(updateItem("entes", initialData.id, data));
+        await directus.request(
+          withToken(
+            session?.access_token,
+            updateItem("entes", initialData.id, data),
+          ),
+        );
       } else {
-        await directus.request(createItem("entes", data));
+        await directus.request(
+          withToken(
+            session?.access_token, 
+            createItem("entes", data)
+          ),
+        );
       }
       router.refresh();
       router.push(`/dashboard/entes`);
@@ -263,7 +278,10 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData }) => {
                     value={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un ámbito" value={field.value ?? ""}/>
+                        <SelectValue
+                          placeholder="Selecciona un ámbito"
+                          value={field.value ?? ""}
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>

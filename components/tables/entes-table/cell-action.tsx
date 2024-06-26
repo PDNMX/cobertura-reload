@@ -36,7 +36,9 @@ export const CellAction = ({ data }: any) => {
     try {
       setLoading(true);
       if (data) {
-        await directus.request(deleteItem("entes",data.id));
+        await directus.request(
+          withToken(session?.access_token, deleteItem("entes", data.id)),
+        ),
         localStorage.setItem("deleted", "true"); // Almacena el estado
         window.location.reload();
       }
@@ -69,15 +71,15 @@ export const CellAction = ({ data }: any) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <Link href={`/dashboard/entes/${data.id}`}>
-              <DropdownMenuItem
-              className="cursor-pointer"
-              >
-                <Edit className="mr-2 h-4 w-4" />  
-                Editar
-              </DropdownMenuItem>
-            </Link>
-          <DropdownMenuItem onClick={() => setOpen(true)} className="cursor-pointer">
+          <Link href={`/dashboard/entes/${data.id}`}>
+            <DropdownMenuItem className="cursor-pointer">
+              <Edit className="mr-2 h-4 w-4" />
+              Editar
+            </DropdownMenuItem>
+          </Link>
+          <DropdownMenuItem
+            onClick={() => setOpen(true)}
+            className="cursor-pointer">
             <Trash className="mr-2 h-4 w-4" /> Eliminar
           </DropdownMenuItem>
         </DropdownMenuContent>

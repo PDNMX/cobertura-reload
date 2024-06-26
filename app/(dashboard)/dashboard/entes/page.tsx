@@ -4,7 +4,7 @@
 import BreadCrumb from "@/components/breadcrumb";
 import { EntesTable } from "@/components/tables/entes-table/table";
 import directus from "@/lib/directus";
-import { readItems } from "@directus/sdk";
+import { readItems, withToken } from "@directus/sdk";
 import { useEffect, useState } from "react";
 import { useCurrentSession } from "@/hooks/useCurrentSession";
 
@@ -19,16 +19,14 @@ export default function Page() {
       async function fetchData() {
         try {
           const result = await directus.request(
-            readItems("entes", {
-              sort: [ "nombre" ],
-              limit: "-1",
-              fields: ["*"],
-              filter: {
-                entidad: {
-                  _eq: session?.user?.entidad,
-                },
-              },
-            })
+            withToken(
+              session?.access_token,
+              readItems("entes", {
+                sort: ["nombre"],
+                limit: "-1",
+                fields: ["*"],
+              }),
+            ),
           );
 
           setEntes(result);

@@ -5,7 +5,7 @@
 import { useEffect, useState } from "react";
 import { useCurrentSession } from "@/hooks/useCurrentSession";
 import directus from "@/lib/directus";
-import { readItems } from "@directus/sdk";
+import { readItems, withToken } from "@directus/sdk";
 import { Overview } from "@/components/overview";
 import {
   Card,
@@ -63,21 +63,19 @@ export default function Page() {
       async function fetchData() {
         try {
           const result = await directus.request(
-            readItems("entes", {
-              limit: "-1",
-              fields: [
-                "*",
-                "controlOIC",
-                "controlTribunal",
-                "ambitoGobierno",
-                "poderGobierno",
-              ],
-              filter: {
-                entidad: {
-                  _eq: session?.user?.entidad,
-                },
-              },
-            })
+            withToken(
+              session?.access_token,
+              readItems("entes", {
+                limit: "-1",
+                fields: [
+                  "*",
+                  "controlOIC",
+                  "controlTribunal",
+                  "ambitoGobierno",
+                  "poderGobierno",
+                ]
+              }),
+            ),
           );
 
           // Procesar datos
@@ -124,7 +122,7 @@ export default function Page() {
               OIC: 0,
               OICM: 0,
               TJA: 0,
-            }
+            },
           );
 
           setData(processedData);
@@ -213,8 +211,7 @@ export default function Page() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle
-                className={`text-sm font-bold tracking-tight ${colors.sistema1}`}
-              >
+                className={`text-sm font-bold tracking-tight ${colors.sistema1}`}>
                 Entes Públicos Conectados al Sistema 1
               </CardTitle>
             </CardHeader>
@@ -231,8 +228,7 @@ export default function Page() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle
-                className={`text-sm font-bold tracking-tight ${colors.sistema2}`}
-              >
+                className={`text-sm font-bold tracking-tight ${colors.sistema2}`}>
                 Entes Públicos Conectados al Sistema 2
               </CardTitle>
             </CardHeader>
@@ -249,8 +245,7 @@ export default function Page() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle
-                className={`text-sm font-bold tracking-tight ${colors.sistema3}`}
-              >
+                className={`text-sm font-bold tracking-tight ${colors.sistema3}`}>
                 Autoridades Resolutoras Conectados al Sistema 3
               </CardTitle>
             </CardHeader>
@@ -266,8 +261,7 @@ export default function Page() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle
-                className={`text-sm font-bold tracking-tight ${colors.sistema6}`}
-              >
+                className={`text-sm font-bold tracking-tight ${colors.sistema6}`}>
                 Entes Públicos Conectados al Sistema 6
               </CardTitle>
             </CardHeader>
