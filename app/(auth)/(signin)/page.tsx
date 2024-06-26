@@ -1,7 +1,6 @@
 // @ts-nocheck
 "use client";
 import { useEffect, useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { CoberturaTable } from "@/components/tables/cobertura-table/table";
 import directus from "@/lib/directus";
 import { readItems } from "@directus/sdk";
@@ -139,20 +138,16 @@ export default function AuthenticationPage() {
   }, []);
 
   return (
-    <ScrollArea className="h-full">
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-1 lg:grid-cols-1">
+      <div className="p-4 pt-8">
           {isLoading ? (
             <div>Cargando datos...</div> // Mensaje de carga
           ) : error ? (
             <div>Error al cargar los datos: {error.message}</div> // Mensaje de error
           ) : (
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-1 lg:grid-cols-1">
+            <div className="grid gap-4 grid-cols-1">
               <CoberturaTable data={entes} />
             </div>
           )}
-        </div>
       </div>
-    </ScrollArea>
   );
 }

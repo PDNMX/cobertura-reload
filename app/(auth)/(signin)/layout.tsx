@@ -14,8 +14,8 @@ export default function DashboardLayout({
   return (
     <>
       <Header />
-      <div className="flex h-screen overflow-hidden">
-        <main className="w-full pt-16">{children}</main>
+      <div>
+        <main className="w-full pt-16"><div className="max-w-screen-2xl mx-auto">{children}</div></main>
       </div>
     </>
   );
