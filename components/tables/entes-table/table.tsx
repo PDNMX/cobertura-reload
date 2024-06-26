@@ -7,15 +7,19 @@ import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { columns } from "./columns";
+import { createColumns } from "./columns"; // Asegúrate de importar createColumns
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useCurrentSession } from "@/hooks/useCurrentSession"; // Asegúrate de importar useCurrentSession
 
 export const EntesTable = ({ data }: any) => {
   const router = useRouter();
+  const { session } = useCurrentSession();
 
   // Filtrar datos basados en los campos controlOIC y controlTribunal
   const sujetosObligados = data.filter((item: any) => !item.controlOIC || item.controlTribunal);
   const organoInternoControl = data.filter((item: any) => item.controlOIC || item.controlTribunal);
+
+  const columns = createColumns(session);
 
   return (
     <>

@@ -15,21 +15,17 @@ import directus from "@/lib/directus"; // Importa directus
 import { useToast } from "@/components/ui/use-toast";
 import { deleteItem, withToken } from "@directus/sdk"; // Importa deleteItem
 import Link from "next/link";
-import { useCurrentSession } from "@/hooks/useCurrentSession";
 
-
-export const CellAction = ({ data }: any) => {
+export const CellAction = ({ data, session }: any) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
-  const { session } = useCurrentSession();
 
   useEffect(() => {
     if (localStorage.getItem("deleted") === "true") {
       toast({
         variant: "default",
-        title: "Deleted Successfully",
-        description: "Ente público eliminado exitosamente.",
+        title: "Ente público eliminado exitosamente",
       });
       localStorage.removeItem("deleted"); // Elimina el estado después de mostrar el toast
     }
@@ -38,10 +34,10 @@ export const CellAction = ({ data }: any) => {
   const onConfirm = async () => {
     try {
       setLoading(true);
-      if (data) {
+      if (data && session) {
         await directus.request(
           withToken(session?.access_token, deleteItem("entes", data.id)),
-        ),
+        );
         localStorage.setItem("deleted", "true"); // Almacena el estado
         window.location.reload();
       }

@@ -5,7 +5,7 @@ import { CellAction } from "./cell-action";
 import { User } from "@/constants/data";
 import { CheckCircle, XCircle } from "lucide-react";
 
-export const columns: ColumnDef<User>[] = [
+export const createColumns = (session): ColumnDef<User>[] => [
   {
     accessorKey: "nombre",
     header: "Nombre",
@@ -86,7 +86,7 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <CellAction data={row.original} />,
+    cell: ({ row }) => <CellAction data={row.original} session={session} />,
     size: 20 // Ancho fijo para acciones
   },
 ];
