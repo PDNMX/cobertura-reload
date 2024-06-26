@@ -13,13 +13,16 @@ import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { useState, useEffect } from "react";
 import directus from "@/lib/directus"; // Importa directus
 import { useToast } from "@/components/ui/use-toast";
-import { deleteItem } from "@directus/sdk"; // Importa deleteItem
+import { deleteItem, withToken } from "@directus/sdk"; // Importa deleteItem
 import Link from "next/link";
+import { useCurrentSession } from "@/hooks/useCurrentSession";
+
 
 export const CellAction = ({ data }: any) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  const { session } = useCurrentSession();
 
   useEffect(() => {
     if (localStorage.getItem("deleted") === "true") {
