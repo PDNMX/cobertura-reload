@@ -1,6 +1,8 @@
 // @ts-nocheck
 "use client";
 
+import React from "react";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -33,7 +35,7 @@ import { Input } from "@/components/ui/input";
 import directus from "@/lib/directus";
 import { readItems } from "@directus/sdk";
 import { EntesTable } from "@/components/tables/cell-entes-table/table";
-import { ConteoColumna } from "./conteo-columna"
+import { ConteoColumna } from "./conteo-columna";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -53,6 +55,44 @@ export function DataTable<TData, TValue>({
     null,
   );
 
+  const Table = React.forwardRef<
+    HTMLTableElement,
+    React.HTMLAttributes<HTMLTableElement>
+  >(({ className, ...props }, ref) => (
+    <table
+      ref={ref}
+      className={cn("w-full caption-bottom text-sm", className)}
+      {...props}
+    />
+  ));
+  Table.displayName = "Table";
+
+  const TableHeader = React.forwardRef<
+    HTMLTableSectionElement,
+    React.HTMLAttributes<HTMLTableSectionElement>
+  >(({ className, ...props }, ref) => (
+    <thead
+      ref={ref}
+      // Manually added sticky top-0 to fix header not sticking to top of table
+      className={cn("sticky top-0 bg-secondary [&_tr]:border-b", className)}
+      {...props}
+    />
+  ));
+  TableHeader.displayName = "TableHeader";
+
+  const TableFooter = React.forwardRef<
+    HTMLTableSectionElement,
+    React.HTMLAttributes<HTMLTableSectionElement>
+  >(({ className, ...props }, ref) => (
+    <tfoot
+      ref={ref}
+      // Manually added sticky top-0 to fix header not sticking to top of table
+      className={cn("sticky top-0 bg-secondary [&_tr]:border-b", className)}
+      {...props}
+    />
+  ));
+  TableFooter.displayName = "TableFooter";
+
   const table = useReactTable({
     data: data.sort((a, b) => a.entidad.localeCompare(b.entidad)), //ordenamos los datos
     columns,
@@ -62,24 +102,60 @@ export function DataTable<TData, TValue>({
 
   async function fetchDataCell(entidad: string | null, tipoColumna: string) {
     const filter = {
-      ...(entidad && { entidad: { _eq: entidad } }),  // Filtra por entidad si se proporciona
-      ...(tipoColumna === "resultSujetosObligados" && { controlOIC: { _eq: false } }),
-      ...(tipoColumna === "resultOIC" && { _or: [{controlOIC: { _eq: true }}, {controlTribunal: { _eq: true }}]  }),
-      ...(tipoColumna === "resultTribunal" && { controlTribunal: { _eq: true } }),
-      ...(tipoColumna === "resultSistema1" && { sistema1: { _eq: true }, controlOIC: { _eq: false } }),
-      ...(tipoColumna === "resultSistema2" && { sistema2: { _eq: true }, controlOIC: { _eq: false } }),
-      ...(tipoColumna === "resultSistema3OIC" && { sistema3: { _eq: true }, _or: [{controlOIC: { _eq: true }}, {controlTribunal: { _eq: true }}]}),
-      ...(tipoColumna === "resultSistema3Tribunal" && { sistema3: { _eq: true }, controlOIC: { _eq: false }, controlTribunal: { _eq: true } }),
-      ...(tipoColumna === "resultSistema6" && { sistema6: { _eq: true }, controlOIC: { _eq: false } }),
-      ...(tipoColumna === "resultConexiones" && { sistema1: { _eq: true }, sistema2: { _eq: true }, sistema6: { _eq: true }, controlOIC: { _eq: false } }),
+      ...(entidad && { entidad: { _eq: entidad } }), // Filtra por entidad si se proporciona
+      ...(tipoColumna === "resultSujetosObligados" && {
+        controlOIC: { _eq: false },
+      }),
+      ...(tipoColumna === "resultOIC" && {
+        _or: [
+          { controlOIC: { _eq: true } },
+          { controlTribunal: { _eq: true } },
+        ],
+      }),
+      ...(tipoColumna === "resultTribunal" && {
+        controlTribunal: { _eq: true },
+      }),
+      ...(tipoColumna === "resultSistema1" && {
+        sistema1: { _eq: true },
+        controlOIC: { _eq: false },
+      }),
+      ...(tipoColumna === "resultSistema2" && {
+        sistema2: { _eq: true },
+        controlOIC: { _eq: false },
+      }),
+      ...(tipoColumna === "resultSistema3OIC" && {
+        sistema3: { _eq: true },
+        _or: [
+          { controlOIC: { _eq: true } },
+          { controlTribunal: { _eq: true } },
+        ],
+      }),
+      ...(tipoColumna === "resultSistema3Tribunal" && {
+        sistema3: { _eq: true },
+        controlOIC: { _eq: false },
+        controlTribunal: { _eq: true },
+      }),
+      ...(tipoColumna === "resultSistema6" && {
+        sistema6: { _eq: true },
+        controlOIC: { _eq: false },
+      }),
+      ...(tipoColumna === "resultConexiones" && {
+        sistema1: { _eq: true },
+        sistema2: { _eq: true },
+        sistema6: { _eq: true },
+        controlOIC: { _eq: false },
+      }),
     };
-  
+
     const options = {
       filter,
-      ...(entidad === null && { aggregate: { count: ["*"] }, groupBy: ["entidad"] }),
+      ...(entidad === null && {
+        aggregate: { count: ["*"] },
+        groupBy: ["entidad"],
+      }),
       ...(entidad !== null && { sort: ["nombre"], limit: "-1", fields: ["*"] }),
     };
-  
+
     try {
       const result = await directus.request(readItems("entes", options));
       return result;
@@ -94,32 +170,78 @@ export function DataTable<TData, TValue>({
       const rowElement = cell.row.original;
       const entidad = rowElement.entidad;
       const tipoColumna = cell.column.id;
-      
+
       const columnVisibilityMap = {
-        resultSujetosObligados: { sistema1: true, sistema2: true, sistema3: false, sistema6: true },
-        resultOIC: { sistema1: false, sistema2: false, sistema3: true, sistema6: false },
-        resultTribunal: { sistema1: true, sistema2: true, sistema3: true, sistema6: true },
-        resultSistema1: { sistema1: true, sistema2: false, sistema3: false, sistema6: false },
-        resultSistema2: { sistema1: false, sistema2: true, sistema3: false, sistema6: false },
-        resultSistema3: { sistema1: false, sistema2: false, sistema3: true, sistema6: false },
-        resultSistema3OIC: { sistema1: false, sistema2: false, sistema3: true, sistema6: false },
-        resultSistema3Tribunal: { sistema1: false, sistema2: false, sistema3: true, sistema6: false },
-        resultSistema6: { sistema1: false, sistema2: false, sistema3: false, sistema6: true }
+        resultSujetosObligados: {
+          sistema1: true,
+          sistema2: true,
+          sistema3: false,
+          sistema6: true,
+        },
+        resultOIC: {
+          sistema1: false,
+          sistema2: false,
+          sistema3: true,
+          sistema6: false,
+        },
+        resultTribunal: {
+          sistema1: true,
+          sistema2: true,
+          sistema3: true,
+          sistema6: true,
+        },
+        resultSistema1: {
+          sistema1: true,
+          sistema2: false,
+          sistema3: false,
+          sistema6: false,
+        },
+        resultSistema2: {
+          sistema1: false,
+          sistema2: true,
+          sistema3: false,
+          sistema6: false,
+        },
+        resultSistema3: {
+          sistema1: false,
+          sistema2: false,
+          sistema3: true,
+          sistema6: false,
+        },
+        resultSistema3OIC: {
+          sistema1: false,
+          sistema2: false,
+          sistema3: true,
+          sistema6: false,
+        },
+        resultSistema3Tribunal: {
+          sistema1: false,
+          sistema2: false,
+          sistema3: true,
+          sistema6: false,
+        },
+        resultSistema6: {
+          sistema1: false,
+          sistema2: false,
+          sistema3: false,
+          sistema6: true,
+        },
       };
-      
+
       const columnasMostrar = columnVisibilityMap[tipoColumna] || {};
 
-      const respuestaDirectus = await fetchDataCell(entidad, tipoColumna); 
-      setDialogContent(<EntesTable data={respuestaDirectus} columnsShow={columnasMostrar} />);
+      const respuestaDirectus = await fetchDataCell(entidad, tipoColumna);
+      setDialogContent(
+        <EntesTable data={respuestaDirectus} columnsShow={columnasMostrar} />,
+      );
       setIsDialogOpen(true);
     } else if (cell.column) {
       const entidad = null; // Ajustar según sea necesario
       const tipoColumna = cell.column.id;
-      const respuestaDirectus = await fetchDataCell(entidad, tipoColumna); 
+      const respuestaDirectus = await fetchDataCell(entidad, tipoColumna);
       // Pasar los datos al nuevo componente
       setIsDialogOpen(true);
       setDialogContent(<ConteoColumna data={respuestaDirectus} />);
-      
     }
   };
 
@@ -147,7 +269,7 @@ export function DataTable<TData, TValue>({
                       onClick={() => handleCellClick(header)}
                       className="text-center py-2 px-0.5 text-muted-foreground"
                       /* style={{ width: header.column.columnDef.size }} */
-                      >
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -209,20 +331,22 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
           {/* FOOTER - TOTALES */}
-          <TableFooter className="sticky bottom-0 bg-gray-200 dark:bg-gray-800"> {/* Styled and Sticky Footer */}
+          <TableFooter className="sticky bottom-0 bg-gray-200 dark:bg-gray-800">
+            {" "}
+            {/* Styled and Sticky Footer */}
             {table.getFooterGroups().map((footerGroup) => (
               <TableRow key={footerGroup.id}>
                 {footerGroup.headers.map((header) => (
-                  <TableCell 
+                  <TableCell
                     key={header.id}
-                    className="text-center py-2 px-0.5 text-muted-foreground" 
+                    className="text-center py-2 px-0.5 text-muted-foreground"
                     /* style={{ width: header.column.columnDef.size }} */
-                  > 
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
                           header.column.columnDef.footer,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableCell>
                 ))}
