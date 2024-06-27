@@ -63,11 +63,11 @@ export function DataTable<TData, TValue>({
     const filter = {
       ...(entidad && { entidad: { _eq: entidad } }),  // Filtra por entidad si se proporciona
       ...(tipoColumna === "resultSujetosObligados" && { controlOIC: { _eq: false } }),
-      ...(tipoColumna === "resultOIC" && { controlOIC: { _eq: true } }),
+      ...(tipoColumna === "resultOIC" && { _or: [{controlOIC: { _eq: true }}, {controlTribunal: { _eq: true }}]  }),
       ...(tipoColumna === "resultTribunal" && { controlTribunal: { _eq: true } }),
       ...(tipoColumna === "resultSistema1" && { sistema1: { _eq: true }, controlOIC: { _eq: false } }),
       ...(tipoColumna === "resultSistema2" && { sistema2: { _eq: true }, controlOIC: { _eq: false } }),
-      ...(tipoColumna === "resultSistema3OIC" && { sistema3: { _eq: true }, controlOIC: { _eq: true } }),
+      ...(tipoColumna === "resultSistema3OIC" && { sistema3: { _eq: true }, _or: [{controlOIC: { _eq: true }}, {controlTribunal: { _eq: true }}]}),
       ...(tipoColumna === "resultSistema3Tribunal" && { sistema3: { _eq: true }, controlOIC: { _eq: false }, controlTribunal: { _eq: true } }),
       ...(tipoColumna === "resultSistema6" && { sistema6: { _eq: true }, controlOIC: { _eq: false } }),
       ...(tipoColumna === "resultConexiones" && { sistema1: { _eq: true }, sistema2: { _eq: true }, sistema6: { _eq: true }, controlOIC: { _eq: false } }),
@@ -95,6 +95,7 @@ export function DataTable<TData, TValue>({
       const tipoColumna = cell.column.id;
       
       const columnVisibilityMap = {
+        resultSujetosObligados: { sistema1: true, sistema2: true, sistema3: false, sistema6: true },
         resultOIC: { sistema1: false, sistema2: false, sistema3: true, sistema6: false },
         resultTribunal: { sistema1: true, sistema2: true, sistema3: true, sistema6: true },
         resultSistema1: { sistema1: true, sistema2: false, sistema3: false, sistema6: false },

@@ -27,7 +27,7 @@ export default function AuthenticationPage() {
           // resultOIC
           resultOIC: directus.request(
             readItems("entes", {
-              filter: { controlOIC: { _eq: true } },
+              filter: { _or: [{controlOIC: { _eq: true }}, {controlTribunal: { _eq: true }}]},
               aggregate: { count: ["*"] },
               groupBy: ["entidad"],
             }),
@@ -59,7 +59,7 @@ export default function AuthenticationPage() {
           // resultSistema3OIC
           resultSistema3OIC: directus.request(
             readItems("entes", {
-              filter: { sistema3: { _eq: true }, controlOIC: { _eq: true } },
+              filter: { sistema3: { _eq: true }, _or: [{controlOIC: { _eq: true }}, {controlTribunal: { _eq: true }}] },
               aggregate: { count: ["*"] },
               groupBy: ["entidad"],
             }),
