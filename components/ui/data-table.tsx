@@ -24,20 +24,24 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   searchKey: string;
+  columnsShow: object;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
+  columnsShow
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
+    state: {
+      columnVisibility: columnsShow,
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
   });
-
   return (
     <>
       <Input
@@ -61,13 +65,12 @@ export function DataTable<TData, TValue>({
                         ? "text-left"
                         : "text-center"
                     }
-                    style={{ width: header.column.columnDef.size }}
-                  >
+                    style={{ width: header.column.columnDef.size }}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -79,8 +82,7 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
+                  data-state={row.getIsSelected() && "selected"}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
@@ -89,11 +91,10 @@ export function DataTable<TData, TValue>({
                           ? "text-left"
                           : "text-center"
                       }
-                      style={{ width: cell.column.columnDef.size }}
-                    >
+                      style={{ width: cell.column.columnDef.size }}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -103,8 +104,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center text-xl"
-                >
+                  className="h-24 text-center text-xl">
                   Sin resultados
                 </TableCell>
               </TableRow>

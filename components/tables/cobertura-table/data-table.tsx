@@ -93,8 +93,22 @@ export function DataTable<TData, TValue>({
       const rowElement = cell.row.original;
       const entidad = rowElement.entidad;
       const tipoColumna = cell.column.id;
+      
+      const columnVisibilityMap = {
+        resultOIC: { sistema1: false, sistema2: false, sistema3: true, sistema6: false },
+        resultTribunal: { sistema1: true, sistema2: true, sistema3: true, sistema6: true },
+        resultSistema1: { sistema1: true, sistema2: false, sistema3: false, sistema6: false },
+        resultSistema2: { sistema1: false, sistema2: true, sistema3: false, sistema6: false },
+        resultSistema3: { sistema1: false, sistema2: false, sistema3: true, sistema6: false },
+        resultSistema3OIC: { sistema1: false, sistema2: false, sistema3: true, sistema6: false },
+        resultSistema3Tribunal: { sistema1: false, sistema2: false, sistema3: true, sistema6: false },
+        resultSistema6: { sistema1: false, sistema2: false, sistema3: false, sistema6: true }
+      };
+      
+      const columnasMostrar = columnVisibilityMap[tipoColumna] || {};
+
       const respuestaDirectus = await fetchDataCell(entidad, tipoColumna); 
-      setDialogContent(<EntesTable data={respuestaDirectus} />);
+      setDialogContent(<EntesTable data={respuestaDirectus} columnsShow={columnasMostrar} />);
       setIsDialogOpen(true);
     } else if (cell.column) {
       const entidad = null; // Ajustar según sea necesario
