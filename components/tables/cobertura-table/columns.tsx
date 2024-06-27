@@ -26,7 +26,10 @@ export const columns: ColumnDef<any>[] = [
         {row.original.nombreEntidad}
       </div>
     ),
-    size: '30%'
+    size: "30%",
+    footer: ({}) => {
+      return "Totales:";
+    },
   },
   {
     accessorKey: "resultSujetosObligados",
@@ -45,6 +48,13 @@ export const columns: ColumnDef<any>[] = [
         {row.original.resultSujetosObligados}
       </div>
     ),
+    footer: ({ table }) =>
+      table
+        .getFilteredRowModel()
+        .rows.reduce(
+          (total, row) => total + row.getValue("resultSujetosObligados"),
+          0,
+        ),
   },
   {
     accessorKey: "resultOIC",
@@ -59,10 +69,15 @@ export const columns: ColumnDef<any>[] = [
       </div>
     ),
     cell: ({ row }) => (
-      <div data-entidad={row.original.entidad}>
-        {row.original.resultOIC}
-      </div>
+      <div data-entidad={row.original.entidad}>{row.original.resultOIC}</div>
     ),
+    footer: ({ table }) =>
+      table
+        .getFilteredRowModel()
+        .rows.reduce(
+          (total, row) => total + row.getValue("resultOIC"),
+          0,
+        ),
   },
   {
     accessorKey: "resultTribunal",
@@ -81,6 +96,13 @@ export const columns: ColumnDef<any>[] = [
         {row.original.resultTribunal}
       </div>
     ),
+    footer: ({ table }) =>
+      table
+        .getFilteredRowModel()
+        .rows.reduce(
+          (total, row) => total + row.getValue("resultTribunal"),
+          0,
+        ),
   },
   {
     accessorKey: "resultSistema1",
@@ -99,6 +121,13 @@ export const columns: ColumnDef<any>[] = [
         {row.original.resultSistema1}
       </div>
     ),
+    footer: ({ table }) =>
+      table
+        .getFilteredRowModel()
+        .rows.reduce(
+          (total, row) => total + row.getValue("resultSistema1"),
+          0,
+        ),
   },
   {
     accessorKey: "resultSistema2",
@@ -117,6 +146,13 @@ export const columns: ColumnDef<any>[] = [
         {row.original.resultSistema2}
       </div>
     ),
+    footer: ({ table }) =>
+      table
+        .getFilteredRowModel()
+        .rows.reduce(
+          (total, row) => total + row.getValue("resultSistema2"),
+          0,
+        ),
   },
   {
     accessorKey: "resultSistema3OIC",
@@ -135,6 +171,13 @@ export const columns: ColumnDef<any>[] = [
         {row.original.resultSistema3OIC}
       </div>
     ),
+    footer: ({ table }) =>
+      table
+        .getFilteredRowModel()
+        .rows.reduce(
+          (total, row) => total + row.getValue("resultSistema3OIC"),
+          0,
+        ),
   },
   {
     accessorKey: "resultSistema3Tribunal",
@@ -153,6 +196,13 @@ export const columns: ColumnDef<any>[] = [
         {row.original.resultSistema3Tribunal}
       </div>
     ),
+    footer: ({ table }) =>
+      table
+        .getFilteredRowModel()
+        .rows.reduce(
+          (total, row) => total + row.getValue("resultSistema3Tribunal"),
+          0,
+        ),
   },
   {
     accessorKey: "resultSistema6",
@@ -171,6 +221,13 @@ export const columns: ColumnDef<any>[] = [
         {row.original.resultSistema6}
       </div>
     ),
+    footer: ({ table }) =>
+      table
+        .getFilteredRowModel()
+        .rows.reduce(
+          (total, row) => total + row.getValue("resultSistema6"),
+          0,
+        ),
   },
   {
     accessorKey: "resultConexiones",
@@ -189,5 +246,12 @@ export const columns: ColumnDef<any>[] = [
         {row.original.resultConexiones}
       </div>
     ),
+    footer: ({ table }) =>
+      table
+        .getFilteredRowModel()
+        .rows.reduce(
+          (total, row) => total + row.getValue("resultConexiones"),
+          0,
+        ),
   },
 ];

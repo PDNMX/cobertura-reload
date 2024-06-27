@@ -14,6 +14,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -136,7 +137,7 @@ export function DataTable<TData, TValue>({
       </div>
       <ScrollArea className="rounded-md border h-[calc(80vh-100px)]">
         <Table className="relative w-full">
-          <TableHeader>
+          <TableHeader className="sticky bottom-0 bg-gray-200 dark:bg-gray-800">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -144,10 +145,9 @@ export function DataTable<TData, TValue>({
                     <TableHead
                       key={header.id}
                       onClick={() => handleCellClick(header)}
-                      className="text-center py-2 px-0.5"
-                      style={{ width: header.column.columnDef.size }}
+                      className="text-center py-2 px-0.5 text-muted-foreground"
+                      /* style={{ width: header.column.columnDef.size }} */
                       >
-                      
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -175,7 +175,7 @@ export function DataTable<TData, TValue>({
                   }>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
-                      style={{ width: cell.column.columnDef.size }}
+                      /* style={{ width: cell.column.columnDef.size }} */
                       key={cell.id}
                       onClick={() => handleCellClick(cell)}
                       onMouseEnter={() => setHoveredColumnId(cell.column.id)}
@@ -208,8 +208,29 @@ export function DataTable<TData, TValue>({
               </TableRow>
             )}
           </TableBody>
+          {/* FOOTER - TOTALES */}
+          <TableFooter className="sticky bottom-0 bg-gray-200 dark:bg-gray-800"> {/* Styled and Sticky Footer */}
+            {table.getFooterGroups().map((footerGroup) => (
+              <TableRow key={footerGroup.id}>
+                {footerGroup.headers.map((header) => (
+                  <TableCell 
+                    key={header.id}
+                    className="text-center py-2 px-0.5 text-muted-foreground" 
+                    /* style={{ width: header.column.columnDef.size }} */
+                  > 
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.footer,
+                          header.getContext()
+                        )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableFooter>
         </Table>
-        <ScrollBar orientation="horizontal" />
+        {/* <ScrollBar orientation="horizontal" /> */}
       </ScrollArea>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
