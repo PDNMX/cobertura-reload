@@ -12,6 +12,7 @@ import icoS3Tribunal from "./icons-thead/s3Tribunal.svg";
 import icoS6 from "./icons-thead/s6.svg";
 import icoTribunal from "./icons-thead/tribunal.svg";
 import icoOIC from "./icons-thead/oic.svg";
+import camp from "./icons-thead/cal.svg";
 
 export const columns: ColumnDef<any>[] = [
   {
@@ -246,12 +247,25 @@ export const columns: ColumnDef<any>[] = [
         {row.original.resultConexiones}
       </div>
     ),
-    footer: ({ table }) =>
-      table
-        .getFilteredRowModel()
-        .rows.reduce(
-          (total, row) => total + row.getValue("resultConexiones"),
-          0,
-        ),
+    footer: "-"
   },
+  {
+    accessorKey: "campeonato",
+    header: () => (
+      <div className="flex items-center">
+        <Image
+          className="m-auto cursor-pointer"
+          src={camp}
+          alt="Campeonato"
+          width={35}
+        />
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div data-entidad={row.original.entidad}>
+        {row.original.campeonato}
+      </div>
+    ),
+    footer: "-",
+  }
 ];
