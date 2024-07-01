@@ -9,6 +9,7 @@ import {
   Cell,
   Tooltip,
 } from "recharts";
+import { useTheme } from 'next-themes';
 
 type EntityData = {
   entidad: string;
@@ -319,7 +320,6 @@ const data: EntityData[] = [
     s6: 0,
   },
 ];
-
 const colors = {
   S1: "#F29888",
   S2: "#B25FAC",
@@ -328,6 +328,7 @@ const colors = {
 };
 
 export function Overview({ entidad }: { entidad: string }) {
+  const { theme } = useTheme();
   const entityData = data.find((item) => item.entidad === entidad);
 
   if (!entityData) {
@@ -359,6 +360,8 @@ export function Overview({ entidad }: { entidad: string }) {
     },
   ];
 
+  const textColor = theme === "dark" ? "#8993A6" : "#1F2937"; // Usar colores del tema oscuro/claro
+
   return (
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={processedData}>
@@ -369,6 +372,7 @@ export function Overview({ entidad }: { entidad: string }) {
           tickLine={false}
           axisLine={false}
           tickFormatter={(value) => value.split(":")[0]}
+          tick={{ fill: textColor }} // Aplicar color dinámico
         />
         <YAxis
           stroke="#888888"
@@ -376,9 +380,13 @@ export function Overview({ entidad }: { entidad: string }) {
           tickLine={false}
           axisLine={false}
           tickFormatter={(value) => `${Number(value).toFixed(2)}%`}
+          tick={{ fill: textColor }} // Aplicar color dinámico
           domain={[0, 100]} // Establece el rango del eje Y de 0 a 100
         />
-        <Tooltip formatter={(value) => `${Number(value).toFixed(2)}%`} />
+        <Tooltip
+          formatter={(value) => `${Number(value).toFixed(2)}%`}
+          contentStyle={{ color: textColor }} // Aplicar color dinámico al tooltip
+        />
         <Bar dataKey="Total" radius={[4, 4, 0, 0]}>
           {processedData.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={entry.color} />
