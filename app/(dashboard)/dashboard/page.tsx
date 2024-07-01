@@ -1,5 +1,4 @@
 // @ts-nocheck
-//read-items
 "use client";
 
 import { useEffect, useState } from "react";
@@ -73,15 +72,15 @@ export default function Page() {
                   "controlTribunal",
                   "ambitoGobierno",
                   "poderGobierno",
-                ]
-              }),
-            ),
+                ],
+              })
+            )
           );
 
           // Procesar datos
           const processedData = result.reduce(
             (acc, item) => {
-              if (!item.controlOIC && !item.controlTribunal) {
+              if (!item.controlOIC) {
                 if (item.sistema1) acc.sistema1 += 1;
                 if (item.sistema2) acc.sistema2 += 1;
                 if (item.sistema6) acc.sistema6 += 1;
@@ -97,13 +96,17 @@ export default function Page() {
                   if (item.poderGobierno === "Ejecutivo")
                     acc.ejecutivoMunicipal += 1;
                 }
-              } else if (item.controlOIC) {
-                if (item.ambitoGobierno === "Estatal") acc.OIC += 1;
-                if (item.ambitoGobierno === "Municipal") acc.OICM += 1;
+              }
+              if (item.controlOIC || item.controlTribunal) {
+                if (item.controlOIC) {
+                  if (item.ambitoGobierno === "Estatal") acc.OIC += 1;
+                  if (item.ambitoGobierno === "Municipal") acc.OICM += 1;
+                }
+                if (item.controlTribunal) {
+                  acc.TJA += 1;
+                }
                 if (item.sistema3) acc.sistema3 += 1;
                 acc.totalOIC += 1;
-              } else if (item.controlTribunal) {
-                acc.TJA += 1;
               }
               return acc;
             },
@@ -122,7 +125,7 @@ export default function Page() {
               OIC: 0,
               OICM: 0,
               TJA: 0,
-            },
+            }
           );
 
           setData(processedData);
@@ -211,7 +214,8 @@ export default function Page() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle
-                className={`text-sm font-bold tracking-tight ${colors.sistema1}`}>
+                className={`text-sm font-bold tracking-tight ${colors.sistema1}`}
+              >
                 Entes Públicos Conectados al Sistema 1
               </CardTitle>
             </CardHeader>
@@ -228,7 +232,8 @@ export default function Page() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle
-                className={`text-sm font-bold tracking-tight ${colors.sistema2}`}>
+                className={`text-sm font-bold tracking-tight ${colors.sistema2}`}
+              >
                 Entes Públicos Conectados al Sistema 2
               </CardTitle>
             </CardHeader>
@@ -245,7 +250,8 @@ export default function Page() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle
-                className={`text-sm font-bold tracking-tight ${colors.sistema3}`}>
+                className={`text-sm font-bold tracking-tight ${colors.sistema3}`}
+              >
                 Autoridades Resolutoras Conectados al Sistema 3
               </CardTitle>
             </CardHeader>
@@ -261,7 +267,8 @@ export default function Page() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle
-                className={`text-sm font-bold tracking-tight ${colors.sistema6}`}>
+                className={`text-sm font-bold tracking-tight ${colors.sistema6}`}
+              >
                 Entes Públicos Conectados al Sistema 6
               </CardTitle>
             </CardHeader>
