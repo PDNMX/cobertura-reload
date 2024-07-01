@@ -244,7 +244,7 @@ export const columns: ColumnDef<any>[] = [
     ),
     cell: ({ row }) => (
       <div data-entidad={row.original.entidad}>
-        {row.original.resultConexiones}
+        {row.original.resultConexiones + "%"}
       </div>
     ),
     footer: "-"
@@ -263,7 +263,7 @@ export const columns: ColumnDef<any>[] = [
     ),
     cell: ({ row }) => (
       <div data-entidad={row.original.entidad}>
-        {row.original.campeonato}
+        {row.original.campeonato + "%"}
       </div>
     ),
     footer: "-",
