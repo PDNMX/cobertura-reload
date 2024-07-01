@@ -18,7 +18,7 @@ import {
   TableHead,
   TableRow,
 } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -401,7 +401,7 @@ export function DataTable<TData, TValue>({
             ))}
           </TableFooter>
         </Table>
-        {/* <ScrollBar orientation="horizontal" /> */}
+        <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

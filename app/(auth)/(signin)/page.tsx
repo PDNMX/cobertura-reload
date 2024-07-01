@@ -2,6 +2,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { CoberturaTable } from "@/components/tables/cobertura-table/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import directus from "@/lib/directus";
 import { readItems } from "@directus/sdk";
 
@@ -27,7 +28,12 @@ export default function AuthenticationPage() {
           // resultOIC
           resultOIC: directus.request(
             readItems("entes", {
-              filter: { _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              filter: {
+                _or: [
+                  { controlOIC: { _eq: true } },
+                  { controlTribunal: { _eq: true } },
+                ],
+              },
               aggregate: { count: ["*"] },
               groupBy: ["entidad"],
             }),
@@ -59,7 +65,13 @@ export default function AuthenticationPage() {
           // resultSistema3OIC
           resultSistema3OIC: directus.request(
             readItems("entes", {
-              filter: { sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              filter: {
+                sistema3: { _eq: true },
+                _or: [
+                  { controlOIC: { _eq: true } },
+                  { controlTribunal: { _eq: true } },
+                ],
+              },
               aggregate: { count: ["*"] },
               groupBy: ["entidad"],
             }),
@@ -124,7 +136,8 @@ export default function AuthenticationPage() {
             const campeonato = porcentaje + (diferencia * totalSO) / 2700;
             combinedData[entidad].campeonato = Math.round(campeonato); // Redondear y almacenar como número
 
-            const conexiones = (100 * (sistema1 + sistema2 + sistema6)) / (3 * totalSO);
+            const conexiones =
+              (100 * (sistema1 + sistema2 + sistema6)) / (3 * totalSO);
             combinedData[entidad].resultConexiones = Math.round(conexiones); // Redondear y almacenar como número
           } else {
             combinedData[entidad].campeonato = 0; // Almacenar como número
@@ -132,10 +145,12 @@ export default function AuthenticationPage() {
           }
         }
 
-        const resultadoFinal = Object.entries(combinedData).map(([entidad, count]) => ({
-          entidad,
-          ...count,
-        }));
+        const resultadoFinal = Object.entries(combinedData).map(
+          ([entidad, count]) => ({
+            entidad,
+            ...count,
+          }),
+        );
         //console.log(resultadoFinal);
         setEntes(resultadoFinal);
       } catch (error) {
@@ -149,15 +164,15 @@ export default function AuthenticationPage() {
   }, []);
 
   return (
-    <div className="p-4 pt-8">
+    <div className="p-4">
       {isLoading ? (
         <div>Cargando datos...</div> // Mensaje de carga
       ) : error ? (
         <div>Error al cargar los datos: {error.message}</div> // Mensaje de error
       ) : (
-        <div className="grid gap-4 grid-cols-1">
+        <ScrollArea className="w-full h-full">
           <CoberturaTable data={entes} />
-        </div>
+        </ScrollArea>
       )}
     </div>
   );
