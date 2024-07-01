@@ -13,12 +13,9 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import {
-  Table,
   TableBody,
   TableCell,
-  TableFooter,
   TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -236,12 +233,63 @@ export function DataTable<TData, TValue>({
       );
       setIsDialogOpen(true);
     } else if (cell.column) {
-      const entidad = null; // Ajustar según sea necesario
       const tipoColumna = cell.column.id;
-      const respuestaDirectus = await fetchDataCell(entidad, tipoColumna);
-      // Pasar los datos al nuevo componente
-      setIsDialogOpen(true);
-      setDialogContent(<ConteoColumna data={respuestaDirectus} />);
+      if (
+        tipoColumna == "resultSujetosObligados" ||
+        tipoColumna == "resultOIC" ||
+        tipoColumna == "resultTribunal"
+      ) {
+        const entidad = null;
+        const respuestaDirectus = await fetchDataCell(entidad, tipoColumna);
+        setIsDialogOpen(true);
+        setDialogContent(<ConteoColumna data={respuestaDirectus} />);
+      } else {
+        //const entidad = null;
+        //const respuestaDirectus = await fetchDataCell(entidad, tipoColumna);
+        console.log(data);
+        let dataConPorcentaje;
+        if (tipoColumna == "resultSistema3OIC") {
+          dataConPorcentaje = data.map((item) => {
+            return {
+              ...item,
+              count: Number(
+                ((item[tipoColumna] / item.resultOIC) * 100).toFixed(2),
+              ),
+            };
+          });
+        } else if (tipoColumna == "resultSistema3Tribunal") {
+          dataConPorcentaje = data.map((item) => {
+            return {
+              ...item,
+              count: Number(
+                ((item[tipoColumna] / item.resultTribunal) * 100).toFixed(2),
+              ),
+            };
+          });
+        } else if (tipoColumna == "resultConexiones" || tipoColumna == "campeonato") {
+          dataConPorcentaje = data.map((item) => {
+            return {
+              ...item,
+              count: item[tipoColumna]
+            };
+          });
+        } else {
+          dataConPorcentaje = data.map((item) => {
+            return {
+              ...item,
+              count: Number(
+                (
+                  (item[tipoColumna] / item.resultSujetosObligados) *
+                  100
+                ).toFixed(2),
+              ),
+            };
+          });
+        }
+        // Pasar los datos al nuevo componente
+        setIsDialogOpen(true);
+        setDialogContent(<ConteoColumna data={dataConPorcentaje} />);
+      }
     }
   };
 
@@ -332,7 +380,6 @@ export function DataTable<TData, TValue>({
           </TableBody>
           {/* FOOTER - TOTALES */}
           <TableFooter className="sticky bottom-0 bg-gray-200 dark:bg-gray-800">
-            {" "}
             {/* Styled and Sticky Footer */}
             {table.getFooterGroups().map((footerGroup) => (
               <TableRow key={footerGroup.id}>

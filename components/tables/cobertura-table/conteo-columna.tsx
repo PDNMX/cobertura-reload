@@ -9,6 +9,7 @@ import {
 import marcoGeoestadisticoInegi from "./data-entidades";
 
 export const ConteoColumna = ({ data }: any) => {
+  console.log(data)
   if (data.length > 0) {
     const datosConNombres = data.map((dato: any) => {
       const entidadEncontrada = marcoGeoestadisticoInegi.find(
@@ -21,7 +22,7 @@ export const ConteoColumna = ({ data }: any) => {
         count: parseInt(dato.count, 10) // Convertir count a número entero (base 10)
       };
     });
-    console.log(datosConNombres);
+    //console.log(datosConNombres);
     return (
       <ResponsiveContainer width="100%" height={400} >
         <BarChart data={datosConNombres} margin={{ top: 10, right: 5, left: 5, bottom: 15 }}>
@@ -37,9 +38,8 @@ export const ConteoColumna = ({ data }: any) => {
           <YAxis
             stroke="#888888"
             fontSize={12}
-            allowDecimals={false}
             type="number"
-            domain={[0, "dataMax"]}
+            domain={[0, 100]}
             scale="linear"
           />
           <Bar
