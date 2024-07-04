@@ -35,7 +35,7 @@ export const EntesTable = ({ data }: any) => {
   const { session } = useCurrentSession();
 
   // Filtrar datos basados en los campos controlOIC y controlTribunal
-  const sujetosObligados = data.filter((item: any) => !item.controlOIC && !item.controlTribunal);
+  const sujetosObligados = data.filter((item: any) => !item.controlOIC);
   const organoInternoControl = data.filter((item: any) => item.controlOIC || item.controlTribunal);
 
   return (
