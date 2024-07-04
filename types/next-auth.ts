@@ -62,8 +62,4 @@ export type UserParams = {
   entidad?: string;
 }
 
-export type UserAuthenticated = {
-  id?: string;
-  name?: string;
-  email?: string;
-}
+

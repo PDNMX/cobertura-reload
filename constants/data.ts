@@ -13,7 +13,6 @@ export type User = {
   status: string;
   loquesea: string;
 };
-export const users: User[] = [];
 
 export const navItems: NavItem[] = [
   {

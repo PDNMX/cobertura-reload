@@ -33,8 +33,6 @@ import {
   Users,
 } from "lucide-react";
 
-export type Icon = LucideIcon;
-
 export const Icons = {
   dashboard: LayoutDashboardIcon,
   logo: Command,
