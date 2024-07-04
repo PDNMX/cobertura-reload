@@ -11,15 +11,32 @@ import { createColumns } from "./columns"; // Asegúrate de importar createColum
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useCurrentSession } from "@/hooks/useCurrentSession"; // Asegúrate de importar useCurrentSession
 
+const columnVisibilityMap = {
+  SO: {
+    ambitoGobierno: true,
+    poderGobierno: true,
+    sistema1: true,
+    sistema2: true,
+    sistema3: false,
+    sistema6: true,
+  },
+  OIC: {
+    ambitoGobierno: false,
+    poderGobierno: false,
+    sistema1: false,
+    sistema2: false,
+    sistema3: true,
+    sistema6: false,
+  },
+};
+
 export const EntesTable = ({ data }: any) => {
   const router = useRouter();
   const { session } = useCurrentSession();
 
   // Filtrar datos basados en los campos controlOIC y controlTribunal
-  const sujetosObligados = data.filter((item: any) => !item.controlOIC || item.controlTribunal);
+  const sujetosObligados = data.filter((item: any) => !item.controlOIC && !item.controlTribunal);
   const organoInternoControl = data.filter((item: any) => item.controlOIC || item.controlTribunal);
-
-  const columns = createColumns(session);
 
   return (
     <>
@@ -50,7 +67,7 @@ export const EntesTable = ({ data }: any) => {
         <TabsContent value="SO" className="space-y-4">
           <DataTable
             searchKey="nombre"
-            columns={columns}
+            columns={createColumns(columnVisibilityMap.SO, session)}
             data={sujetosObligados}
           />
         </TabsContent>
@@ -58,7 +75,7 @@ export const EntesTable = ({ data }: any) => {
         <TabsContent value="OIC" className="space-y-4">
           <DataTable
             searchKey="nombre"
-            columns={columns}
+            columns={createColumns(columnVisibilityMap.OIC, session)}
             data={organoInternoControl}
           />
         </TabsContent>

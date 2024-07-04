@@ -5,14 +5,14 @@ import { CellAction } from "./cell-action";
 import { User } from "@/constants/data";
 import { CheckCircle, XCircle } from "lucide-react";
 
-export const createColumns = (session): ColumnDef<User>[] => [
+export const createColumns = (visibilityMap, session): ColumnDef<User>[] => [
   {
     accessorKey: "nombre",
     header: "Nombre",
     cell: ({ row }) => <div className="text-left">{row.original.nombre}</div>,
     size: 500, // Ancho fijo para Nombre
   },
-  {
+  visibilityMap.ambitoGobierno && {
     accessorKey: "ambitoGobierno",
     header: "Ámbito Gobierno",
     cell: ({ row }) => (
@@ -20,7 +20,7 @@ export const createColumns = (session): ColumnDef<User>[] => [
     ),
     size: 125, // Ancho fijo para Ámbito Gobierno
   },
-  {
+  visibilityMap.poderGobierno && {
     accessorKey: "poderGobierno",
     header: "Poder Gobierno",
     cell: ({ row }) => (
@@ -28,7 +28,7 @@ export const createColumns = (session): ColumnDef<User>[] => [
     ),
     size: 125, // Ancho fijo para Poder Gobierno
   },
-  {
+  visibilityMap.sistema1 && {
     accessorKey: "sistema1",
     header: "S1",
     cell: ({ row }) => (
@@ -42,7 +42,7 @@ export const createColumns = (session): ColumnDef<User>[] => [
     ),
     size: 20, // Ancho fijo para S1
   },
-  {
+  visibilityMap.sistema2 && {
     accessorKey: "sistema2",
     header: "S2",
     cell: ({ row }) => (
@@ -56,7 +56,7 @@ export const createColumns = (session): ColumnDef<User>[] => [
     ),
     size: 20 // Ancho fijo para S2
   },
-  {
+  visibilityMap.sistema3 && {
     accessorKey: "sistema3",
     header: "S3",
     cell: ({ row }) => (
@@ -70,7 +70,7 @@ export const createColumns = (session): ColumnDef<User>[] => [
     ),
     size: 20 // Ancho fijo para S3
   },
-  {
+  visibilityMap.sistema6 && {
     accessorKey: "sistema6",
     header: "S6",
     cell: ({ row }) => (
@@ -89,4 +89,4 @@ export const createColumns = (session): ColumnDef<User>[] => [
     cell: ({ row }) => <CellAction data={row.original} session={session} />,
     size: 20 // Ancho fijo para acciones
   },
-];
+].filter(Boolean); // Filtrar columnas nulas
