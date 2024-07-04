@@ -7,15 +7,19 @@ import directus from "@/lib/directus";
 import { readItems, withToken } from "@directus/sdk";
 import { useEffect, useState } from "react";
 import { useCurrentSession } from "@/hooks/useCurrentSession";
+import { signOut } from "next-auth/react";
 
 const breadcrumbItems = [{ title: "Entes Públicos", link: "/dashboard/entes" }];
 
 export default function Page() {
   const { session, status } = useCurrentSession();
   const [entes, setEntes] = useState([]);
+  console.log(session)
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (session?.forceLogout) {
+      signOut({ callbackUrl: "/" });
+    } else if (status === "authenticated") {
       async function fetchData() {
         try {
           const result = await directus.request(

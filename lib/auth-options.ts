@@ -103,12 +103,13 @@ export const authOptions: NextAuthOptions = {
           }
           return resultToken
         } catch (error) {
-          return { ...token, error: "RefreshAccessTokenError" as const }
+          return { ...token, error: "RefreshAccessTokenError" as const, forceLogout: true }
         }
       }
     },
     async session({ session, token }): Promise<Session> {
-      if (token.error) {
+      if (token.error || token.forceLogout) {
+        session.forceLogout = true
         session.error = token.error
         session.expires = new Date(
           new Date().setDate(new Date().getDate() - 1)

@@ -22,6 +22,7 @@ declare module "next-auth" {
     refresh_token?: string
     tokenIsRefreshed: boolean | null
     error?: string | null
+    forceLogout?: boolean;
   }
 }
 
