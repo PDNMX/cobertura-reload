@@ -34,7 +34,7 @@ const data: EntityData[] = [
   {
     "entidad": "01",
     "totalSO": 93,
-    "totalOIC": 67,
+    "totalOIC": 68,
     "s1": 93,
     "s2": 90,
     "s3": 68,
@@ -43,7 +43,7 @@ const data: EntityData[] = [
   {
     "entidad": "02",
     "totalSO": 132,
-    "totalOIC": 94,
+    "totalOIC": 95,
     "s1": 0,
     "s2": 0,
     "s3": 0,
@@ -52,7 +52,7 @@ const data: EntityData[] = [
   {
     "entidad": "03",
     "totalSO": 125,
-    "totalOIC": 17,
+    "totalOIC": 18,
     "s1": 125,
     "s2": 125,
     "s3": 18,
@@ -61,7 +61,7 @@ const data: EntityData[] = [
   {
     "entidad": "04",
     "totalSO": 107,
-    "totalOIC": 44,
+    "totalOIC": 45,
     "s1": 0,
     "s2": 11,
     "s3": 1,
@@ -70,7 +70,7 @@ const data: EntityData[] = [
   {
     "entidad": "05",
     "totalSO": 118,
-    "totalOIC": 31,
+    "totalOIC": 32,
     "s1": 0,
     "s2": 20,
     "s3": 0,
@@ -79,7 +79,7 @@ const data: EntityData[] = [
   {
     "entidad": "06",
     "totalSO": 74,
-    "totalOIC": 32,
+    "totalOIC": 33,
     "s1": 0,
     "s2": 0,
     "s3": 0,
@@ -88,7 +88,7 @@ const data: EntityData[] = [
   {
     "entidad": "07",
     "totalSO": 230,
-    "totalOIC": 164,
+    "totalOIC": 165,
     "s1": 207,
     "s2": 148,
     "s3": 64,
@@ -97,7 +97,7 @@ const data: EntityData[] = [
   {
     "entidad": "08",
     "totalSO": 152,
-    "totalOIC": 14,
+    "totalOIC": 15,
     "s1": 67,
     "s2": 26,
     "s3": 0,
@@ -115,7 +115,7 @@ const data: EntityData[] = [
   {
     "entidad": "10",
     "totalSO": 125,
-    "totalOIC": 62,
+    "totalOIC": 63,
     "s1": 1,
     "s2": 125,
     "s3": 2,
@@ -124,7 +124,7 @@ const data: EntityData[] = [
   {
     "entidad": "11",
     "totalSO": 127,
-    "totalOIC": 11,
+    "totalOIC": 12,
     "s1": 10,
     "s2": 19,
     "s3": 12,
@@ -133,7 +133,7 @@ const data: EntityData[] = [
   {
     "entidad": "12",
     "totalSO": 286,
-    "totalOIC": 220,
+    "totalOIC": 221,
     "s1": 1,
     "s2": 4,
     "s3": 4,
@@ -142,7 +142,7 @@ const data: EntityData[] = [
   {
     "entidad": "13",
     "totalSO": 175,
-    "totalOIC": 5,
+    "totalOIC": 6,
     "s1": 0,
     "s2": 0,
     "s3": 0,
@@ -151,7 +151,7 @@ const data: EntityData[] = [
   {
     "entidad": "14",
     "totalSO": 485,
-    "totalOIC": 361,
+    "totalOIC": 362,
     "s1": 152,
     "s2": 133,
     "s3": 227,
@@ -160,7 +160,7 @@ const data: EntityData[] = [
   {
     "entidad": "15",
     "totalSO": 420,
-    "totalOIC": 134,
+    "totalOIC": 135,
     "s1": 13,
     "s2": 411,
     "s3": 2,
@@ -169,7 +169,7 @@ const data: EntityData[] = [
   {
     "entidad": "16",
     "totalSO": 265,
-    "totalOIC": 132,
+    "totalOIC": 133,
     "s1": 85,
     "s2": 157,
     "s3": 120,
@@ -178,7 +178,7 @@ const data: EntityData[] = [
   {
     "entidad": "17",
     "totalSO": 140,
-    "totalOIC": 63,
+    "totalOIC": 64,
     "s1": 38,
     "s2": 114,
     "s3": 0,
@@ -187,7 +187,7 @@ const data: EntityData[] = [
   {
     "entidad": "18",
     "totalSO": 111,
-    "totalOIC": 78,
+    "totalOIC": 79,
     "s1": 9,
     "s2": 0,
     "s3": 0,
@@ -196,7 +196,7 @@ const data: EntityData[] = [
   {
     "entidad": "19",
     "totalSO": 395,
-    "totalOIC": 297,
+    "totalOIC": 298,
     "s1": 0,
     "s2": 0,
     "s3": 0,
@@ -205,7 +205,7 @@ const data: EntityData[] = [
   {
     "entidad": "20",
     "totalSO": 375,
-    "totalOIC": 285,
+    "totalOIC": 286,
     "s1": 0,
     "s2": 0,
     "s3": 0,
@@ -214,7 +214,7 @@ const data: EntityData[] = [
   {
     "entidad": "21",
     "totalSO": 308,
-    "totalOIC": 306,
+    "totalOIC": 307,
     "s1": 165,
     "s2": 87,
     "s3": 89,
@@ -223,7 +223,7 @@ const data: EntityData[] = [
   {
     "entidad": "22",
     "totalSO": 129,
-    "totalOIC": 88,
+    "totalOIC": 89,
     "s1": 0,
     "s2": 24,
     "s3": 7,
@@ -232,7 +232,7 @@ const data: EntityData[] = [
   {
     "entidad": "23",
     "totalSO": 86,
-    "totalOIC": 23,
+    "totalOIC": 24,
     "s1": 85,
     "s2": 8,
     "s3": 6,
@@ -241,7 +241,7 @@ const data: EntityData[] = [
   {
     "entidad": "24",
     "totalSO": 184,
-    "totalOIC": 183,
+    "totalOIC": 184,
     "s1": 97,
     "s2": 88,
     "s3": 57,
@@ -250,7 +250,7 @@ const data: EntityData[] = [
   {
     "entidad": "25",
     "totalSO": 171,
-    "totalOIC": 93,
+    "totalOIC": 94,
     "s1": 0,
     "s2": 22,
     "s3": 0,
@@ -259,7 +259,7 @@ const data: EntityData[] = [
   {
     "entidad": "26",
     "totalSO": 172,
-    "totalOIC": 146,
+    "totalOIC": 147,
     "s1": 0,
     "s2": 0,
     "s3": 0,
@@ -268,7 +268,7 @@ const data: EntityData[] = [
   {
     "entidad": "27",
     "totalSO": 97,
-    "totalOIC": 96,
+    "totalOIC": 97,
     "s1": 1,
     "s2": 79,
     "s3": 97,
@@ -277,7 +277,7 @@ const data: EntityData[] = [
   {
     "entidad": "28",
     "totalSO": 208,
-    "totalOIC": 200,
+    "totalOIC": 201,
     "s1": 0,
     "s2": 0,
     "s3": 0,
@@ -286,7 +286,7 @@ const data: EntityData[] = [
   {
     "entidad": "29",
     "totalSO": 209,
-    "totalOIC": 82,
+    "totalOIC": 83,
     "s1": 71,
     "s2": 71,
     "s3": 1,
@@ -295,7 +295,7 @@ const data: EntityData[] = [
   {
     "entidad": "30",
     "totalSO": 325,
-    "totalOIC": 234,
+    "totalOIC": 235,
     "s1": 0,
     "s2": 7,
     "s3": 11,
@@ -304,7 +304,7 @@ const data: EntityData[] = [
   {
     "entidad": "31",
     "totalSO": 191,
-    "totalOIC": 190,
+    "totalOIC": 191,
     "s1": 0,
     "s2": 2,
     "s3": 4,
@@ -313,7 +313,7 @@ const data: EntityData[] = [
   {
     "entidad": "32",
     "totalSO": 157,
-    "totalOIC": 84,
+    "totalOIC": 85,
     "s1": 1,
     "s2": 56,
     "s3": 1,
