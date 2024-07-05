@@ -285,9 +285,9 @@ export default function Page() {
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
           <Card className="col-span-4">
             <CardHeader>
-              <CardTitle>Avance del Trimestre Anterior</CardTitle>
+              <CardTitle>Avance del Segundo Trimestre</CardTitle>
               <CardDescription>
-                Última actualización: 31 de marzo de 2024
+                Última actualización: 30 de junio de 2024
               </CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
