@@ -402,7 +402,6 @@ export function DataTable<TData, TValue>({
           dataEntidad={dataEntidad}
           selectedColumn={tipoColumna}
           dataNacional={dataNacional}
-          tipoColumna={tipoColumna}
           dataAmbito={dataAmbito}
         />
       );
@@ -525,7 +524,7 @@ export function DataTable<TData, TValue>({
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogOverlay className="fixed inset-0 bg-black opacity-30" />
-        <DialogContent className="p-6 rounded-md shadow-lg max-w-5xl w-full bg-white dark:bg-gray-800">
+        <DialogContent className="p-6 rounded-md shadow-lg max-w-5xl w-full bg-white dark:bg-gray-900">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
               Entes Públicos
