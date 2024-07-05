@@ -2,30 +2,30 @@
 "use client";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {AmbitoBarChart} from "./ambito-bar-chart"
+import { EntidadBarChart } from "./entidad-bar-chart";
+import { AvanceBarChart } from "./avance-bar-chart";
 
-export const TabsColumnsSistemas = ({ data }: any) => {
+export const TabsColumnsSistemas = ({ dataEntidad, dataNacional, tipoColumna }: any) => {
+  return (
+    <>  
+      <Tabs defaultValue="entidad" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="entidad">
+            Entidad
+          </TabsTrigger>
+          <TabsTrigger value="nacional">
+            Nacional
+          </TabsTrigger>
+        </TabsList>
 
-    return (
-      <>  
-        <Tabs defaultValue="SO" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="SO">
-              Sujetos Obligados 
-            </TabsTrigger>
-            <TabsTrigger value="OIC">
-              Autoridades Resolutoras 
-            </TabsTrigger>
-          </TabsList>
-  
-          <TabsContent value="SO" className="space-y-4">
-            <AmbitoBarChart/>
-          </TabsContent>
-  
-          <TabsContent value="OIC" className="space-y-4">
+        <TabsContent value="entidad" className="space-y-4">
+          <EntidadBarChart data={dataEntidad} />
+        </TabsContent>
 
-          </TabsContent>
-        </Tabs>
-      </>
-    );
-  };
+        <TabsContent value="nacional" className="space-y-4">
+          <AvanceBarChart data={dataNacional} tipoColumna={tipoColumna} />
+        </TabsContent>
+      </Tabs>
+    </>
+  );
+};

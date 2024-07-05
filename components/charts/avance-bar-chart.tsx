@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from "react";
 import {
   BarChart,
@@ -5,35 +6,28 @@ import {
   XAxis,
   YAxis,
   ResponsiveContainer,
+  Cell,
+  Tooltip,
 } from "recharts";
-import marcoGeoestadisticoInegi from "../tables/cobertura-table/data-entidades";
+
+const colorMap = {
+  "Sistema 1": "#F29888",
+  "Sistema 2": "#B25FAC",
+  "Sistema 3 OIC": "#9085DA",
+  "Sistema 3 Tribunal": "#9085DA",
+  "Sistema 6": "#42A5CC",
+};
 
 export const AvanceBarChart = ({ data }: any) => {
-  console.log(data)
   if (data.length > 0) {
-    const datosConNombres = data.map((dato: any) => {
-      const entidadEncontrada = marcoGeoestadisticoInegi.find(
-        (entidad) => entidad.id === dato.entidad,
-      );
-      return {
-        ...dato,
-        nombreEntidad: entidadEncontrada?.nombre || "Entidad no encontrada",
-        abreviacion: entidadEncontrada?.abreviacion || "NA",
-        count: parseInt(dato.count, 10) // Convertir count a número entero (base 10)
-      };
-    });
-    //console.log(datosConNombres);
     return (
-      <ResponsiveContainer width="100%" height={400} >
-        <BarChart data={datosConNombres} margin={{ top: 10, right: 5, left: 5, bottom: 15 }}>
+      <ResponsiveContainer width="100%" height={400}>
+        <BarChart data={data} margin={{ top: 10, right: 5, left: 5, bottom: 15 }}>
           <XAxis
-            dataKey="abreviacion"
+            dataKey="sistema"
             stroke="#888888"
             fontSize={12}
-            angle={-45} 
-            textAnchor="end"
-            interval={0} // Asegurar que todas las etiquetas se muestren
-            padding={{ left: 5, right: 5 }} // Ajustar el padding
+            padding={{ left: 5, right: 5 }}
           />
           <YAxis
             stroke="#888888"
@@ -41,18 +35,28 @@ export const AvanceBarChart = ({ data }: any) => {
             type="number"
             domain={[0, 100]}
             scale="linear"
+            tickFormatter={(tick) => `${tick}%`}
           />
-          <Bar
-            dataKey="count"
-            fill="hsl(var(--primary))"
+          <Tooltip
+            formatter={(value, name, props) => {
+              const totalEntes = props.payload.totalEntes;
+              const conectados = props.payload.conectados;
+              return [`Total: ${value}%`,`${conectados} de ${totalEntes}`];
+            }}
+            labelFormatter={() => ""}
           />
+          <Bar dataKey="count">
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={colorMap[entry.sistema]} />
+            ))}
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     );
   } else {
     return (
       <>
-        <p className="text-xl">No hay datos que mostrar</p>
+        <p>No hay datos que mostrar</p>
       </>
     );
   }

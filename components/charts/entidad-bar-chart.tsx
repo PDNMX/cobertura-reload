@@ -9,7 +9,6 @@ import {
 import marcoGeoestadisticoInegi from "../tables/cobertura-table/data-entidades";
 
 export const EntidadBarChart = ({ data }: any) => {
-  console.log(data)
   if (data.length > 0) {
     const datosConNombres = data.map((dato: any) => {
       const entidadEncontrada = marcoGeoestadisticoInegi.find(
