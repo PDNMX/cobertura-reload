@@ -176,8 +176,73 @@ export function DataTable<TData, TValue>({
       const tipoColumna = cell.column.id;
     
       const columnVisibilityMap = {
-        // map configuration as before
-      };
+        resultSujetosObligados: {
+          sistema1: true,
+          sistema2: true,
+          sistema3: false,
+          sistema6: true,
+        },
+        resultOIC: {
+          sistema1: false,
+          sistema2: false,
+          sistema3: true,
+          sistema6: false,
+        },
+        resultTribunal: {
+          sistema1: true,
+          sistema2: true,
+          sistema3: true,
+          sistema6: true,
+        },
+        resultSistema1: {
+          sistema1: true,
+          sistema2: false,
+          sistema3: false,
+          sistema6: false,
+        },
+        resultSistema2: {
+          sistema1: false,
+          sistema2: true,
+          sistema3: false,
+          sistema6: false,
+        },
+        resultSistema3: {
+          sistema1: false,
+          sistema2: false,
+          sistema3: true,
+          sistema6: false,
+        },
+        resultSistema3OIC: {
+          sistema1: false,
+          sistema2: false,
+          sistema3: true,
+          sistema6: false,
+        },
+        resultSistema3Tribunal: {
+          sistema1: false,
+          sistema2: false,
+          sistema3: true,
+          sistema6: false,
+        },
+        resultSistema6: {
+          sistema1: false,
+          sistema2: false,
+          sistema3: false,
+          sistema6: true,
+        },
+        resultConexiones: {
+          sistema1: true,
+          sistema2: true,
+          sistema3: false,
+          sistema6: true,
+        },
+        resultCampeonatoS1: {
+          sistema1: true,
+          sistema2: false,
+          sistema3: false,
+          sistema6: false,
+        },
+      };  
     
       const columnasMostrar = columnVisibilityMap[tipoColumna] || {};
     
