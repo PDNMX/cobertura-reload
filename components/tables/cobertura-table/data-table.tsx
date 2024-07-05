@@ -266,7 +266,25 @@ export function DataTable<TData, TValue>({
         //const respuestaDirectus = await fetchDataCell(entidad, tipoColumna);
         console.log(data);
         let dataConPorcentaje;
-        if (tipoColumna == "resultSistema3OIC") {
+        if (tipoColumna == "resultSistema1") {
+          dataConPorcentaje = data.map((item) => {
+            return {
+              ...item,
+              count: Number(
+                ((item[tipoColumna] / item.resultOIC) * 100).toFixed(2),
+              ),
+            };
+          });
+        } else if (tipoColumna == "resultSistema2") {
+          dataConPorcentaje = data.map((item) => {
+            return {
+              ...item,
+              count: Number(
+                ((item[tipoColumna] / item.resultOIC) * 100).toFixed(2),
+              ),
+            };
+          });
+        } else if (tipoColumna == "resultSistema3OIC") {
           dataConPorcentaje = data.map((item) => {
             return {
               ...item,
@@ -281,6 +299,15 @@ export function DataTable<TData, TValue>({
               ...item,
               count: Number(
                 ((item[tipoColumna] / item.resultTribunal) * 100).toFixed(2),
+              ),
+            };
+          });
+        } else if (tipoColumna == "resultSistema6") {
+          dataConPorcentaje = data.map((item) => {
+            return {
+              ...item,
+              count: Number(
+                ((item[tipoColumna] / item.resultOIC) * 100).toFixed(2),
               ),
             };
           });
