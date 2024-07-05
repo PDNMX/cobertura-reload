@@ -142,11 +142,11 @@ export function DataTable<TData, TValue>({
           {sistema1: { _eq: true }},
           {sistema2: { _eq: true }},
           {sistema6: { _eq: true }},
-        ],
+        ]
       }),
       ...(tipoColumna === "resultCampeonatoS1" && {
-        controlOIC: { _eq: false },
         sistema1: { _eq: true },
+        controlOIC: { _eq: false },
       }),
     };
 
@@ -266,25 +266,7 @@ export function DataTable<TData, TValue>({
         //const respuestaDirectus = await fetchDataCell(entidad, tipoColumna);
         console.log(data);
         let dataConPorcentaje;
-        if (tipoColumna == "resultSistema1") {
-          dataConPorcentaje = data.map((item) => {
-            return {
-              ...item,
-              count: Number(
-                ((item[tipoColumna] / item.resultOIC) * 100).toFixed(2),
-              ),
-            };
-          });
-        } else if (tipoColumna == "resultSistema2") {
-          dataConPorcentaje = data.map((item) => {
-            return {
-              ...item,
-              count: Number(
-                ((item[tipoColumna] / item.resultOIC) * 100).toFixed(2),
-              ),
-            };
-          });
-        } else if (tipoColumna == "resultSistema3OIC") {
+        if (tipoColumna == "resultSistema3OIC") {
           dataConPorcentaje = data.map((item) => {
             return {
               ...item,
@@ -302,16 +284,7 @@ export function DataTable<TData, TValue>({
               ),
             };
           });
-        } else if (tipoColumna == "resultSistema6") {
-          dataConPorcentaje = data.map((item) => {
-            return {
-              ...item,
-              count: Number(
-                ((item[tipoColumna] / item.resultOIC) * 100).toFixed(2),
-              ),
-            };
-          });
-        } else if (tipoColumna == "resultConexiones" || "resultCampeonatoS1") {
+        } else if (tipoColumna == "resultConexiones" || tipoColumna == "campeonato") {
           dataConPorcentaje = data.map((item) => {
             return {
               ...item,
