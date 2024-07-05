@@ -284,7 +284,7 @@ export function DataTable<TData, TValue>({
               ),
             };
           });
-        } else if (tipoColumna == "resultConexiones" || tipoColumna == "campeonato") {
+        } else if (tipoColumna == "resultConexiones" || tipoColumna == "resultCampeonatoS1") {
           dataConPorcentaje = data.map((item) => {
             return {
               ...item,
