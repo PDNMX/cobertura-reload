@@ -174,7 +174,7 @@ export function DataTable<TData, TValue>({
       const rowElement = cell.row.original;
       const entidad = rowElement.entidad;
       const tipoColumna = cell.column.id;
-    
+  
       const columnVisibilityMap = {
         resultSujetosObligados: {
           sistema1: true,
@@ -242,10 +242,10 @@ export function DataTable<TData, TValue>({
           sistema3: false,
           sistema6: false,
         },
-      };  
-    
+      };
+  
       const columnasMostrar = columnVisibilityMap[tipoColumna] || {};
-    
+  
       const respuestaDirectus = await fetchDataCell(entidad, tipoColumna);
       setDialogContent(
         <EntesTable data={respuestaDirectus} columnsShow={columnasMostrar} />,
@@ -257,12 +257,12 @@ export function DataTable<TData, TValue>({
         tipoColumna === "resultSujetosObligados" ||
         tipoColumna === "resultOIC" ||
         tipoColumna === "resultTribunal" ||
-        tipoColumna === "resultConexiones" || 
-        tipoColumna === "resultCampeonatoS1" 
+        tipoColumna === "resultConexiones" ||
+        tipoColumna === "resultCampeonatoS1"
       ) {
         return;
       }
-    
+  
       const nombreAmigableMap = {
         resultSistema1: "Sistema 1",
         resultSistema2: "Sistema 2",
@@ -270,16 +270,26 @@ export function DataTable<TData, TValue>({
         resultSistema3Tribunal: "Sistema 3 Tribunal",
         resultSistema6: "Sistema 6",
       };
-    
+  
       let dataEntidad = data.map((item) => ({
         ...item,
         count: parseInt(item[tipoColumna], 10), // Corrected to use selected column value
         total: parseInt(item.resultSujetosObligados, 10) || 1, // Total como resultSujetosObligados
       }));
-    
+  
       let dataNacional;
-      if (tipoColumna === "resultSistema3OIC" || tipoColumna === "resultSistema3Tribunal") {
+      if (tipoColumna === "resultSistema3OIC") {
         const totalEntes = data.reduce((acc, item) => acc + item.resultOIC, 0);
+        const conectados = data.reduce((acc, item) => acc + item[tipoColumna], 0);
+        const porcentajeConectados = (conectados / totalEntes) * 100;
+        dataNacional = [{
+          sistema: nombreAmigableMap[tipoColumna],
+          count: parseFloat(porcentajeConectados.toFixed(2)), // Convertir a porcentaje con 2 decimales
+          conectados,
+          totalEntes
+        }];
+      } else if (tipoColumna === "resultSistema3Tribunal") {
+        const totalEntes = data.reduce((acc, item) => acc + item.resultTribunal, 0);
         const conectados = data.reduce((acc, item) => acc + item[tipoColumna], 0);
         const porcentajeConectados = (conectados / totalEntes) * 100;
         dataNacional = [{
@@ -299,15 +309,13 @@ export function DataTable<TData, TValue>({
           totalEntes
         }];
       }
-    
-      // Pasar los datos al nuevo componente
       setIsDialogOpen(true);
       setDialogContent(
-        <TabsColumnsSistemas 
-          dataEntidad={dataEntidad} 
-          selectedColumn={tipoColumna} 
-          dataNacional={dataNacional} 
-          tipoColumna={tipoColumna} 
+        <TabsColumnsSistemas
+          dataEntidad={dataEntidad}
+          selectedColumn={tipoColumna}
+          dataNacional={dataNacional}
+          tipoColumna={tipoColumna}
         />
       );
     }

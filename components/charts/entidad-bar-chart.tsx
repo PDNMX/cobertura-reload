@@ -23,7 +23,8 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const { originalCount, total } = payload[0].payload;
     return (
-      <div className="custom-tooltip p-2 border rounded shadow-lg bg-white text-black">        <p className="label">{`${originalCount} de ${total}`}</p>
+      <div className="custom-tooltip p-2 border rounded shadow-lg bg-white text-black">
+        <p className="label">{`${originalCount} de ${total}`}</p>
         <p className="intro">{`Total: ${(originalCount / total * 100).toFixed(2)}%`}</p>
       </div>
     );
@@ -39,7 +40,14 @@ export const EntidadBarChart = ({ data, selectedColumn }: any) => {
         (entidad) => entidad.id === dato.entidad,
       );
       const originalCount = parseInt(dato[selectedColumn], 10);
-      const total = parseInt(dato.resultSujetosObligados, 10) || 1;
+      let total;
+
+      if (selectedColumn === "resultSistema3Tribunal") {
+        total = parseInt(dato.resultTribunal, 10) || 1;
+      } else {
+        total = parseInt(dato.resultSujetosObligados, 10) || 1;
+      }
+
       const percentage = (originalCount / total) * 100;
 
       return {
@@ -69,7 +77,7 @@ export const EntidadBarChart = ({ data, selectedColumn }: any) => {
             fontSize={12}
             type="number"
             domain={[0, 100]}
-            scale="sqrt"
+            scale="linear"
             tickFormatter={(tick) => `${tick}%`} // Añadir el símbolo de porcentaje
           />
           <Tooltip content={<CustomTooltip />} />
