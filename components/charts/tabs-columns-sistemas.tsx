@@ -5,7 +5,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { EntidadBarChart } from "./entidad-bar-chart";
 import { AvanceBarChart } from "./avance-bar-chart";
 
-export const TabsColumnsSistemas = ({ dataEntidad, dataNacional, tipoColumna }: any) => {
+export const TabsColumnsSistemas = ({ dataEntidad, selectedColumn, dataNacional, tipoColumna }: any) => {
+  console.log(dataEntidad)
   return (
     <>  
       <Tabs defaultValue="entidad" className="space-y-4">
@@ -19,7 +20,7 @@ export const TabsColumnsSistemas = ({ dataEntidad, dataNacional, tipoColumna }: 
         </TabsList>
 
         <TabsContent value="entidad" className="space-y-4">
-          <EntidadBarChart data={dataEntidad} />
+          <EntidadBarChart data={dataEntidad} selectedColumn={selectedColumn}/>
         </TabsContent>
 
         <TabsContent value="nacional" className="space-y-4">

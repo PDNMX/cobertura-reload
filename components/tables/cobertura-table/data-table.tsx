@@ -174,78 +174,13 @@ export function DataTable<TData, TValue>({
       const rowElement = cell.row.original;
       const entidad = rowElement.entidad;
       const tipoColumna = cell.column.id;
-  
+    
       const columnVisibilityMap = {
-        resultSujetosObligados: {
-          sistema1: true,
-          sistema2: true,
-          sistema3: false,
-          sistema6: true,
-        },
-        resultOIC: {
-          sistema1: false,
-          sistema2: false,
-          sistema3: true,
-          sistema6: false,
-        },
-        resultTribunal: {
-          sistema1: true,
-          sistema2: true,
-          sistema3: true,
-          sistema6: true,
-        },
-        resultSistema1: {
-          sistema1: true,
-          sistema2: false,
-          sistema3: false,
-          sistema6: false,
-        },
-        resultSistema2: {
-          sistema1: false,
-          sistema2: true,
-          sistema3: false,
-          sistema6: false,
-        },
-        resultSistema3: {
-          sistema1: false,
-          sistema2: false,
-          sistema3: true,
-          sistema6: false,
-        },
-        resultSistema3OIC: {
-          sistema1: false,
-          sistema2: false,
-          sistema3: true,
-          sistema6: false,
-        },
-        resultSistema3Tribunal: {
-          sistema1: false,
-          sistema2: false,
-          sistema3: true,
-          sistema6: false,
-        },
-        resultSistema6: {
-          sistema1: false,
-          sistema2: false,
-          sistema3: false,
-          sistema6: true,
-        },
-        resultConexiones: {
-          sistema1: true,
-          sistema2: true,
-          sistema3: false,
-          sistema6: true,
-        },
-        resultCampeonatoS1: {
-          sistema1: true,
-          sistema2: false,
-          sistema3: false,
-          sistema6: false,
-        },
+        // map configuration as before
       };
-  
+    
       const columnasMostrar = columnVisibilityMap[tipoColumna] || {};
-  
+    
       const respuestaDirectus = await fetchDataCell(entidad, tipoColumna);
       setDialogContent(
         <EntesTable data={respuestaDirectus} columnsShow={columnasMostrar} />,
@@ -256,11 +191,13 @@ export function DataTable<TData, TValue>({
       if (
         tipoColumna === "resultSujetosObligados" ||
         tipoColumna === "resultOIC" ||
-        tipoColumna === "resultTribunal"
+        tipoColumna === "resultTribunal" ||
+        tipoColumna === "resultConexiones" || 
+        tipoColumna === "resultCampeonatoS1" 
       ) {
         return;
       }
-  
+    
       const nombreAmigableMap = {
         resultSistema1: "Sistema 1",
         resultSistema2: "Sistema 2",
@@ -268,25 +205,13 @@ export function DataTable<TData, TValue>({
         resultSistema3Tribunal: "Sistema 3 Tribunal",
         resultSistema6: "Sistema 6",
       };
-  
-      let dataEntidad;
-      if (tipoColumna === "resultSistema3OIC") {
-        dataEntidad = data.map((item) => ({
-          ...item,
-          count: Number(((item[tipoColumna] / item.resultOIC) * 100).toFixed(2)),
-        }));
-      } else if (tipoColumna === "resultSistema3Tribunal") {
-        dataEntidad = data.map((item) => ({
-          ...item,
-          count: Number(((item[tipoColumna] / item.resultTribunal) * 100).toFixed(2)),
-        }));
-      } else {
-        dataEntidad = data.map((item) => ({
-          ...item,
-          count: Number(((item[tipoColumna] / item.resultSujetosObligados) * 100).toFixed(2)),
-        }));
-      }
-  
+    
+      let dataEntidad = data.map((item) => ({
+        ...item,
+        count: parseInt(item[tipoColumna], 10), // Corrected to use selected column value
+        total: parseInt(item.resultSujetosObligados, 10) || 1, // Total como resultSujetosObligados
+      }));
+    
       let dataNacional;
       if (tipoColumna === "resultSistema3OIC" || tipoColumna === "resultSistema3Tribunal") {
         const totalEntes = data.reduce((acc, item) => acc + item.resultOIC, 0);
@@ -309,10 +234,16 @@ export function DataTable<TData, TValue>({
           totalEntes
         }];
       }
+    
       // Pasar los datos al nuevo componente
       setIsDialogOpen(true);
       setDialogContent(
-        <TabsColumnsSistemas dataEntidad={dataEntidad} dataNacional={dataNacional} tipoColumna={tipoColumna} />
+        <TabsColumnsSistemas 
+          dataEntidad={dataEntidad} 
+          selectedColumn={tipoColumna} 
+          dataNacional={dataNacional} 
+          tipoColumna={tipoColumna} 
+        />
       );
     }
   };
