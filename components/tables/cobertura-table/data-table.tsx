@@ -274,6 +274,7 @@ export function DataTable<TData, TValue>({
       let dataEntidad;
       if (tipoColumna === "resultSistema3OIC") {
         dataEntidad = data.map((item) => ({
+          ...item,
           count: Number(
             ((item[tipoColumna] / item.resultOIC) * 100).toFixed(2)
           ),

@@ -44,6 +44,8 @@ export const EntidadBarChart = ({ data, selectedColumn }: any) => {
 
       if (selectedColumn === "resultSistema3Tribunal") {
         total = parseInt(dato.resultTribunal, 10) || 1;
+      } else if (selectedColumn === "resultSistema3OIC") {
+        total = parseInt(dato.resultOIC, 10) || 1;
       } else {
         total = parseInt(dato.resultSujetosObligados, 10) || 1;
       }
