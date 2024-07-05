@@ -8,7 +8,7 @@ import {
 } from "recharts";
 import marcoGeoestadisticoInegi from "../tables/cobertura-table/data-entidades";
 
-export const ConteoColumna = ({ data }: any) => {
+export const EntidadBarChart = ({ data }: any) => {
   console.log(data)
   if (data.length > 0) {
     const datosConNombres = data.map((dato: any) => {
