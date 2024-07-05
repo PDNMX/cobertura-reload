@@ -39,7 +39,7 @@ export const PoderBarChart = ({ data }: any) => {
             fontSize={12}
             type="number"
             domain={[0, 100]}
-            scale="linear"
+            scale="sqrt"
           />
           <Bar
             dataKey="count"

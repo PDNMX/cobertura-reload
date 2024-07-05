@@ -69,7 +69,7 @@ export const EntidadBarChart = ({ data, selectedColumn }: any) => {
             fontSize={12}
             type="number"
             domain={[0, 100]}
-            scale="linear"
+            scale="sqrt"
             tickFormatter={(tick) => `${tick}%`} // Añadir el símbolo de porcentaje
           />
           <Tooltip content={<CustomTooltip />} />

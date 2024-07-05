@@ -1,12 +1,11 @@
-// @ts-nocheck
 "use client";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { EntidadBarChart } from "./entidad-bar-chart";
 import { AvanceBarChart } from "./avance-bar-chart";
+//import { AvanceMapa } from "./avance-mapa"
 
 export const TabsColumnsSistemas = ({ dataEntidad, selectedColumn, dataNacional, tipoColumna }: any) => {
-  console.log(dataEntidad)
   return (
     <>  
       <Tabs defaultValue="entidad" className="space-y-4">
@@ -17,6 +16,9 @@ export const TabsColumnsSistemas = ({ dataEntidad, selectedColumn, dataNacional,
           <TabsTrigger value="nacional">
             Nacional
           </TabsTrigger>
+          {/* <TabsTrigger value="avanceMapa">
+            Mapa
+          </TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="entidad" className="space-y-4">
@@ -26,6 +28,10 @@ export const TabsColumnsSistemas = ({ dataEntidad, selectedColumn, dataNacional,
         <TabsContent value="nacional" className="space-y-4">
           <AvanceBarChart data={dataNacional} tipoColumna={tipoColumna} />
         </TabsContent>
+
+        {/* <TabsContent value="avanceMapa" className="space-y-4">
+          <AvanceMapa data={dataEntidad} />
+        </TabsContent> */}
       </Tabs>
     </>
   );
