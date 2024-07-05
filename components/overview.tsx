@@ -327,8 +327,21 @@ const colors = {
   S6: "#42A5CC",
 };
 
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const { sistema, count, total, Total } = payload[0].payload;
+    return (
+      <div className="custom-tooltip p-2 border rounded shadow-lg bg-white text-black">
+        <p className="label">{`${count} de ${total}`}</p>
+        <p className="intro">{`Total: ${Total.toFixed(2)}%`}</p>
+      </div>
+    );
+  }
+
+  return null;
+};
+
 export function Overview({ entidad }: { entidad: string }) {
-  const { theme } = useTheme();
   const entityData = data.find((item) => item.entidad === entidad);
 
   if (!entityData) {
@@ -339,40 +352,44 @@ export function Overview({ entidad }: { entidad: string }) {
 
   const processedData = [
     {
-      name: `S1: ${entityData.s1} de ${entityData.totalSO}`,
+      sistema: "S1",
+      count: entityData.s1,
+      total: entityData.totalSO,
       Total: (entityData.s1 / entityData.totalSO) * 100,
       color: colors.S1,
     },
     {
-      name: `S2: ${entityData.s2} de ${entityData.totalSO}`,
+      sistema: "S2",
+      count: entityData.s2,
+      total: entityData.totalSO,
       Total: (entityData.s2 / entityData.totalSO) * 100,
       color: colors.S2,
     },
     {
-      name: `S3: ${entityData.s3} de ${entityData.totalOIC}`,
+      sistema: "S3",
+      count: entityData.s3,
+      total: entityData.totalOIC,
       Total: (entityData.s3 / entityData.totalOIC) * 100,
       color: colors.S3,
     },
     {
-      name: `S6: ${entityData.s6} de ${entityData.totalSO}`,
+      sistema: "S6",
+      count: entityData.s6,
+      total: entityData.totalSO,
       Total: (entityData.s6 / entityData.totalSO) * 100,
       color: colors.S6,
     },
   ];
 
-  const textColor = theme === "dark" ? "#8993A6" : "#1F2937"; // Usar colores del tema oscuro/claro
-
   return (
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={processedData}>
         <XAxis
-          dataKey="name"
+          dataKey="sistema"
           stroke="#888888"
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => value.split(":")[0]}
-          tick={{ fill: textColor }} // Aplicar color dinámico
         />
         <YAxis
           stroke="#888888"
@@ -380,13 +397,9 @@ export function Overview({ entidad }: { entidad: string }) {
           tickLine={false}
           axisLine={false}
           tickFormatter={(value) => `${Number(value).toFixed(2)}%`}
-          tick={{ fill: textColor }} // Aplicar color dinámico
           domain={[0, 100]} // Establece el rango del eje Y de 0 a 100
         />
-        <Tooltip
-          formatter={(value) => `${Number(value).toFixed(2)}%`}
-          contentStyle={{ color: textColor }} // Aplicar color dinámico al tooltip
-        />
+        <Tooltip content={<CustomTooltip />} />
         <Bar dataKey="Total" radius={[4, 4, 0, 0]}>
           {processedData.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={entry.color} />
