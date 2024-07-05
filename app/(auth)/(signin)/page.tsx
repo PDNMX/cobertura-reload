@@ -134,13 +134,13 @@ export default function AuthenticationPage() {
               diferencia = porcentaje;
             }
             const campeonato = porcentaje + (diferencia * totalSO) / 2700;
-            combinedData[entidad].campeonato = Math.round(campeonato); // Redondear y almacenar como número
+            combinedData[entidad].resultCampeonatoS1 = Math.round(campeonato); // Redondear y almacenar como número
 
             const conexiones =
               (100 * (sistema1 + sistema2 + sistema6)) / (3 * totalSO);
             combinedData[entidad].resultConexiones = Math.round(conexiones); // Redondear y almacenar como número
           } else {
-            combinedData[entidad].campeonato = 0; // Almacenar como número
+            combinedData[entidad].resultCampeonatoS1 = 0; // Almacenar como número
             combinedData[entidad].resultConexiones = 0; // Almacenar como número
           }
         }

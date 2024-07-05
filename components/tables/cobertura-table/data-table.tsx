@@ -137,10 +137,16 @@ export function DataTable<TData, TValue>({
         controlOIC: { _eq: false },
       }),
       ...(tipoColumna === "resultConexiones" && {
-        sistema1: { _eq: true },
-        sistema2: { _eq: true },
-        sistema6: { _eq: true },
         controlOIC: { _eq: false },
+        _or: [
+          {sistema1: { _eq: true }},
+          {sistema2: { _eq: true }},
+          {sistema6: { _eq: true }},
+        ],
+      }),
+      ...(tipoColumna === "resultCampeonatoS1" && {
+        controlOIC: { _eq: false },
+        sistema1: { _eq: true },
       }),
     };
 
@@ -223,6 +229,18 @@ export function DataTable<TData, TValue>({
           sistema3: false,
           sistema6: true,
         },
+        resultConexiones: {
+          sistema1: true,
+          sistema2: true,
+          sistema3: false,
+          sistema6: true,
+        },
+        resultCampeonatoS1: {
+          sistema1: true,
+          sistema2: false,
+          sistema3: false,
+          sistema6: false,
+        },
       };
 
       const columnasMostrar = columnVisibilityMap[tipoColumna] || {};
@@ -266,7 +284,7 @@ export function DataTable<TData, TValue>({
               ),
             };
           });
-        } else if (tipoColumna == "resultConexiones" || tipoColumna == "campeonato") {
+        } else if (tipoColumna == "resultConexiones" || "resultCampeonatoS1") {
           dataConPorcentaje = data.map((item) => {
             return {
               ...item,

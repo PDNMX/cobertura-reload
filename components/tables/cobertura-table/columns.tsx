@@ -250,7 +250,7 @@ export const columns: ColumnDef<any>[] = [
     footer: "-"
   },
   {
-    accessorKey: "campeonato",
+    accessorKey: "resultCampeonatoS1",
     header: () => (
       <div className="flex items-center">
         <Image
@@ -263,7 +263,7 @@ export const columns: ColumnDef<any>[] = [
     ),
     cell: ({ row }) => (
       <div data-entidad={row.original.entidad}>
-        {row.original.campeonato + "%"}
+        {row.original.resultCampeonatoS1 + "%"}
       </div>
     ),
     footer: "-",
