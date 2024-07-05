@@ -33,7 +33,7 @@ import directus from "@/lib/directus";
 import { readItems } from "@directus/sdk";
 import { EntesTable } from "@/components/tables/cell-entes-table/table";
 import { ConteoColumna } from "./conteo-columna";
-import { TabsColumnsSistemas } from "@/components/charts/tabs-columns-sistemas"
+import { TabsColumnsSistemas } from "@/components/charts/tabs-columns-sistemas";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -50,7 +50,7 @@ export function DataTable<TData, TValue>({
   const [hoveredColumnId, setHoveredColumnId] = useState<string | null>(null);
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
   const [dialogContent, setDialogContent] = useState<React.ReactNode | null>(
-    null,
+    null
   );
 
   const Table = React.forwardRef<
@@ -140,10 +140,10 @@ export function DataTable<TData, TValue>({
       ...(tipoColumna === "resultConexiones" && {
         controlOIC: { _eq: false },
         _or: [
-          {sistema1: { _eq: true }},
-          {sistema2: { _eq: true }},
-          {sistema6: { _eq: true }},
-        ]
+          { sistema1: { _eq: true } },
+          { sistema2: { _eq: true } },
+          { sistema6: { _eq: true } },
+        ],
       }),
       ...(tipoColumna === "resultCampeonatoS1" && {
         sistema1: { _eq: true },
@@ -174,7 +174,7 @@ export function DataTable<TData, TValue>({
       const rowElement = cell.row.original;
       const entidad = rowElement.entidad;
       const tipoColumna = cell.column.id;
-  
+
       const columnVisibilityMap = {
         resultSujetosObligados: {
           sistema1: true,
@@ -243,12 +243,12 @@ export function DataTable<TData, TValue>({
           sistema6: false,
         },
       };
-  
+
       const columnasMostrar = columnVisibilityMap[tipoColumna] || {};
-  
+
       const respuestaDirectus = await fetchDataCell(entidad, tipoColumna);
       setDialogContent(
-        <EntesTable data={respuestaDirectus} columnsShow={columnasMostrar} />,
+        <EntesTable data={respuestaDirectus} columnsShow={columnasMostrar} />
       );
       setIsDialogOpen(true);
     } else if (cell.column) {
@@ -262,7 +262,7 @@ export function DataTable<TData, TValue>({
       ) {
         return;
       }
-  
+
       const nombreAmigableMap = {
         resultSistema1: "Sistema 1",
         resultSistema2: "Sistema 2",
@@ -270,45 +270,131 @@ export function DataTable<TData, TValue>({
         resultSistema3Tribunal: "Sistema 3 Tribunal",
         resultSistema6: "Sistema 6",
       };
-  
-      let dataEntidad = data.map((item) => ({
-        ...item,
-        count: parseInt(item[tipoColumna], 10), // Corrected to use selected column value
-        total: parseInt(item.resultSujetosObligados, 10) || 1, // Total como resultSujetosObligados
-      }));
-  
+
+      let dataEntidad;
+      if (tipoColumna === "resultSistema3OIC") {
+        dataEntidad = data.map((item) => ({
+          count: Number(
+            ((item[tipoColumna] / item.resultOIC) * 100).toFixed(2)
+          ),
+        }));
+      } else if (tipoColumna === "resultSistema3Tribunal") {
+        dataEntidad = data.map((item) => ({
+          ...item,
+          count: Number(
+            ((item[tipoColumna] / item.resultTribunal) * 100).toFixed(2)
+          ),
+        }));
+      } else {
+        dataEntidad = data.map((item) => ({
+          ...item,
+          count: Number(
+            ((item[tipoColumna] / item.resultSujetosObligados) * 100).toFixed(2)
+          ),
+        }));
+      }
+
       let dataNacional;
       if (tipoColumna === "resultSistema3OIC") {
         const totalEntes = data.reduce((acc, item) => acc + item.resultOIC, 0);
-        const conectados = data.reduce((acc, item) => acc + item[tipoColumna], 0);
+        const conectados = data.reduce(
+          (acc, item) => acc + item[tipoColumna],
+          0
+        );
         const porcentajeConectados = (conectados / totalEntes) * 100;
-        dataNacional = [{
-          sistema: nombreAmigableMap[tipoColumna],
-          count: parseFloat(porcentajeConectados.toFixed(2)), // Convertir a porcentaje con 2 decimales
-          conectados,
-          totalEntes
-        }];
+        dataNacional = [
+          {
+            sistema: nombreAmigableMap[tipoColumna],
+            count: parseFloat(porcentajeConectados.toFixed(2)), // Convertir a porcentaje con 2 decimales
+            conectados,
+            totalEntes,
+          },
+        ];
       } else if (tipoColumna === "resultSistema3Tribunal") {
-        const totalEntes = data.reduce((acc, item) => acc + item.resultTribunal, 0);
-        const conectados = data.reduce((acc, item) => acc + item[tipoColumna], 0);
+        const totalEntes = data.reduce(
+          (acc, item) => acc + item.resultTribunal,
+          0
+        );
+        const conectados = data.reduce(
+          (acc, item) => acc + item[tipoColumna],
+          0
+        );
         const porcentajeConectados = (conectados / totalEntes) * 100;
-        dataNacional = [{
-          sistema: nombreAmigableMap[tipoColumna],
-          count: parseFloat(porcentajeConectados.toFixed(2)), // Convertir a porcentaje con 2 decimales
-          conectados,
-          totalEntes
-        }];
+        dataNacional = [
+          {
+            sistema: nombreAmigableMap[tipoColumna],
+            count: parseFloat(porcentajeConectados.toFixed(2)), // Convertir a porcentaje con 2 decimales
+            conectados,
+            totalEntes,
+          },
+        ];
       } else {
-        const totalEntes = data.reduce((acc, item) => acc + item.resultSujetosObligados, 0);
-        const conectados = data.reduce((acc, item) => acc + item[tipoColumna], 0);
+        const totalEntes = data.reduce(
+          (acc, item) => acc + item.resultSujetosObligados,
+          0
+        );
+        const conectados = data.reduce(
+          (acc, item) => acc + item[tipoColumna],
+          0
+        );
         const porcentajeConectados = (conectados / totalEntes) * 100;
-        dataNacional = [{
-          sistema: nombreAmigableMap[tipoColumna],
-          count: parseFloat(porcentajeConectados.toFixed(2)), // Convertir a porcentaje con 2 decimales
-          conectados,
-          totalEntes
-        }];
+        dataNacional = [
+          {
+            sistema: nombreAmigableMap[tipoColumna],
+            count: parseFloat(porcentajeConectados.toFixed(2)), // Convertir a porcentaje con 2 decimales
+            conectados,
+            totalEntes,
+          },
+        ];
       }
+
+      let dataAmbito;
+      if (tipoColumna === "resultSistema3OIC") {
+        const ambitoFederal = data
+          .filter((item) => item.ambitoGobierno === "Federal")
+          .reduce((acc, item) => acc + item[tipoColumna], 0);
+        const ambitoEstatal = data
+          .filter((item) => item.ambitoGobierno === "Estatal")
+          .reduce((acc, item) => acc + item[tipoColumna], 0);
+        const ambitoMunicipal = data
+          .filter((item) => item.ambitoGobierno === "Municipal")
+          .reduce((acc, item) => acc + item[tipoColumna], 0);
+
+        const totalFederal = data
+          .filter((item) => item.ambitoGobierno === "Federal")
+          .reduce((acc, item) => acc + item.resultOIC, 0);
+        const totalEstatal = data
+          .filter((item) => item.ambitoGobierno === "Estatal")
+          .reduce((acc, item) => acc + item.resultOIC, 0);
+        const totalMunicipal = data
+          .filter((item) => item.ambitoGobierno === "Municipal")
+          .reduce((acc, item) => acc + item.resultOIC, 0);
+
+        const porcentajeFederal = (ambitoFederal / totalFederal) * 100;
+        const porcentajeEstatal = (ambitoEstatal / totalEstatal) * 100;
+        const porcentajeMunicipal = (ambitoMunicipal / totalMunicipal) * 100;
+        dataAmbito = [
+          {
+            tipo: "Federal",
+            conectados: ambitoFederal,
+            total: totalFederal,
+            porcentaje: parseFloat(porcentajeFederal.toFixed(2)),
+          },
+          {
+            tipo: "Estatal",
+            conectados: ambitoEstatal,
+            total: totalEstatal,
+            porcentaje: parseFloat(porcentajeEstatal.toFixed(2)),
+          },
+          {
+            tipo: "Municipal",
+            conectados: ambitoMunicipal,
+            total: totalMunicipal,
+            porcentaje: parseFloat(porcentajeMunicipal.toFixed(2)),
+          },
+        ];
+      }
+      console.log(dataAmbito);
       setIsDialogOpen(true);
       setDialogContent(
         <TabsColumnsSistemas
@@ -316,6 +402,7 @@ export function DataTable<TData, TValue>({
           selectedColumn={tipoColumna}
           dataNacional={dataNacional}
           tipoColumna={tipoColumna}
+          dataAmbito={dataAmbito}
         />
       );
     }
@@ -350,7 +437,7 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext(),
+                            header.getContext()
                           )}
                     </TableHead>
                   );
@@ -370,7 +457,8 @@ export function DataTable<TData, TValue>({
                     hoveredRowId === row.id
                       ? "bg-gray-100 dark:bg-gray-700"
                       : ""
-                  }>
+                  }
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       /* style={{ width: cell.column.columnDef.size }} */
@@ -387,10 +475,11 @@ export function DataTable<TData, TValue>({
                         hoveredColumnId === cell.column.id
                           ? "bg-gray-300 dark:bg-gray-500"
                           : ""
-                      } text-center`}>
+                      } text-center`}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext(),
+                        cell.getContext()
                       )}
                     </TableCell>
                   ))}
@@ -400,7 +489,8 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center text-xl">
+                  className="h-24 text-center text-xl"
+                >
                   Sin resultados
                 </TableCell>
               </TableRow>
@@ -421,7 +511,7 @@ export function DataTable<TData, TValue>({
                       ? null
                       : flexRender(
                           header.column.columnDef.footer,
-                          header.getContext(),
+                          header.getContext()
                         )}
                   </TableCell>
                 ))}
