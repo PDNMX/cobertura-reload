@@ -734,13 +734,692 @@ export function DataTable<TData, TValue>({
               totalEntes: totalMunicipal,
             },
           ];
-
         } catch (error) {
           console.error("Error al cargar los datos de ambito:", error);
         }
       };
 
       await fetchAmbitoData();
+
+      // Obtener datos de poder
+      let dataPoder = [];
+
+      const fetchPoderData = async () => {
+        try {
+          const poderQueries = {
+            resultSistema1: {
+              ejecutivo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  sistema1: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              judicial: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Judicial" },
+                  sistema1: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              legislativo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Legislativo" },
+                  sistema1: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              autonomo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Autonomo" },
+                  sistema1: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              ejecutivoMunicipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  sistema1: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+            resultSistema2: {
+              ejecutivo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  sistema2: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              judicial: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Judicial" },
+                  sistema2: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              legislativo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Legislativo" },
+                  sistema2: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              autonomo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Autonomo" },
+                  sistema2: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              ejecutivoMunicipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  sistema2: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+            resultSistema3OIC: {
+              ejecutivo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  sistema3: { _eq: true },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              judicial: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Judicial" },
+                  sistema3: { _eq: true },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              legislativo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Legislativo" },
+                  sistema3: { _eq: true },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              autonomo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Autonomo" },
+                  sistema3: { _eq: true },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              ejecutivoMunicipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  sistema3: { _eq: true },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+            resultSistema3Tribunal: {
+              ejecutivo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  sistema3: { _eq: true },
+                  controlTribunal: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              judicial: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Judicial" },
+                  sistema3: { _eq: true },
+                  controlTribunal: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              legislativo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Legislativo" },
+                  sistema3: { _eq: true },
+                  controlTribunal: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              autonomo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Autonomo" },
+                  sistema3: { _eq: true },
+                  controlTribunal: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              ejecutivoMunicipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  sistema3: { _eq: true },
+                  controlTribunal: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+            resultSistema6: {
+              ejecutivo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  sistema6: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              judicial: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Judicial" },
+                  sistema6: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              legislativo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Legislativo" },
+                  sistema6: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              autonomo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Autonomo" },
+                  sistema6: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              ejecutivoMunicipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  sistema6: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+            resultSujetosObligados: {
+              ejecutivo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              judicial: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Judicial" },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              legislativo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Legislativo" },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              autonomo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Autonomo" },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              ejecutivoMunicipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+            resultOIC: {
+              ejecutivo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              judicial: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Judicial" },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              legislativo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Legislativo" },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              autonomo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Autonomo" },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              ejecutivoMunicipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+            resultTribunal: {
+              ejecutivo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  controlTribunal: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              judicial: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Judicial" },
+                  controlTribunal: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              legislativo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Legislativo" },
+                  controlTribunal: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              autonomo: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _neq: "Municipal" },
+                  poderGobierno: { _eq: "Autonomo" },
+                  controlTribunal: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              ejecutivoMunicipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  poderGobierno: { _eq: "Ejecutivo" },
+                  controlTribunal: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+          };
+
+          let resultEjecutivo,
+            resultJudicial,
+            resultLegislativo,
+            resultAutonomo,
+            resultEjecutivoMunicipal;
+          let totalEjecutivo,
+            totalJudicial,
+            totalLegislativo,
+            totalAutonomo,
+            totalEjecutivoMunicipal;
+
+          if (tipoColumna === "resultSistema3OIC") {
+            [
+              resultEjecutivo,
+              resultJudicial,
+              resultLegislativo,
+              resultAutonomo,
+              resultEjecutivoMunicipal,
+            ] = await Promise.all([
+              directus.request(poderQueries.resultSistema3OIC.ejecutivo),
+              directus.request(poderQueries.resultSistema3OIC.judicial),
+              directus.request(poderQueries.resultSistema3OIC.legislativo),
+              directus.request(poderQueries.resultSistema3OIC.autonomo),
+              directus.request(
+                poderQueries.resultSistema3OIC.ejecutivoMunicipal
+              ),
+            ]);
+
+            const totalOICEjecutivo = await directus.request(
+              poderQueries.resultOIC.ejecutivo
+            );
+            const totalOICJudicial = await directus.request(
+              poderQueries.resultOIC.judicial
+            );
+            const totalOICLegislativo = await directus.request(
+              poderQueries.resultOIC.legislativo
+            );
+            const totalOICAutonomo = await directus.request(
+              poderQueries.resultOIC.autonomo
+            );
+            const totalOICEjecutivoMunicipal = await directus.request(
+              poderQueries.resultOIC.ejecutivoMunicipal
+            );
+
+            totalEjecutivo = totalOICEjecutivo.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalJudicial = totalOICJudicial.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalLegislativo = totalOICLegislativo.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalAutonomo = totalOICAutonomo.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalEjecutivoMunicipal = totalOICEjecutivoMunicipal.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+          } else if (tipoColumna === "resultSistema3Tribunal") {
+            [
+              resultEjecutivo,
+              resultJudicial,
+              resultLegislativo,
+              resultAutonomo,
+              resultEjecutivoMunicipal,
+            ] = await Promise.all([
+              directus.request(poderQueries.resultSistema3Tribunal.ejecutivo),
+              directus.request(poderQueries.resultSistema3Tribunal.judicial),
+              directus.request(poderQueries.resultSistema3Tribunal.legislativo),
+              directus.request(poderQueries.resultSistema3Tribunal.autonomo),
+              directus.request(
+                poderQueries.resultSistema3Tribunal.ejecutivoMunicipal
+              ),
+            ]);
+
+            const totalTribunalEjecutivo = await directus.request(
+              poderQueries.resultTribunal.ejecutivo
+            );
+            const totalTribunalJudicial = await directus.request(
+              poderQueries.resultTribunal.judicial
+            );
+            const totalTribunalLegislativo = await directus.request(
+              poderQueries.resultTribunal.legislativo
+            );
+            const totalTribunalAutonomo = await directus.request(
+              poderQueries.resultTribunal.autonomo
+            );
+            const totalTribunalEjecutivoMunicipal = await directus.request(
+              poderQueries.resultTribunal.ejecutivoMunicipal
+            );
+
+            totalEjecutivo = totalTribunalEjecutivo.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalJudicial = totalTribunalJudicial.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalLegislativo = totalTribunalLegislativo.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalAutonomo = totalTribunalAutonomo.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalEjecutivoMunicipal = totalTribunalEjecutivoMunicipal.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+          } else {
+            [
+              resultEjecutivo,
+              resultJudicial,
+              resultLegislativo,
+              resultAutonomo,
+              resultEjecutivoMunicipal,
+            ] = await Promise.all([
+              directus.request(poderQueries[tipoColumna].ejecutivo),
+              directus.request(poderQueries[tipoColumna].judicial),
+              directus.request(poderQueries[tipoColumna].legislativo),
+              directus.request(poderQueries[tipoColumna].autonomo),
+              directus.request(poderQueries[tipoColumna].ejecutivoMunicipal),
+            ]);
+
+            const totalSujetosEjecutivo = await directus.request(
+              poderQueries.resultSujetosObligados.ejecutivo
+            );
+            const totalSujetosJudicial = await directus.request(
+              poderQueries.resultSujetosObligados.judicial
+            );
+            const totalSujetosLegislativo = await directus.request(
+              poderQueries.resultSujetosObligados.legislativo
+            );
+            const totalSujetosAutonomo = await directus.request(
+              poderQueries.resultSujetosObligados.autonomo
+            );
+            const totalSujetosEjecutivoMunicipal = await directus.request(
+              poderQueries.resultSujetosObligados.ejecutivoMunicipal
+            );
+
+            totalEjecutivo = totalSujetosEjecutivo.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalJudicial = totalSujetosJudicial.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalLegislativo = totalSujetosLegislativo.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalAutonomo = totalSujetosAutonomo.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalEjecutivoMunicipal = totalSujetosEjecutivoMunicipal.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+          }
+
+          const ejecutivoConectados = resultEjecutivo.reduce(
+            (acc, item) => acc + Number(item.count),
+            0
+          );
+          const judicialConectados = resultJudicial.reduce(
+            (acc, item) => acc + Number(item.count),
+            0
+          );
+          const legislativoConectados = resultLegislativo.reduce(
+            (acc, item) => acc + Number(item.count),
+            0
+          );
+          const autonomoConectados = resultAutonomo.reduce(
+            (acc, item) => acc + Number(item.count),
+            0
+          );
+          const ejecutivoMunicipalConectados = resultEjecutivoMunicipal.reduce(
+            (acc, item) => acc + Number(item.count),
+            0
+          );
+
+          const ejecutivoPorcentaje =
+            (ejecutivoConectados / totalEjecutivo) * 100;
+          const judicialPorcentaje = (judicialConectados / totalJudicial) * 100;
+          const legislativoPorcentaje =
+            (legislativoConectados / totalLegislativo) * 100;
+          const autonomoPorcentaje = (autonomoConectados / totalAutonomo) * 100;
+          const ejecutivoMunicipalPorcentaje =
+            (ejecutivoMunicipalConectados / totalEjecutivoMunicipal) * 100;
+
+          dataPoder = [
+            {
+              poder: "Ejec.",
+              count: parseFloat(ejecutivoPorcentaje.toFixed(2)),
+              conectados: ejecutivoConectados,
+              totalEntes: totalEjecutivo,
+            },
+            {
+              poder: "Judicial",
+              count: parseFloat(judicialPorcentaje.toFixed(2)),
+              conectados: judicialConectados,
+              totalEntes: totalJudicial,
+            },
+            {
+              poder: "Legislativo",
+              count: parseFloat(legislativoPorcentaje.toFixed(2)),
+              conectados: legislativoConectados,
+              totalEntes: totalLegislativo,
+            },
+            {
+              poder: "OCAS",
+              count: parseFloat(autonomoPorcentaje.toFixed(2)),
+              conectados: autonomoConectados,
+              totalEntes: totalAutonomo,
+            },
+            {
+              poder: "Ejec. Muni.",
+              count: parseFloat(ejecutivoMunicipalPorcentaje.toFixed(2)),
+              conectados: ejecutivoMunicipalConectados,
+              totalEntes: totalEjecutivoMunicipal,
+            },
+          ];
+
+          console.log(dataPoder);
+        } catch (error) {
+          console.error("Error al cargar los datos de poder:", error);
+        }
+      };
+
+      await fetchPoderData();
 
       setIsDialogOpen(true);
       setDialogContent(
@@ -749,6 +1428,7 @@ export function DataTable<TData, TValue>({
           selectedColumn={tipoColumna}
           dataNacional={dataNacional}
           dataAmbito={dataAmbito}
+          dataPoder={dataPoder}
         />
       );
     }

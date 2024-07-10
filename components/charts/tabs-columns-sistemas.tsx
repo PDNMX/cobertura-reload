@@ -6,12 +6,14 @@ import { EntidadBarChart } from "./entidad-bar-chart";
 import { AvanceBarChart } from "./avance-bar-chart";
 import { AvanceMapa } from "./avance-mapa";
 import { AmbitoBarChart } from "./ambito-bar-chart";
+import { PoderBarChart } from "./poder-bar-chart"; // Asegúrate de tener este componente
 
 export const TabsColumnsSistemas = ({
   dataEntidad,
   selectedColumn,
   dataNacional,
-  dataAmbito
+  dataAmbito,
+  dataPoder, // Añadimos dataPoder
 }: any) => {
   const colors: object = {
     resultSistema1: "#F29888",
@@ -29,6 +31,7 @@ export const TabsColumnsSistemas = ({
           <TabsTrigger value="entidad">Entidad</TabsTrigger>
           <TabsTrigger value="nacional">Nacional</TabsTrigger>
           <TabsTrigger value="ambito">Ámbito</TabsTrigger>
+          <TabsTrigger value="poder">Poder</TabsTrigger> {/* Añadimos la pestaña Poder */}
           <TabsTrigger value="avanceMapa">Mapa</TabsTrigger>
         </TabsList>
 
@@ -42,6 +45,10 @@ export const TabsColumnsSistemas = ({
 
         <TabsContent value="ambito" className="space-y-4">
           <AmbitoBarChart data={dataAmbito} tipoColumna={selectedColumn} />
+        </TabsContent>
+
+        <TabsContent value="poder" className="space-y-4">
+          <PoderBarChart data={dataPoder} tipoColumna={selectedColumn} /> {/* Añadimos PoderBarChart */}
         </TabsContent>
 
         <TabsContent value="avanceMapa" className="space-y-4">

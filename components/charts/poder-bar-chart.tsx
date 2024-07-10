@@ -1,58 +1,61 @@
+// @ts-nocheck
 import React from "react";
 import {
   BarChart,
   Bar,
   XAxis,
   YAxis,
+  Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import marcoGeoestadisticoInegi from "../tables/cobertura-table/data-entidades";
 
-export const PoderBarChart = ({ data }: any) => {
-  if (data.length > 0) {
-    const datosConNombres = data.map((dato: any) => {
-      const entidadEncontrada = marcoGeoestadisticoInegi.find(
-        (entidad) => entidad.id === dato.entidad,
-      );
-      return {
-        ...dato,
-        nombreEntidad: entidadEncontrada?.nombre || "Entidad no encontrada",
-        abreviacion: entidadEncontrada?.abreviacion || "NA",
-        count: parseInt(dato.count, 10) // Convertir count a número entero (base 10)
-      };
-    });
-    //console.log(datosConNombres);
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const { conectados, totalEntes, count } = payload[0].payload;
     return (
-      <ResponsiveContainer width="100%" height={400} >
-        <BarChart data={datosConNombres} margin={{ top: 10, right: 5, left: 5, bottom: 15 }}>
-          <XAxis
-            dataKey="abreviacion"
-            stroke="#888888"
-            fontSize={12}
-            angle={-45} 
-            textAnchor="end"
-            interval={0} // Asegurar que todas las etiquetas se muestren
-            padding={{ left: 5, right: 5 }} // Ajustar el padding
-          />
-          <YAxis
-            stroke="#888888"
-            fontSize={12}
-            type="number"
-            domain={[0, 100]}
-            scale="sqrt"
-          />
-          <Bar
-            dataKey="count"
-            fill="hsl(var(--primary))"
-          />
-        </BarChart>
-      </ResponsiveContainer>
-    );
-  } else {
-    return (
-      <>
-        <p className="text-xl">No hay datos que mostrar</p>
-      </>
+      <div className="custom-tooltip p-2 border rounded shadow-lg bg-white text-black">
+        <p className="label">{`${conectados} de ${totalEntes}`}</p>
+        <p className="intro">{`Total: ${count}%`}</p>
+      </div>
     );
   }
+
+  return null;
+};
+
+export const PoderBarChart = ({ data, tipoColumna }: any) => {
+  const colors: object = {
+    resultSistema1: "#F29888",
+    resultSistema2: "#B25FAC",
+    resultSistema3OIC: "#9085DA",
+    resultSistema3Tribunal: "#9085DA",
+    resultSistema6: "#42A5CC",
+  };
+
+  const colorSistema = colors[tipoColumna];
+
+  return (
+    <ResponsiveContainer width="100%" height={400}>
+      <BarChart data={data} margin={{ top: 10, right: 5, left: 5, bottom: 15 }}>
+        <XAxis
+          dataKey="poder"
+          stroke="#888888"
+          fontSize={12}
+          angle={-45}
+          textAnchor="end"
+          interval={0} // Asegurar que todas las etiquetas se muestren
+          padding={{ left: 5, right: 5 }} // Ajustar el padding
+        />
+        <YAxis
+          stroke="#888888"
+          fontSize={12}
+          type="number"
+          domain={[0, 100]}
+          scale="sqrt"
+        />
+        <Tooltip content={<CustomTooltip />} />
+        <Bar dataKey="count" fill={colorSistema} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
 };
