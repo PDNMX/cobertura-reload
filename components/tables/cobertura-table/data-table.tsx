@@ -735,7 +735,6 @@ export function DataTable<TData, TValue>({
             },
           ];
 
-          console.log(dataAmbito);
         } catch (error) {
           console.error("Error al cargar los datos de ambito:", error);
         }

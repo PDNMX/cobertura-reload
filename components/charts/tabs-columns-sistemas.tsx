@@ -28,8 +28,8 @@ export const TabsColumnsSistemas = ({
         <TabsList>
           <TabsTrigger value="entidad">Entidad</TabsTrigger>
           <TabsTrigger value="nacional">Nacional</TabsTrigger>
-          <TabsTrigger value="avanceMapa">Mapa</TabsTrigger>
           <TabsTrigger value="ambito">Ámbito</TabsTrigger>
+          <TabsTrigger value="avanceMapa">Mapa</TabsTrigger>
         </TabsList>
 
         <TabsContent value="entidad" className="space-y-4">
@@ -40,12 +40,12 @@ export const TabsColumnsSistemas = ({
           <AvanceBarChart data={dataNacional} tipoColumna={selectedColumn} />
         </TabsContent>
 
-        <TabsContent value="avanceMapa" className="space-y-4">
-          <AvanceMapa data={dataEntidad} baseColor={colorSistema} />
-        </TabsContent>
-
         <TabsContent value="ambito" className="space-y-4">
           <AmbitoBarChart data={dataAmbito} tipoColumna={selectedColumn} />
+        </TabsContent>
+
+        <TabsContent value="avanceMapa" className="space-y-4">
+          <AvanceMapa data={dataEntidad} baseColor={colorSistema} />
         </TabsContent>
       </Tabs>
     </>
