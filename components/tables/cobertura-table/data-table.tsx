@@ -71,7 +71,6 @@ export function DataTable<TData, TValue>({
   >(({ className, ...props }, ref) => (
     <thead
       ref={ref}
-      // Manually added sticky top-0 to fix header not sticking to top of table
       className={cn("sticky top-0 bg-secondary [&_tr]:border-b", className)}
       {...props}
     />
@@ -84,7 +83,6 @@ export function DataTable<TData, TValue>({
   >(({ className, ...props }, ref) => (
     <tfoot
       ref={ref}
-      // Manually added sticky top-0 to fix header not sticking to top of table
       className={cn("sticky top-0 bg-secondary [&_tr]:border-b", className)}
       {...props}
     />
@@ -349,53 +347,402 @@ export function DataTable<TData, TValue>({
         ];
       }
 
-      let dataAmbito;
-      if (tipoColumna === "resultSistema3OIC") {
-        const ambitoFederal = data
-          .filter((item) => item.ambitoGobierno === "Federal")
-          .reduce((acc, item) => acc + item[tipoColumna], 0);
-        const ambitoEstatal = data
-          .filter((item) => item.ambitoGobierno === "Estatal")
-          .reduce((acc, item) => acc + item[tipoColumna], 0);
-        const ambitoMunicipal = data
-          .filter((item) => item.ambitoGobierno === "Municipal")
-          .reduce((acc, item) => acc + item[tipoColumna], 0);
+      // Obtener datos de ambito
+      let dataAmbito = [];
 
-        const totalFederal = data
-          .filter((item) => item.ambitoGobierno === "Federal")
-          .reduce((acc, item) => acc + item.resultOIC, 0);
-        const totalEstatal = data
-          .filter((item) => item.ambitoGobierno === "Estatal")
-          .reduce((acc, item) => acc + item.resultOIC, 0);
-        const totalMunicipal = data
-          .filter((item) => item.ambitoGobierno === "Municipal")
-          .reduce((acc, item) => acc + item.resultOIC, 0);
+      const fetchAmbitoData = async () => {
+        try {
+          const ambitoQueries = {
+            resultSistema1: {
+              federal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Federal" },
+                  sistema1: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              estatal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Estatal" },
+                  sistema1: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              municipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  sistema1: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+            resultSistema2: {
+              federal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Federal" },
+                  sistema2: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              estatal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Estatal" },
+                  sistema2: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              municipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  sistema2: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+            resultSistema3OIC: {
+              federal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Federal" },
+                  sistema3: { _eq: true },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              estatal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Estatal" },
+                  sistema3: { _eq: true },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              municipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  sistema3: { _eq: true },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+            resultSistema3Tribunal: {
+              federal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Federal" },
+                  sistema3: { _eq: true },
+                  controlTribunal: { _eq: true },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              estatal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Estatal" },
+                  sistema3: { _eq: true },
+                  controlTribunal: { _eq: true },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              municipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  sistema3: { _eq: true },
+                  controlTribunal: { _eq: true },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+            resultSistema6: {
+              federal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Federal" },
+                  sistema6: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              estatal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Estatal" },
+                  sistema6: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              municipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  sistema6: { _eq: true },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+            resultSujetosObligados: {
+              federal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Federal" },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              estatal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Estatal" },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              municipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  controlOIC: { _eq: false },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+            resultOIC: {
+              federal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Federal" },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              estatal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Estatal" },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              municipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  _or: [
+                    { controlOIC: { _eq: true } },
+                    { controlTribunal: { _eq: true } },
+                  ],
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+            resultTribunal: {
+              federal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Federal" },
+                  controlTribunal: { _eq: true },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              estatal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Estatal" },
+                  controlTribunal: { _eq: true },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+              municipal: readItems("entes", {
+                filter: {
+                  ambitoGobierno: { _eq: "Municipal" },
+                  controlTribunal: { _eq: true },
+                },
+                aggregate: { count: ["*"] },
+                groupBy: ["entidad"],
+              }),
+            },
+          };
 
-        const porcentajeFederal = (ambitoFederal / totalFederal) * 100;
-        const porcentajeEstatal = (ambitoEstatal / totalEstatal) * 100;
-        const porcentajeMunicipal = (ambitoMunicipal / totalMunicipal) * 100;
-        dataAmbito = [
-          {
-            tipo: "Federal",
-            conectados: ambitoFederal,
-            total: totalFederal,
-            porcentaje: parseFloat(porcentajeFederal.toFixed(2)),
-          },
-          {
-            tipo: "Estatal",
-            conectados: ambitoEstatal,
-            total: totalEstatal,
-            porcentaje: parseFloat(porcentajeEstatal.toFixed(2)),
-          },
-          {
-            tipo: "Municipal",
-            conectados: ambitoMunicipal,
-            total: totalMunicipal,
-            porcentaje: parseFloat(porcentajeMunicipal.toFixed(2)),
-          },
-        ];
-      }
-      console.log(dataAmbito);
+          let resultFederal, resultEstatal, resultMunicipal;
+          let totalFederal, totalEstatal, totalMunicipal;
+
+          if (tipoColumna === "resultSistema3OIC") {
+            [resultFederal, resultEstatal, resultMunicipal] = await Promise.all(
+              [
+                directus.request(ambitoQueries.resultSistema3OIC.federal),
+                directus.request(ambitoQueries.resultSistema3OIC.estatal),
+                directus.request(ambitoQueries.resultSistema3OIC.municipal),
+              ]
+            );
+
+            const totalOICFederal = await directus.request(
+              ambitoQueries.resultOIC.federal
+            );
+            const totalOICEstatal = await directus.request(
+              ambitoQueries.resultOIC.estatal
+            );
+            const totalOICMunicipal = await directus.request(
+              ambitoQueries.resultOIC.municipal
+            );
+
+            totalFederal = totalOICFederal.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalEstatal = totalOICEstatal.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalMunicipal = totalOICMunicipal.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+          } else if (tipoColumna === "resultSistema3Tribunal") {
+            [resultFederal, resultEstatal, resultMunicipal] = await Promise.all(
+              [
+                directus.request(ambitoQueries.resultSistema3Tribunal.federal),
+                directus.request(ambitoQueries.resultSistema3Tribunal.estatal),
+                directus.request(
+                  ambitoQueries.resultSistema3Tribunal.municipal
+                ),
+              ]
+            );
+
+            const totalTribunalFederal = await directus.request(
+              ambitoQueries.resultTribunal.federal
+            );
+            const totalTribunalEstatal = await directus.request(
+              ambitoQueries.resultTribunal.estatal
+            );
+            const totalTribunalMunicipal = await directus.request(
+              ambitoQueries.resultTribunal.municipal
+            );
+
+            totalFederal = totalTribunalFederal.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalEstatal = totalTribunalEstatal.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalMunicipal = totalTribunalMunicipal.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+          } else {
+            [resultFederal, resultEstatal, resultMunicipal] = await Promise.all(
+              [
+                directus.request(ambitoQueries[tipoColumna].federal),
+                directus.request(ambitoQueries[tipoColumna].estatal),
+                directus.request(ambitoQueries[tipoColumna].municipal),
+              ]
+            );
+
+            const totalSujetosFederal = await directus.request(
+              ambitoQueries.resultSujetosObligados.federal
+            );
+            const totalSujetosEstatal = await directus.request(
+              ambitoQueries.resultSujetosObligados.estatal
+            );
+            const totalSujetosMunicipal = await directus.request(
+              ambitoQueries.resultSujetosObligados.municipal
+            );
+
+            totalFederal = totalSujetosFederal.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalEstatal = totalSujetosEstatal.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+            totalMunicipal = totalSujetosMunicipal.reduce(
+              (acc, item) => acc + Number(item.count),
+              0
+            );
+          }
+
+          const federalConectados = resultFederal.reduce(
+            (acc, item) => acc + Number(item.count),
+            0
+          );
+          const estatalConectados = resultEstatal.reduce(
+            (acc, item) => acc + Number(item.count),
+            0
+          );
+          const municipalConectados = resultMunicipal.reduce(
+            (acc, item) => acc + Number(item.count),
+            0
+          );
+
+          const federalPorcentaje = (federalConectados / totalFederal) * 100;
+          const estatalPorcentaje = (estatalConectados / totalEstatal) * 100;
+          const municipalPorcentaje =
+            (municipalConectados / totalMunicipal) * 100;
+
+          dataAmbito = [
+            {
+              ambito: "Federal",
+              count: parseFloat(federalPorcentaje.toFixed(2)),
+              conectados: federalConectados,
+              totalEntes: totalFederal,
+            },
+            {
+              ambito: "Estatal",
+              count: parseFloat(estatalPorcentaje.toFixed(2)),
+              conectados: estatalConectados,
+              totalEntes: totalEstatal,
+            },
+            {
+              ambito: "Municipal",
+              count: parseFloat(municipalPorcentaje.toFixed(2)),
+              conectados: municipalConectados,
+              totalEntes: totalMunicipal,
+            },
+          ];
+
+          console.log(dataAmbito);
+        } catch (error) {
+          console.error("Error al cargar los datos de ambito:", error);
+        }
+      };
+
+      await fetchAmbitoData();
+
       setIsDialogOpen(true);
       setDialogContent(
         <TabsColumnsSistemas
@@ -431,7 +778,6 @@ export function DataTable<TData, TValue>({
                       key={header.id}
                       onClick={() => handleCellClick(header)}
                       className="text-center py-2 px-0.5 text-muted-foreground"
-                      /* style={{ width: header.column.columnDef.size }} */
                     >
                       {header.isPlaceholder
                         ? null
@@ -461,7 +807,6 @@ export function DataTable<TData, TValue>({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
-                      /* style={{ width: cell.column.columnDef.size }} */
                       key={cell.id}
                       onClick={() => handleCellClick(cell)}
                       onMouseEnter={() => setHoveredColumnId(cell.column.id)}
@@ -496,16 +841,13 @@ export function DataTable<TData, TValue>({
               </TableRow>
             )}
           </TableBody>
-          {/* FOOTER - TOTALES */}
           <TableFooter className="sticky bottom-0 bg-gray-200 dark:bg-gray-800">
-            {/* Styled and Sticky Footer */}
             {table.getFooterGroups().map((footerGroup) => (
               <TableRow key={footerGroup.id}>
                 {footerGroup.headers.map((header) => (
                   <TableCell
                     key={header.id}
                     className="text-center py-2 px-0.5 text-muted-foreground"
-                    /* style={{ width: header.column.columnDef.size }} */
                   >
                     {header.isPlaceholder
                       ? null

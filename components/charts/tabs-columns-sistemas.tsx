@@ -5,11 +5,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { EntidadBarChart } from "./entidad-bar-chart";
 import { AvanceBarChart } from "./avance-bar-chart";
 import { AvanceMapa } from "./avance-mapa";
+import { AmbitoBarChart } from "./ambito-bar-chart";
 
 export const TabsColumnsSistemas = ({
   dataEntidad,
   selectedColumn,
   dataNacional,
+  dataAmbito
 }: any) => {
   const colors: object = {
     resultSistema1: "#F29888",
@@ -27,6 +29,7 @@ export const TabsColumnsSistemas = ({
           <TabsTrigger value="entidad">Entidad</TabsTrigger>
           <TabsTrigger value="nacional">Nacional</TabsTrigger>
           <TabsTrigger value="avanceMapa">Mapa</TabsTrigger>
+          <TabsTrigger value="ambito">Ámbito</TabsTrigger>
         </TabsList>
 
         <TabsContent value="entidad" className="space-y-4">
@@ -39,6 +42,10 @@ export const TabsColumnsSistemas = ({
 
         <TabsContent value="avanceMapa" className="space-y-4">
           <AvanceMapa data={dataEntidad} baseColor={colorSistema} />
+        </TabsContent>
+
+        <TabsContent value="ambito" className="space-y-4">
+          <AmbitoBarChart data={dataAmbito} tipoColumna={selectedColumn} />
         </TabsContent>
       </Tabs>
     </>
