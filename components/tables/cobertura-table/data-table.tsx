@@ -32,7 +32,6 @@ import { Input } from "@/components/ui/input";
 import directus from "@/lib/directus";
 import { readItems } from "@directus/sdk";
 import { EntesTable } from "@/components/tables/cell-entes-table/table";
-import { ConteoColumna } from "./conteo-columna";
 import { TabsColumnsSistemas } from "@/components/charts/tabs-columns-sistemas";
 
 interface DataTableProps<TData, TValue> {

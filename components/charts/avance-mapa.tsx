@@ -52,7 +52,7 @@ export const AvanceMapa = ({
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  fill={porcentajeAvance ? colorScale(percentage) : "#2A272A"}
+                  fill={(percentage && porcentajeAvance || Number(percentage)) ? colorScale(percentage) : "#fff"}
                   stroke="#2A272A"
                   strokeWidth={1.5}
                   style={{
@@ -60,9 +60,9 @@ export const AvanceMapa = ({
                       outline: "none",
                     },
                     hover: {
-                      fill: porcentajeAvance
+                      fill: (percentage && porcentajeAvance || Number(percentage))
                         ? interpolateRgb(colorScale(percentage), "#000000")(0.3)
-                        : interpolateRgb("#2A272A", "#000000")(0.3),
+                        : interpolateRgb("#fff", "#000000")(0.3),
                       stroke: "#2A272A",
                       strokeWidth: 2.5,
                       outline: "none",
@@ -72,10 +72,11 @@ export const AvanceMapa = ({
                   onMouseEnter={() => {
                     setTooltipContent(
                       `${
-                        porcentajeAvance
-                          ? porcentajeAvance.nombreEntidad
-                          : "N/A"
-                      }: ${percentage}%`,
+                        porcentajeAvance.nombreEntidad
+
+                      }: ${Number(percentage)
+                        ? percentage + "%"
+                        : "0%"}`,
                     );
                   }}
                   onMouseLeave={() => {
