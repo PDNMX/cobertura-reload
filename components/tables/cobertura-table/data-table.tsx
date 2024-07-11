@@ -1393,8 +1393,8 @@ export function DataTable<TData, TValue>({
 
           <div className="grid gap-4 py-4">
             {isLoading ? (
-              <div>
-                Cargando datos
+              <div className="flex flex-row items-start gap-2">
+                Cargando datos...
                 <Loader2 className="animate-spin ml-1" />{" "}
                 {/* Mensaje de carga */}
               </div>
@@ -1406,7 +1406,7 @@ export function DataTable<TData, TValue>({
             )}
           </div>
           <DialogFooter>
-            <Button onClick={() => setIsDialogOpen(false)} className="mt-4">
+            <Button onClick={() => setIsDialogOpen(false)} className="mt-4" disabled={isLoading}>
               Cerrar
             </Button>
           </DialogFooter>

@@ -18,6 +18,47 @@ const generateColorRange = (baseColor: string) => {
     .clamp(true); // Asegura que los valores fuera del dominio se ajusten al rango
 };
 
+const ColorLegend = ({ colorScale, width, height, x, y }) => {
+  const gradientId = "colorGradient";
+  const numStops = 20; // Número de paradas en el gradiente
+
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <defs>
+        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+          {Array.from({ length: numStops }, (_, i) => i / (numStops - 1)).map(
+            (t) => (
+              <stop
+                key={t}
+                offset={`${t * 100}%`}
+                stopColor={colorScale(t * 100)}
+              />
+            ),
+          )}
+        </linearGradient>
+      </defs>
+      <rect
+        stroke="#888888"
+        strokeWidth={0.5}
+        width={width}
+        height={height}
+        fill={`url(#${gradientId})`}
+      />
+      <text fill="#888" x="0" y={height + 15} fontSize="12">
+        0%
+      </text>
+      <text
+        fill="#888"
+        x={width}
+        y={height + 15}
+        fontSize="12"
+        textAnchor="end">
+        100%
+      </text>
+    </g>
+  );
+};
+
 export const AvanceMapa = ({
   data,
   baseColor = "#fff",
@@ -52,31 +93,35 @@ export const AvanceMapa = ({
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  fill={(percentage && porcentajeAvance || Number(percentage)) ? colorScale(percentage) : "#fff"}
-                  stroke="#2A272A"
-                  strokeWidth={1.5}
+                  fill={
+                    (percentage && porcentajeAvance) || Number(percentage)
+                      ? colorScale(percentage)
+                      : "#fff"
+                  }
+                  stroke="#888888"
+                  strokeWidth={0.5}
                   style={{
                     default: {
                       outline: "none",
                     },
                     hover: {
-                      fill: (percentage && porcentajeAvance || Number(percentage))
-                        ? interpolateRgb(colorScale(percentage), "#000000")(0.3)
-                        : interpolateRgb("#fff", "#000000")(0.3),
-                      stroke: "#2A272A",
-                      strokeWidth: 2.5,
+                      fill:
+                        (percentage && porcentajeAvance) || Number(percentage)
+                          ? interpolateRgb(
+                              colorScale(percentage),
+                              "#000000",
+                            )(0.3)
+                          : interpolateRgb("#fff", "#000000")(0.3),
+                      strokeWidth: 1,
                       outline: "none",
                       transition: "all 250ms",
                     },
                   }}
                   onMouseEnter={() => {
                     setTooltipContent(
-                      `${
-                        porcentajeAvance.nombreEntidad
-
-                      }: ${Number(percentage)
-                        ? percentage + "%"
-                        : "0%"}`,
+                      `${porcentajeAvance.nombreEntidad}: ${
+                        Number(percentage) ? percentage + "%" : "0%"
+                      }`,
                     );
                   }}
                   onMouseLeave={() => {
@@ -88,6 +133,13 @@ export const AvanceMapa = ({
             })
           }
         </Geographies>
+        <ColorLegend
+          colorScale={colorScale}
+          width={150}
+          height={15}
+          x={620}
+          y={40}
+        />
       </ComposableMap>
       <Tooltip id="my-tooltip" content={tooltipContent} />
     </>

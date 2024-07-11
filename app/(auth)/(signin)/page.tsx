@@ -167,8 +167,9 @@ export default function AuthenticationPage() {
   return (
     <div className="p-4">
       {isLoading ? (
-        <div>
-          Cargando datos <Loader2 className="animate-spin ml-1" />{" "}
+        <div className="flex flex-row items-start gap-2">
+          Cargando datos... 
+          <Loader2 className="animate-spin ml-1" />{" "}
           {/* Mensaje de carga */}
         </div> // Mensaje de carga
       ) : error ? (
