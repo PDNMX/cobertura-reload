@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { CoberturaTable } from "@/components/tables/cobertura-table/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import directus from "@/lib/directus";
+import { Loader2 } from "lucide-react";
 import { readItems } from "@directus/sdk";
 
 export default function AuthenticationPage() {
@@ -23,7 +24,7 @@ export default function AuthenticationPage() {
               filter: { controlOIC: { _eq: false } },
               aggregate: { count: ["*"] },
               groupBy: ["entidad"],
-            }),
+            })
           ),
           // resultOIC
           resultOIC: directus.request(
@@ -36,7 +37,7 @@ export default function AuthenticationPage() {
               },
               aggregate: { count: ["*"] },
               groupBy: ["entidad"],
-            }),
+            })
           ),
           // resultTribunal
           resultTribunal: directus.request(
@@ -44,7 +45,7 @@ export default function AuthenticationPage() {
               filter: { controlTribunal: { _eq: true } },
               aggregate: { count: ["*"] },
               groupBy: ["entidad"],
-            }),
+            })
           ),
           // resultSistema1
           resultSistema1: directus.request(
@@ -52,7 +53,7 @@ export default function AuthenticationPage() {
               filter: { sistema1: { _eq: true }, controlOIC: { _eq: false } },
               aggregate: { count: ["*"] },
               groupBy: ["entidad"],
-            }),
+            })
           ),
           // resultSistema2
           resultSistema2: directus.request(
@@ -60,7 +61,7 @@ export default function AuthenticationPage() {
               filter: { sistema2: { _eq: true }, controlOIC: { _eq: false } },
               aggregate: { count: ["*"] },
               groupBy: ["entidad"],
-            }),
+            })
           ),
           // resultSistema3OIC
           resultSistema3OIC: directus.request(
@@ -74,7 +75,7 @@ export default function AuthenticationPage() {
               },
               aggregate: { count: ["*"] },
               groupBy: ["entidad"],
-            }),
+            })
           ),
           // resultSistema3Tribunal
           resultSistema3Tribunal: directus.request(
@@ -86,7 +87,7 @@ export default function AuthenticationPage() {
               },
               aggregate: { count: ["*"] },
               groupBy: ["entidad"],
-            }),
+            })
           ),
           // resultSistema6
           resultSistema6: directus.request(
@@ -94,7 +95,7 @@ export default function AuthenticationPage() {
               filter: { sistema6: { _eq: true }, controlOIC: { _eq: false } },
               aggregate: { count: ["*"] },
               groupBy: ["entidad"],
-            }),
+            })
           ),
         };
 
@@ -149,7 +150,7 @@ export default function AuthenticationPage() {
           ([entidad, count]) => ({
             entidad,
             ...count,
-          }),
+          })
         );
         //console.log(resultadoFinal);
         setEntes(resultadoFinal);
@@ -166,7 +167,10 @@ export default function AuthenticationPage() {
   return (
     <div className="p-4">
       {isLoading ? (
-        <div>Cargando datos...</div> // Mensaje de carga
+        <div>
+          Cargando datos <Loader2 className="animate-spin ml-1" />{" "}
+          {/* Mensaje de carga */}
+        </div> // Mensaje de carga
       ) : error ? (
         <div>Error al cargar los datos: {error.message}</div> // Mensaje de error
       ) : (

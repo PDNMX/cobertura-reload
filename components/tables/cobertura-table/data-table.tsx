@@ -3,6 +3,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -1252,7 +1253,6 @@ export function DataTable<TData, TValue>({
               totalEntes: totalAutonomo,
             },
           ];
-
         } catch (error) {
           console.error("Error al cargar los datos de poder:", error);
         }
@@ -1393,9 +1393,16 @@ export function DataTable<TData, TValue>({
 
           <div className="grid gap-4 py-4">
             {isLoading ? (
-              <div>Cargando datos...</div> // Mensaje de carga
+              <div>
+                Cargando datos
+                <Loader2 className="animate-spin ml-1" />{" "}
+                {/* Mensaje de carga */}
+              </div>
             ) : (
-              <>{dialogContent}</>
+              <>
+                {dialogContent}
+                {isLoading && <Loader2 className="animate-spin ml-1" />}
+              </>
             )}
           </div>
           <DialogFooter>
