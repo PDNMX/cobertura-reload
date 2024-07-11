@@ -50,8 +50,9 @@ export const AmbitoBarChart = ({ data, tipoColumna }: any) => {
           stroke="#888888"
           fontSize={12}
           type="number"
-          domain={[0, 100]}
           scale="sqrt"
+          domain={[0, 100]}
+          tickFormatter={(tick) => `${tick}%`}
         />
         <Tooltip content={<CustomTooltip />} />
         <Bar dataKey="count" fill={colorSistema} />

@@ -49,9 +49,10 @@ export const PoderBarChart = ({ data, tipoColumna }: any) => {
         <YAxis
           stroke="#888888"
           fontSize={12}
+          scale="sqrt"
           type="number"
           domain={[0, 100]}
-          scale="sqrt"
+          tickFormatter={(tick) => `${tick}%`}
         />
         <Tooltip content={<CustomTooltip />} />
         <Bar dataKey="count" fill={colorSistema} />
