@@ -49,7 +49,7 @@ export const PoderBarChart = ({ data, tipoColumna }: any) => {
         <YAxis
           stroke="#888888"
           fontSize={12}
-          scale="sqrt"
+          scale="linear"
           type="number"
           domain={[0, 100]}
           tickFormatter={(tick) => `${tick}%`}

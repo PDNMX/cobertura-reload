@@ -50,7 +50,7 @@ export const AmbitoBarChart = ({ data, tipoColumna }: any) => {
           stroke="#888888"
           fontSize={12}
           type="number"
-          scale="sqrt"
+          scale="linear"
           domain={[0, 100]}
           tickFormatter={(tick) => `${tick}%`}
         />
