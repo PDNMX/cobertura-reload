@@ -5,9 +5,19 @@ import {
   Bar,
   XAxis,
   YAxis,
-  Tooltip,
   ResponsiveContainer,
+  Cell,
+  Tooltip,
+  CartesianGrid,
+  LabelList,
 } from "recharts";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -23,40 +33,61 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-export const PoderBarChart = ({ data, tipoColumna }: any) => {
-  const colors: object = {
-    resultSistema1: "#F29888",
-    resultSistema2: "#B25FAC",
-    resultSistema3OIC: "#9085DA",
-    resultSistema3Tribunal: "#9085DA",
-    resultSistema6: "#42A5CC",
-  };
+const colorMap = {
+  resultSistema1: "#F29888",
+  resultSistema2: "#B25FAC",
+  resultSistema3OIC: "#9085DA",
+  resultSistema3Tribunal: "#9085DA",
+  resultSistema6: "#42A5CC",
+};
 
-  const colorSistema = colors[tipoColumna];
+export const PoderBarChart = ({ data, tipoColumna }: any) => {
+  const colorSistema = colorMap[tipoColumna];
 
   return (
-    <ResponsiveContainer width="100%" height={400}>
-      <BarChart data={data} margin={{ top: 10, right: 5, left: 5, bottom: 15 }}>
-        <XAxis
-          dataKey="poder"
-          stroke="#888888"
-          fontSize={12}
-          angle={-45}
-          textAnchor="end"
-          interval={0} // Asegurar que todas las etiquetas se muestren
-          padding={{ left: 5, right: 5 }} // Ajustar el padding
-        />
-        <YAxis
-          stroke="#888888"
-          fontSize={12}
-          scale="linear"
-          type="number"
-          domain={[0, 100]}
-          tickFormatter={(tick) => `${tick}%`}
-        />
-        <Tooltip content={<CustomTooltip />} />
-        <Bar dataKey="count" fill={colorSistema} />
-      </BarChart>
-    </ResponsiveContainer>
+    <Card>
+      <CardHeader>
+        <CardTitle>Porcentaje de avance</CardTitle>
+        <CardDescription>
+          En la integración de la información de los entes públicos, por poder u
+          órgano de gobierno
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart data={data}>
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="poder"
+              stroke="#888888"
+              fontSize={12}
+              padding={{ left: 20, right: 20 }}
+            />
+            <YAxis
+              stroke="#888888"
+              fontSize={12}
+              scale="linear"
+              type="number"
+              domain={[0, 100]}
+              tickFormatter={(tick) => `${tick}%`}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="count" fill={colorSistema} radius={8}>
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={colorSistema} />
+              ))}
+              <LabelList
+                dataKey="count"
+                position="top"
+                offset={10}
+                className="fill-foreground"
+                fontSize={12}
+                formatter={(value) => `${value}%`}
+              />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
   );
 };

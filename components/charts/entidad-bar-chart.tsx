@@ -8,8 +8,17 @@ import {
   ResponsiveContainer,
   Tooltip,
   Cell,
+  CartesianGrid,
+  LabelList,
 } from "recharts";
 import marcoGeoestadisticoInegi from "../tables/cobertura-table/data-entidades";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 
 const colors = {
   resultSistema1: "#F29888",
@@ -25,7 +34,9 @@ const CustomTooltip = ({ active, payload }: any) => {
     return (
       <div className="custom-tooltip p-2 border rounded shadow-lg bg-white text-black">
         <p className="label">{`${originalCount} de ${total}`}</p>
-        <p className="intro">{`Total: ${(originalCount / total * 100).toFixed(2)}%`}</p>
+        <p className="intro">{`Total: ${((originalCount / total) * 100).toFixed(
+          2
+        )}%`}</p>
       </div>
     );
   }
@@ -37,7 +48,7 @@ export const EntidadBarChart = ({ data, selectedColumn }: any) => {
   if (data.length > 0) {
     const datosConNombres = data.map((dato: any) => {
       const entidadEncontrada = marcoGeoestadisticoInegi.find(
-        (entidad) => entidad.id === dato.entidad,
+        (entidad) => entidad.id === dato.entidad
       );
       const originalCount = parseInt(dato[selectedColumn], 10);
       let total;
@@ -63,39 +74,61 @@ export const EntidadBarChart = ({ data, selectedColumn }: any) => {
     });
 
     return (
-      <ResponsiveContainer width="100%" height={400}>
-        <BarChart data={datosConNombres} margin={{ top: 10, right: 5, left: 5, bottom: 15 }}>
-          <XAxis
-            dataKey="abreviacion"
-            stroke="#888888"
-            fontSize={12}
-            angle={-45}
-            textAnchor="end"
-            interval={0} // Asegurar que todas las etiquetas se muestren
-            padding={{ left: 5, right: 5 }} // Ajustar el padding
-          />
-          <YAxis
-            stroke="#888888"
-            fontSize={12}
-            type="number"
-            domain={[0, 100]}
-            scale="linear"
-            tickFormatter={(tick) => `${tick}%`} // Añadir el símbolo de porcentaje
-          />
-          <Tooltip content={<CustomTooltip />} />
-          <Bar dataKey="count">
-            {datosConNombres.map((entry: any, index: number) => (
-              <Cell key={`cell-${index}`} fill={colors[selectedColumn]} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+      <Card>
+        <CardHeader>
+          <CardTitle>Porcentaje de avance</CardTitle>
+          <CardDescription>
+            En la integración de sujetos obligados por entidad a la PDN
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={datosConNombres} margin={{ bottom: 65 }}>
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="nombreEntidad"
+                stroke="#888888"
+                fontSize={12}
+                angle={-45}
+                textAnchor="end"
+                interval={0} // Asegurar que todas las etiquetas se muestren
+                padding={{ left: 20, right: 20 }} // Ajustar el padding
+              />
+              <YAxis
+                stroke="#888888"
+                fontSize={12}
+                type="number"
+                domain={[0, 100]}
+                scale="linear"
+                tickFormatter={(tick) => `${tick}%`} // Añadir el símbolo de porcentaje
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="count" radius={5}>
+                {datosConNombres.map((entry: any, index: number) => (
+                  <Cell key={`cell-${index}`} fill={colors[selectedColumn]} />
+                ))}
+                <LabelList
+                  dataKey="count"
+                  position="top"
+                  offset={10}
+                  angle={-45}
+                  className="fill-foreground"
+                  fontSize={10}
+                  formatter={(value) => `${value}%`}
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
     );
   } else {
     return (
-      <>
-        <p className="text-xl">No hay datos que mostrar</p>
-      </>
+      <Card>
+        <CardContent>
+          <p className="text-xl">No hay datos que mostrar</p>
+        </CardContent>
+      </Card>
     );
   }
 };

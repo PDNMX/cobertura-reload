@@ -6,8 +6,17 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  CartesianGrid,
+  LabelList,
   ResponsiveContainer,
 } from "recharts";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -35,28 +44,47 @@ export const AmbitoBarChart = ({ data, tipoColumna }: any) => {
   const colorSistema = colors[tipoColumna];
 
   return (
-    <ResponsiveContainer width="100%" height={400}>
-      <BarChart data={data} margin={{ top: 10, right: 5, left: 5, bottom: 15 }}>
-        <XAxis
-          dataKey="ambito"
-          stroke="#888888"
-          fontSize={12}
-          angle={-45}
-          textAnchor="end"
-          interval={0} // Asegurar que todas las etiquetas se muestren
-          padding={{ left: 5, right: 5 }} // Ajustar el padding
-        />
-        <YAxis
-          stroke="#888888"
-          fontSize={12}
-          type="number"
-          scale="linear"
-          domain={[0, 100]}
-          tickFormatter={(tick) => `${tick}%`}
-        />
-        <Tooltip content={<CustomTooltip />} />
-        <Bar dataKey="count" fill={colorSistema} />
-      </BarChart>
-    </ResponsiveContainer>
+    <Card>
+      <CardHeader>
+        <CardTitle>Porcentaje de avance</CardTitle>
+        <CardDescription>
+          En la integración de la información de los entes públicos, por ámbito
+          de gobierno
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart data={data}>
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="ambito"
+              stroke="#888888"
+              fontSize={12}
+              padding={{ left: 20, right: 20 }}
+              interval={0}
+            />
+            <YAxis
+              type="number"
+              stroke="#888888"
+              fontSize={12}
+              domain={[0, 100]}
+              scale="linear"
+              tickFormatter={(tick) => `${tick}%`}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="count" fill={colorSistema} radius={8}>
+              <LabelList
+                dataKey="count"
+                position="top"
+                offset={10}
+                className="fill-foreground"
+                fontSize={12}
+                formatter={(value) => `${value}%`}
+              />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
   );
 };

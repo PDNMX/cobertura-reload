@@ -1229,7 +1229,7 @@ export function DataTable<TData, TValue>({
 
           dataPoder = [
             {
-              poder: "Ejec.",
+              poder: "Ejecutivo",
               count: parseFloat(ejecutivoPorcentaje.toFixed(2)),
               conectados: ejecutivoConectados,
               totalEntes: totalEjecutivo,
