@@ -83,7 +83,7 @@ export const EntidadBarChart = ({ data, selectedColumn }: any) => {
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={datosConNombres} margin={{ bottom: 65 }}>
+            <BarChart data={datosConNombres} margin={{ bottom: 65, top: 25 }}>
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="nombreEntidad"
