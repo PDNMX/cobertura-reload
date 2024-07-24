@@ -99,9 +99,9 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    initialState: {
+    /* initialState: {
       sorting: [{ id: 'entidad', desc: false }]
-    },
+    }, */
   });
 
   async function fetchDataCell(entidad: string | null, tipoColumna: string) {
