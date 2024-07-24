@@ -14,6 +14,7 @@ import icoTribunal from "./icons-thead/tribunal.svg";
 import icoOIC from "./icons-thead/oic.svg";
 import camp from "./icons-thead/cal.svg";
 
+
 export const columns: ColumnDef<any>[] = [
   {
     accessorKey: "nombreEntidad",
@@ -27,10 +28,10 @@ export const columns: ColumnDef<any>[] = [
         {row.original.nombreEntidad}
       </div>
     ),
-    size: "30%",
     footer: ({}) => {
       return "Totales:";
     },
+    enableSorting: true,
   },
   {
     accessorKey: "resultSujetosObligados",
@@ -56,6 +57,7 @@ export const columns: ColumnDef<any>[] = [
           (total, row) => total + row.getValue("resultSujetosObligados"),
           0,
         ),
+    enableSorting: true,
   },
   {
     accessorKey: "resultOIC",
@@ -75,10 +77,8 @@ export const columns: ColumnDef<any>[] = [
     footer: ({ table }) =>
       table
         .getFilteredRowModel()
-        .rows.reduce(
-          (total, row) => total + row.getValue("resultOIC"),
-          0,
-        ),
+        .rows.reduce((total, row) => total + row.getValue("resultOIC"), 0),
+    enableSorting: true,
   },
   {
     accessorKey: "resultTribunal",
@@ -100,10 +100,8 @@ export const columns: ColumnDef<any>[] = [
     footer: ({ table }) =>
       table
         .getFilteredRowModel()
-        .rows.reduce(
-          (total, row) => total + row.getValue("resultTribunal"),
-          0,
-        ),
+        .rows.reduce((total, row) => total + row.getValue("resultTribunal"), 0),
+    enableSorting: true,
   },
   {
     accessorKey: "resultSistema1",
@@ -125,10 +123,8 @@ export const columns: ColumnDef<any>[] = [
     footer: ({ table }) =>
       table
         .getFilteredRowModel()
-        .rows.reduce(
-          (total, row) => total + row.getValue("resultSistema1"),
-          0,
-        ),
+        .rows.reduce((total, row) => total + row.getValue("resultSistema1"), 0),
+    enableSorting: false,
   },
   {
     accessorKey: "resultSistema2",
@@ -150,10 +146,8 @@ export const columns: ColumnDef<any>[] = [
     footer: ({ table }) =>
       table
         .getFilteredRowModel()
-        .rows.reduce(
-          (total, row) => total + row.getValue("resultSistema2"),
-          0,
-        ),
+        .rows.reduce((total, row) => total + row.getValue("resultSistema2"), 0),
+    enableSorting: false,
   },
   {
     accessorKey: "resultSistema3OIC",
@@ -179,6 +173,7 @@ export const columns: ColumnDef<any>[] = [
           (total, row) => total + row.getValue("resultSistema3OIC"),
           0,
         ),
+    enableSorting: false,
   },
   {
     accessorKey: "resultSistema3Tribunal",
@@ -204,6 +199,7 @@ export const columns: ColumnDef<any>[] = [
           (total, row) => total + row.getValue("resultSistema3Tribunal"),
           0,
         ),
+    enableSorting: false,
   },
   {
     accessorKey: "resultSistema6",
@@ -225,10 +221,8 @@ export const columns: ColumnDef<any>[] = [
     footer: ({ table }) =>
       table
         .getFilteredRowModel()
-        .rows.reduce(
-          (total, row) => total + row.getValue("resultSistema6"),
-          0,
-        ),
+        .rows.reduce((total, row) => total + row.getValue("resultSistema6"), 0),
+    enableSorting: false,
   },
   {
     accessorKey: "resultConexiones",
@@ -247,7 +241,8 @@ export const columns: ColumnDef<any>[] = [
         {row.original.resultConexiones + "%"}
       </div>
     ),
-    footer: "-"
+    footer: "-",
+    enableSorting: true,
   },
   {
     accessorKey: "resultCampeonatoS1",
@@ -267,5 +262,6 @@ export const columns: ColumnDef<any>[] = [
       </div>
     ),
     footer: "-",
-  }
+    enableSorting: true,
+  },
 ];
