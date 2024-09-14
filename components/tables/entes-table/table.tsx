@@ -21,8 +21,8 @@ const columnVisibilityMap = {
     sistema6: true,
   },
   OIC: {
-    ambitoGobierno: false,
-    poderGobierno: false,
+    ambitoGobierno: true,
+    poderGobierno: true,
     sistema1: false,
     sistema2: false,
     sistema3: true,

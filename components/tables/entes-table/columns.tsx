@@ -10,7 +10,8 @@ export const createColumns = (visibilityMap, session): ColumnDef<User>[] => [
     accessorKey: "nombre",
     header: "Nombre",
     cell: ({ row }) => <div className="text-left">{row.original.nombre}</div>,
-    size: 500, // Ancho fijo para Nombre
+    size: 500,
+    enableSorting: true,
   },
   visibilityMap.ambitoGobierno && {
     accessorKey: "ambitoGobierno",
@@ -18,7 +19,8 @@ export const createColumns = (visibilityMap, session): ColumnDef<User>[] => [
     cell: ({ row }) => (
       <div className="text-center">{row.original.ambitoGobierno}</div>
     ),
-    size: 125, // Ancho fijo para Ámbito Gobierno
+    size: 125,
+    enableSorting: true,
   },
   visibilityMap.poderGobierno && {
     accessorKey: "poderGobierno",
@@ -26,7 +28,8 @@ export const createColumns = (visibilityMap, session): ColumnDef<User>[] => [
     cell: ({ row }) => (
       <div className="text-center">{row.original.poderGobierno}</div>
     ),
-    size: 125, // Ancho fijo para Poder Gobierno
+    size: 125,
+    enableSorting: true,
   },
   visibilityMap.sistema1 && {
     accessorKey: "sistema1",
@@ -40,7 +43,13 @@ export const createColumns = (visibilityMap, session): ColumnDef<User>[] => [
         )}
       </div>
     ),
-    size: 20, // Ancho fijo para S1
+    size: 20,
+    enableSorting: true,
+    sortingFn: (rowA, rowB, columnId) => {
+      const a = rowA.original[columnId] ? 1 : 0;
+      const b = rowB.original[columnId] ? 1 : 0;
+      return a - b;
+    },
   },
   visibilityMap.sistema2 && {
     accessorKey: "sistema2",
@@ -54,7 +63,13 @@ export const createColumns = (visibilityMap, session): ColumnDef<User>[] => [
         )}
       </div>
     ),
-    size: 20 // Ancho fijo para S2
+    size: 20,
+    enableSorting: true,
+    sortingFn: (rowA, rowB, columnId) => {
+      const a = rowA.original[columnId] ? 1 : 0;
+      const b = rowB.original[columnId] ? 1 : 0;
+      return a - b;
+    },
   },
   visibilityMap.sistema3 && {
     accessorKey: "sistema3",
@@ -68,7 +83,13 @@ export const createColumns = (visibilityMap, session): ColumnDef<User>[] => [
         )}
       </div>
     ),
-    size: 20 // Ancho fijo para S3
+    size: 20,
+    enableSorting: true,
+    sortingFn: (rowA, rowB, columnId) => {
+      const a = rowA.original[columnId] ? 1 : 0;
+      const b = rowB.original[columnId] ? 1 : 0;
+      return a - b;
+    },
   },
   visibilityMap.sistema6 && {
     accessorKey: "sistema6",
@@ -82,11 +103,18 @@ export const createColumns = (visibilityMap, session): ColumnDef<User>[] => [
         )}
       </div>
     ),
-    size: 20 // Ancho fijo para S6
+    size: 20,
+    enableSorting: true,
+    sortingFn: (rowA, rowB, columnId) => {
+      const a = rowA.original[columnId] ? 1 : 0;
+      const b = rowB.original[columnId] ? 1 : 0;
+      return a - b;
+    },
   },
   {
     id: "actions",
     cell: ({ row }) => <CellAction data={row.original} session={session} />,
-    size: 20 // Ancho fijo para acciones
+    size: 20,
+    enableSorting: false,
   },
-].filter(Boolean); // Filtrar columnas nulas
+].filter(Boolean);
