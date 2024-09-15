@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "./input";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowUpDown } from "lucide-react";
 
 interface DataTableProps<TData, TValue> {
@@ -35,7 +35,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
-  columnsShow
+  columnsShow,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -62,22 +62,24 @@ export function DataTable<TData, TValue>({
         }
         className="w-full mb-4"
       />
-      <ScrollArea className="rounded-md border h-[calc(80vh-150px)]">
-        <Table className="relative w-full">
-          <TableHeader className="sticky top-0 bg-gray-200 dark:bg-gray-800 z-10">
+      <div className="rounded-md border h-[calc(80vh-150px)] overflow-y-auto">
+        {/* Encabezado con 'sticky' */}
+        <table className="min-w-full border-collapse">
+          <thead className="sticky top-0 z-10 bg-gray-200 dark:bg-gray-800">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead
+                  <th
                     key={header.id}
                     className={`
                       ${header.column.id === "nombre" ? "text-left" : "text-center"}
                       ${header.column.getCanSort() ? 'cursor-pointer select-none' : ''}
                       relative group transition-colors duration-200 hover:bg-gray-300 dark:hover:bg-gray-700
+                      px-4 py-2
                     `}
                     onClick={header.column.getToggleSortingHandler()}
                   >
-                    <div className="flex items-center justify-between px-2">
+                    <div className="flex items-center justify-between">
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext()
@@ -88,46 +90,40 @@ export function DataTable<TData, TValue>({
                         </span>
                       )}
                     </div>
-                  </TableHead>
+                  </th>
                 ))}
-              </TableRow>
+              </tr>
             ))}
-          </TableHeader>
-          <TableBody>
+          </thead>
+          <tbody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}>
+                <tr key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell
+                    <td
                       key={cell.id}
-                      className={
-                        cell.column.id === "nombre"
-                          ? "text-left"
-                          : "text-center"
-                      }>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
+                      className={`py-2 px-4 border-b ${
+                        cell.column.id === "nombre" ? "text-left" : "text-center"
+                      } dark:text-gray-100`}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
                   ))}
-                </TableRow>
+                </tr>
               ))
             ) : (
-              <TableRow>
-                <TableCell
+              <tr>
+                <td
                   colSpan={columns.length}
-                  className="h-24 text-center text-xl">
+                  className="h-24 text-center text-xl"
+                >
                   Sin resultados
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             )}
-          </TableBody>
-        </Table>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }
