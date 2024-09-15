@@ -21,8 +21,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "./input";
-import { ScrollArea, ScrollBar } from "./scroll-area";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ArrowUpDown } from "lucide-react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -60,40 +60,35 @@ export function DataTable<TData, TValue>({
         onChange={(event) =>
           table.getColumn(searchKey)?.setFilterValue(event.target.value)
         }
-        className="w-full"
+        className="w-full mb-4"
       />
       <ScrollArea className="rounded-md border h-[calc(80vh-150px)]">
-        <Table className="relative">
-          <TableHeader>
+        <Table className="relative w-full">
+          <TableHeader className="sticky top-0 bg-gray-200 dark:bg-gray-800 z-10">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead
-                  key={header.id}
-                  className={`${
-                    header.column.id === "nombre"
-                      ? "text-left"
-                      : "text-center"
-                  } ${header.column.getCanSort() ? 'cursor-pointer select-none' : ''}`}
-                  style={{ width: header.column.columnDef.size }}
-                  onClick={header.column.getToggleSortingHandler()}
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
+                    key={header.id}
+                    className={`
+                      ${header.column.id === "nombre" ? "text-left" : "text-center"}
+                      ${header.column.getCanSort() ? 'cursor-pointer select-none' : ''}
+                      relative group transition-colors duration-200 hover:bg-gray-300 dark:hover:bg-gray-700
+                    `}
+                    onClick={header.column.getToggleSortingHandler()}
+                  >
+                    <div className="flex items-center justify-between px-2">
+                      {flexRender(
                         header.column.columnDef.header,
                         header.getContext()
                       )}
-                  {header.column.getCanSort() && (
-                    <span className="ml-2 inline-block">
-                      {header.column.getIsSorted() === "asc" ? (
-                        <ChevronUp className="h-4 w-4" />
-                      ) : header.column.getIsSorted() === "desc" ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : null}
-                    </span>
-                  )}
-                </TableHead>
+                      {header.column.getCanSort() && (
+                        <span className="text-gray-600 dark:text-gray-200 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <ArrowUpDown className="h-4 w-4" />
+                        </span>
+                      )}
+                    </div>
+                  </TableHead>
                 ))}
               </TableRow>
             ))}
@@ -111,8 +106,7 @@ export function DataTable<TData, TValue>({
                         cell.column.id === "nombre"
                           ? "text-left"
                           : "text-center"
-                      }
-                      style={{ width: cell.column.columnDef.size }}>
+                      }>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
