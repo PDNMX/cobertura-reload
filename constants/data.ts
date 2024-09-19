@@ -13,11 +13,10 @@ export const navItems: NavItem[] = [
     icon: "users",
     label: "entes",
   },
- /* {
+  {
     title: "Directorio",
     href: "/dashboard/directorio",
     icon: "notebook",
     label: "directorio",
-  },*/
+  },
 ];
-
