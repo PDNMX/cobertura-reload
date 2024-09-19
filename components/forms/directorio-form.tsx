@@ -25,8 +25,6 @@ import { createItem, updateItem, readItems, withToken } from "@directus/sdk";
 import { Combobox } from "@/components/ui/combobox";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import clsx from "clsx";
 
 // Esquema de validación
 const formSchema = z.object({
@@ -39,7 +37,6 @@ const formSchema = z.object({
   sujetosObligados: z
     .array(z.number())
     .min(1, "Debe seleccionar al menos un Sujeto Obligado"),
-
   puesto: z.string().min(3, {
     message: "El puesto debe tener al menos 3 caracteres.",
   }),
@@ -62,21 +59,6 @@ type DirectorioFormValues = z.infer<typeof formSchema>;
 interface DirectorioFormProps {
   initialData: any | null;
 }
-// Para Combobox
-interface ComboboxProps {
-  options: { value: number; label: string }[];
-  value: number | null;
-  onChange: (value: number | null) => void;
-  placeholder: string;
-}
-
-// Para MultiSelect
-interface MultiSelectProps {
-  options: { value: number; label: string }[];
-  value: number[];
-  onChange: (value: number[]) => void;
-  placeholder: string;
-}
 
 export const DirectorioForm: React.FC<DirectorioFormProps> = ({
   initialData,
@@ -85,7 +67,10 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [oicOptions, setOicOptions] = useState([]);
+  const [existingOicIds, setExistingOicIds] = useState(new Set());
   const [sujetosObligadosOptions, setSujetosObligadosOptions] = useState([]);
+  const [existingSujetosObligadosIds, setExistingSujetosObligadosIds] =
+    useState(new Set());
   const { session } = useCurrentSession();
 
   const title = initialData ? "Actualizar Directorio" : "Crear Directorio";
@@ -116,10 +101,12 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
 
   useEffect(() => {
     const fetchOicOptions = async () => {
+      if (!session?.access_token) return;
+
       try {
         const response = await directus.request(
           withToken(
-            session?.access_token,
+            session.access_token,
             readItems("entes", {
               filter: {
                 _or: [
@@ -128,13 +115,14 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                 ],
               },
               fields: ["id", "nombre"],
-              limit: "-1",
+              limit: -1,
             })
           )
         );
+
         setOicOptions(
           response.map((ente) => ({
-            value: Number(ente.id),
+            value: ente.id,
             label: ente.nombre,
           }))
         );
@@ -143,15 +131,47 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
       }
     };
 
-    const fetchSujetosObligadosOptions = async () => {
+    const fetchExistingIds = async () => {
+      if (!session?.access_token) return;
+
       try {
         const response = await directus.request(
           withToken(
-            session?.access_token,
+            session.access_token,
+            readItems("directorio", {
+              fields: ["oic", "sujetosObligados"],
+              limit: -1,
+            })
+          )
+        );
+
+        const oicIds = new Set(
+          response.map((item) => item.oic).filter(Boolean)
+        );
+        setExistingOicIds(oicIds);
+
+        const sujetosObligadosIds = new Set(
+          response
+            .flatMap((item) => item.sujetosObligados || [])
+            .filter(Boolean)
+        );
+        setExistingSujetosObligadosIds(sujetosObligadosIds);
+      } catch (error) {
+        console.error("Error al obtener IDs existentes", error);
+      }
+    };
+
+    const fetchSujetosObligadosOptions = async () => {
+      if (!session?.access_token) return;
+
+      try {
+        const response = await directus.request(
+          withToken(
+            session.access_token,
             readItems("entes", {
               filter: { controlOIC: { _eq: false } },
               fields: ["id", "nombre"],
-              limit: "-1",
+              limit: -1,
             })
           )
         );
@@ -170,6 +190,7 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
     };
 
     fetchOicOptions();
+    fetchExistingIds();
     fetchSujetosObligadosOptions();
 
     if (!initialData && session?.user?.entidad) {
@@ -231,19 +252,24 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Autoridad Resolutora (OIC){" "}
+                        OIC{" "}
                         <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <Combobox
-                          options={oicOptions}
+                          options={oicOptions.filter(
+                            (option) =>
+                              !existingOicIds.has(option.value) ||
+                              option.value === field.value
+                          )}
                           value={field.value}
-                          onChange={(value) => {
-                            field.onChange(value);
-                          }}
+                          onChange={(value) => field.onChange(value)}
                           placeholder="Buscar y seleccionar OIC"
                         />
                       </FormControl>
+                      <FormDescription>
+                        Seleccione el Organo Interno de Control correspondiente.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -255,19 +281,27 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Sujetos Obligados{" "}
+                        Ente(s) Públcio(s){" "}
                         <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <MultiSelect
-                          options={sujetosObligadosOptions}
+                          options={sujetosObligadosOptions.filter(
+                            (option) =>
+                              !existingSujetosObligadosIds.has(option.value) ||
+                              (initialData?.sujetosObligados &&
+                                initialData.sujetosObligados.includes(
+                                  option.value
+                                ))
+                          )}
                           value={field.value}
-                          onChange={(values) => {
-                            field.onChange(values);
-                          }}
-                          placeholder="Buscar y seleccionar Sujetos Obligados"
+                          onChange={(values) => field.onChange(values)}
+                          placeholder="Buscar y seleccionar Entes Públicos"
                         />
                       </FormControl>
+                      <FormDescription>
+                        Seleccione uno o más Entes Públicos asociados.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -285,7 +319,7 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Puesto <span className="text-red-500">*</span>
+                        Puesto <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -294,6 +328,9 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                           {...field}
                         />
                       </FormControl>
+                      <FormDescription>
+                        Ingrese el puesto o cargo que ocupa.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -305,7 +342,7 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Nombre <span className="text-red-500">*</span>
+                        Nombre <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -314,6 +351,9 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                           {...field}
                         />
                       </FormControl>
+                      <FormDescription>
+                        Ingrese su nombre completo.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -326,7 +366,7 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                     <FormItem>
                       <FormLabel>
                         Correo Electrónico{" "}
-                        <span className="text-red-500">*</span>
+                        <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -335,6 +375,9 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                           {...field}
                         />
                       </FormControl>
+                      <FormDescription>
+                        Ingrese una dirección de correo electrónico válida.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -353,6 +396,9 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                           {...field}
                         />
                       </FormControl>
+                      <FormDescription>
+                        Ingrese un número de teléfono de contacto.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -376,6 +422,9 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                         {...field}
                       />
                     </FormControl>
+                    <FormDescription>
+                      Ingrese su dirección completa.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

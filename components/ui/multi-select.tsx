@@ -1,12 +1,12 @@
 // @ts-nocheck
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 export const MultiSelect = ({ options, onChange, placeholder, value }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const wrapperRef = useRef(null);
 
   useEffect(() => {
@@ -15,18 +15,21 @@ export const MultiSelect = ({ options, onChange, placeholder, value }) => {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [wrapperRef]);
 
-  const filteredOptions = options.filter(option =>
-    option.label.toLowerCase().includes(search.toLowerCase()) &&
-    !value.includes(option.value)
+  const filteredOptions = options.filter(
+    (option) =>
+      option.label.toLowerCase().includes(search.toLowerCase()) &&
+      !value.includes(option.value)
   );
 
-  const selectedOptions = options.filter(option => value.includes(option.value));
+  const selectedOptions = options.filter((option) =>
+    value.includes(option.value)
+  );
 
   return (
     <div ref={wrapperRef} className="relative">
@@ -37,21 +40,19 @@ export const MultiSelect = ({ options, onChange, placeholder, value }) => {
         aria-expanded={isOpen}
         className="w-full justify-between"
         onClick={() => setIsOpen(!isOpen)}
-        style={{ maxHeight: '150px', overflowY: 'auto' }} // Límite de altura y desplazamiento vertical
       >
-        <div className="flex flex-wrap gap-1 mr-2 max-w-full overflow-hidden">
+        <div className="flex flex-wrap gap-1 mr-2 max-h-[100px] overflow-y-auto">
           {selectedOptions.map((option) => (
             <span
               key={option.value}
-              className="bg-secondary text-secondary-foreground px-2 py-1 rounded-full text-sm flex items-center max-w-full truncate"
-              style={{ maxWidth: '150px' }} // Limitar el ancho de cada selección
+              className="bg-secondary text-secondary-foreground px-2 py-1 rounded-full text-sm flex items-center"
             >
               {option.label}
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onChange(value.filter(v => v !== option.value));
+                  onChange(value.filter((v) => v !== option.value));
                 }}
                 className="ml-1 text-secondary-foreground hover:text-primary focus:outline-none"
               >
@@ -59,7 +60,9 @@ export const MultiSelect = ({ options, onChange, placeholder, value }) => {
               </button>
             </span>
           ))}
-          {selectedOptions.length === 0 && <span className="text-muted-foreground">{placeholder}</span>}
+          {selectedOptions.length === 0 && (
+            <span className="text-muted-foreground">{placeholder}</span>
+          )}
         </div>
         <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
       </Button>
@@ -80,7 +83,7 @@ export const MultiSelect = ({ options, onChange, placeholder, value }) => {
                 key={option.value}
                 onClick={() => {
                   onChange([...value, option.value]);
-                  setSearch('');
+                  setSearch("");
                 }}
                 className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
               >
