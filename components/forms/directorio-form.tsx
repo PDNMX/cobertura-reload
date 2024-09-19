@@ -1,6 +1,11 @@
 // @ts-nocheck
 "use client";
 
+import React, { useState, useEffect } from 'react';
+import { useRouter } from "next/navigation";
+import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
@@ -13,12 +18,7 @@ import {
 import { Heading } from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useForm, FormProvider } from "react-hook-form";
-import * as z from "zod";
 import { useToast } from "@/components/ui/use-toast";
-import { useState, useEffect } from "react";
 import { useCurrentSession } from "@/hooks/useCurrentSession";
 import directus from "@/lib/directus";
 import { createItem, updateItem, readItems, withToken } from "@directus/sdk";
@@ -26,7 +26,6 @@ import { Combobox } from "@/components/ui/combobox";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Card, CardContent } from "@/components/ui/card";
 
-// Esquema de validación
 const formSchema = z.object({
   oic: z
     .number()
@@ -60,17 +59,14 @@ interface DirectorioFormProps {
   initialData: any | null;
 }
 
-export const DirectorioForm: React.FC<DirectorioFormProps> = ({
-  initialData,
-}) => {
+export const DirectorioForm: React.FC<DirectorioFormProps> = ({ initialData }) => {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [oicOptions, setOicOptions] = useState([]);
   const [existingOicIds, setExistingOicIds] = useState(new Set());
   const [sujetosObligadosOptions, setSujetosObligadosOptions] = useState([]);
-  const [existingSujetosObligadosIds, setExistingSujetosObligadosIds] =
-    useState(new Set());
+  const [existingSujetosObligadosIds, setExistingSujetosObligadosIds] = useState(new Set());
   const { session } = useCurrentSession();
 
   const title = initialData ? "Actualizar Directorio" : "Crear Directorio";
@@ -193,7 +189,13 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
     fetchExistingIds();
     fetchSujetosObligadosOptions();
 
-    if (!initialData && session?.user?.entidad) {
+    if (initialData) {
+      Object.keys(initialData).forEach((key) => {
+        if (key in defaultValues) {
+          form.setValue(key as keyof DirectorioFormValues, initialData[key]);
+        }
+      });
+    } else if (session?.user?.entidad) {
       form.setValue("entidad", session.user.entidad);
     }
   }, [session, initialData, form]);
@@ -252,8 +254,7 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        OIC{" "}
-                        <span className="text-destructive">*</span>
+                        OIC <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <Combobox
@@ -281,8 +282,7 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Ente(s) Públcio(s){" "}
-                        <span className="text-destructive">*</span>
+                        Ente(s) Público(s) <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <MultiSelect
@@ -365,8 +365,7 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Correo Electrónico{" "}
-                        <span className="text-destructive">*</span>
+                        Correo Electrónico <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
