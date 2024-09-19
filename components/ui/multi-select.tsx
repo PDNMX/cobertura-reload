@@ -4,6 +4,11 @@ import { Check, ChevronsUpDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
+const truncateText = (text, maxLength) => {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength) + '...';
+};
+
 export const MultiSelect = ({ options, onChange, placeholder, value }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -31,39 +36,41 @@ export const MultiSelect = ({ options, onChange, placeholder, value }) => {
     value.includes(option.value)
   );
 
+  const removeOption = (optionValue) => {
+    onChange(value.filter((v) => v !== optionValue));
+  };
+
   return (
     <div ref={wrapperRef} className="relative">
+      <div className="flex flex-wrap gap-2 p-2 border rounded-md min-h-[80px] max-h-[200px] overflow-y-auto">
+        {selectedOptions.map((option) => (
+          <span
+            key={option.value}
+            className="bg-secondary text-secondary-foreground px-2 py-1 rounded-full text-sm flex items-center max-w-[600px] group"
+            title={option.label}
+          >
+            <span className="truncate mr-1">{truncateText(option.label, 80)}</span>
+            <button
+              type="button"
+              onClick={() => removeOption(option.value)}
+              className="ml-1 text-secondary-foreground hover:text-primary focus:outline-none flex-shrink-0 opacity-100"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </span>
+        ))}
+        {selectedOptions.length === 0 && (
+          <span className="text-muted-foreground">{placeholder}</span>
+        )}
+      </div>
       <Button
         type="button"
         variant="outline"
         role="combobox"
         aria-expanded={isOpen}
-        className="w-full justify-between"
+        className="absolute right-0 top-0 h-full"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <div className="flex flex-wrap gap-1 mr-2 max-h-[100px] overflow-y-auto">
-          {selectedOptions.map((option) => (
-            <span
-              key={option.value}
-              className="bg-secondary text-secondary-foreground px-2 py-1 rounded-full text-sm flex items-center"
-            >
-              {option.label}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onChange(value.filter((v) => v !== option.value));
-                }}
-                className="ml-1 text-secondary-foreground hover:text-primary focus:outline-none"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ))}
-          {selectedOptions.length === 0 && (
-            <span className="text-muted-foreground">{placeholder}</span>
-          )}
-        </div>
         <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
       </Button>
       {isOpen && (
