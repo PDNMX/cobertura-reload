@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,9 +47,14 @@ const formSchema = z.object({
   }),
   telefono: z
     .string()
+    .regex(/^\d*$/, "El teléfono debe contener solo números")
     .min(10, "El teléfono debe tener al menos 10 dígitos")
-    .optional(),
-  direccion: z.string().optional(),
+    .nullish()
+    .transform((value) => value || ""),
+  direccion: z
+    .string()
+    .nullish()
+    .transform((value) => value || ""),
   entidad: z.string(),
 });
 
@@ -59,14 +64,17 @@ interface DirectorioFormProps {
   initialData: any | null;
 }
 
-export const DirectorioForm: React.FC<DirectorioFormProps> = ({ initialData }) => {
+export const DirectorioForm: React.FC<DirectorioFormProps> = ({
+  initialData,
+}) => {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [oicOptions, setOicOptions] = useState([]);
   const [existingOicIds, setExistingOicIds] = useState(new Set());
   const [sujetosObligadosOptions, setSujetosObligadosOptions] = useState([]);
-  const [existingSujetosObligadosIds, setExistingSujetosObligadosIds] = useState(new Set());
+  const [existingSujetosObligadosIds, setExistingSujetosObligadosIds] =
+    useState(new Set());
   const { session } = useCurrentSession();
 
   const title = initialData ? "Actualizar Directorio" : "Crear Directorio";
@@ -203,16 +211,25 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({ initialData }) =
   const onSubmit = async (data: DirectorioFormValues) => {
     try {
       setLoading(true);
+      const formattedData = {
+        ...data,
+        telefono: data.telefono || null,
+        direccion: data.direccion || null,
+      };
+
       if (initialData) {
         await directus.request(
           withToken(
             session?.access_token,
-            updateItem("directorio", initialData.id, data)
+            updateItem("directorio", initialData.id, formattedData)
           )
         );
       } else {
         await directus.request(
-          withToken(session?.access_token, createItem("directorio", data))
+          withToken(
+            session?.access_token,
+            createItem("directorio", formattedData)
+          )
         );
       }
       router.refresh();
@@ -232,6 +249,14 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({ initialData }) =
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePhoneChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onChange: (value: string) => void
+  ) => {
+    const value = e.target.value.replace(/\D/g, "");
+    onChange(value);
   };
 
   return (
@@ -282,7 +307,8 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({ initialData }) =
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Ente(s) Público(s) <span className="text-destructive">*</span>
+                        Ente(s) Público(s){" "}
+                        <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <MultiSelect
@@ -365,7 +391,8 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({ initialData }) =
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Correo Electrónico <span className="text-destructive">*</span>
+                        Correo Electrónico{" "}
+                        <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -393,10 +420,13 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({ initialData }) =
                           disabled={loading}
                           placeholder="Teléfono"
                           {...field}
+                          value={field.value || ""}
+                          onChange={(e) => handlePhoneChange(e, field.onChange)}
                         />
                       </FormControl>
                       <FormDescription>
-                        Ingrese un número de teléfono de contacto.
+                        Ingrese un número de teléfono de contacto (solo
+                        números).
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -419,6 +449,7 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({ initialData }) =
                         disabled={loading}
                         placeholder="Dirección"
                         {...field}
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormDescription>
