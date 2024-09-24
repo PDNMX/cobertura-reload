@@ -279,7 +279,7 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        OIC <span className="text-destructive">*</span>
+                        Órgano Interno de Control <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <Combobox
@@ -294,7 +294,7 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                         />
                       </FormControl>
                       <FormDescription>
-                        Seleccione el Organo Interno de Control correspondiente.
+                        Seleccione el Órgano Interno de Control correspondiente.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
