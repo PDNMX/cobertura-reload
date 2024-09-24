@@ -425,8 +425,7 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                         />
                       </FormControl>
                       <FormDescription>
-                        Ingrese un número de teléfono de contacto (solo
-                        números).
+                        Ingrese un número de teléfono de contacto.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
