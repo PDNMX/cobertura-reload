@@ -41,26 +41,48 @@ export const MultiSelect = ({ options, onChange, placeholder, value }) => {
   };
 
   return (
-    <div ref={wrapperRef} className="relative">
-      <div className="flex flex-wrap gap-2 p-2 border rounded-md min-h-[80px] max-h-[200px] overflow-y-auto">
-        {selectedOptions.map((option) => (
-          <span
-            key={option.value}
-            className="bg-secondary text-secondary-foreground px-2 py-1 rounded-full text-sm flex items-center max-w-[600px] group"
-            title={option.label}
-          >
-            <span className="truncate mr-1">{truncateText(option.label, 80)}</span>
+    <div ref={wrapperRef} className="relative w-full">
+      <div 
+        className={cn(
+          "flex flex-wrap gap-2 p-2 border rounded-md overflow-hidden transition-all duration-200",
+          selectedOptions.length > 1 ? "min-h-[80px] max-h-[200px] overflow-y-auto pr-10" : "h-10"
+        )}
+      >
+        {selectedOptions.length === 0 && (
+          <span className="text-muted-foreground self-center">{placeholder}</span>
+        )}
+        {selectedOptions.length === 1 ? (
+          <div className="flex items-center justify-between w-[calc(100%-40px)]">
+            <span className="truncate mr-1" title={selectedOptions[0].label}>
+              {truncateText(selectedOptions[0].label, 50)}
+            </span>
             <button
               type="button"
-              onClick={() => removeOption(option.value)}
-              className="ml-1 text-secondary-foreground hover:text-primary focus:outline-none flex-shrink-0 opacity-100"
+              onClick={() => removeOption(selectedOptions[0].value)}
+              className="ml-1 text-secondary-foreground hover:text-primary focus:outline-none flex-shrink-0"
             >
               <X className="h-3 w-3" />
             </button>
-          </span>
-        ))}
-        {selectedOptions.length === 0 && (
-          <span className="text-muted-foreground">{placeholder}</span>
+          </div>
+        ) : (
+          selectedOptions.map((option) => (
+            <span
+              key={option.value}
+              className="bg-secondary text-secondary-foreground px-2 py-1 rounded-full text-sm flex items-center justify-between w-[calc(100%-0.5rem)]"
+              title={option.label}
+            >
+              <span className="truncate mr-1">
+                {truncateText(option.label, 70)}
+              </span>
+              <button
+                type="button"
+                onClick={() => removeOption(option.value)}
+                className="ml-1 text-secondary-foreground hover:text-primary focus:outline-none flex-shrink-0"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ))
         )}
       </div>
       <Button
@@ -68,7 +90,10 @@ export const MultiSelect = ({ options, onChange, placeholder, value }) => {
         variant="outline"
         role="combobox"
         aria-expanded={isOpen}
-        className="absolute right-0 top-0 h-full"
+        className={cn(
+          "absolute right-0 top-0",
+          selectedOptions.length > 1 ? "h-10 w-10" : "h-10"
+        )}
         onClick={() => setIsOpen(!isOpen)}
       >
         <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
