@@ -44,6 +44,11 @@ const colorMap = {
 export const PoderBarChart = ({ data, tipoColumna }: any) => {
   const colorSistema = colorMap[tipoColumna];
 
+  // Filtrar los datos para excluir 'Legislativo' si es resultSistema3Tribunal
+  const filteredData = tipoColumna === "resultSistema3Tribunal"
+    ? data.filter(item => item.poder !== "Legislativo")
+    : data;
+
   return (
     <Card>
       <CardHeader>
@@ -51,11 +56,12 @@ export const PoderBarChart = ({ data, tipoColumna }: any) => {
         <CardDescription>
           En la integración de la información de los entes públicos, por poder u
           órgano de gobierno
+          {tipoColumna === "resultSistema3Tribunal" && " (excluyendo poder Legislativo)"}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={data}>
+          <BarChart data={filteredData}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="poder"
@@ -73,7 +79,7 @@ export const PoderBarChart = ({ data, tipoColumna }: any) => {
             />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="count" fill={colorSistema} radius={8}>
-              {data.map((entry, index) => (
+              {filteredData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={colorSistema} />
               ))}
               <LabelList

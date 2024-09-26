@@ -43,6 +43,11 @@ export const AmbitoBarChart = ({ data, tipoColumna }: any) => {
 
   const colorSistema = colors[tipoColumna];
 
+  // Filtrar los datos para excluir 'Municipal' si es resultSistema3Tribunal
+  const filteredData = tipoColumna === "resultSistema3Tribunal"
+    ? data.filter(item => item.ambito !== "Municipal")
+    : data;
+
   return (
     <Card>
       <CardHeader>
@@ -50,11 +55,12 @@ export const AmbitoBarChart = ({ data, tipoColumna }: any) => {
         <CardDescription>
           En la integración de la información de los entes públicos, por ámbito
           de gobierno
+          {tipoColumna === "resultSistema3Tribunal" && " (excluyendo ámbito Municipal)"}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={data}>
+          <BarChart data={filteredData}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="ambito"
