@@ -1,8 +1,7 @@
 // @ts-nocheck
-"use client";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/ui/data-table";
+import { AdjustableDataTable } from "@/components/ui/adjustable-data-table";
 import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
@@ -58,36 +57,56 @@ export const DirectorioTable = ({ data }: any) => {
     fetchEntesNames();
   }, [data, session]);
 
+  const columns = createColumns({ entesMap }, session);
+
+  const columnVisibility = {
+    oic: true,
+    sujetosObligados: true,
+    puesto: true,
+    nombre: true,
+    correoElectronico: true,
+    telefono: true,
+    direccion: true,
+    actions: true,
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+    <div className="flex flex-col h-screen">
+      <div className="flex items-start justify-between mb-4">
         <Heading
           title="Directorio de Órganos Internos de Control"
           description="Gestión de datos de contacto y localización"
         />
         <Button
-          className="text-xs md:text-sm whitespace-nowrap"
+          className="text-xs md:text-sm"
           onClick={() => router.push(`/dashboard/directorio/create`)}
         >
           <Plus className="mr-2 h-4 w-4" /> Agregar nuevo
         </Button>
       </div>
 
-      <Card className="bg-muted">
+      <Card className="bg-muted mb-4">
         <CardContent className="pt-6">
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Esta sección integra los datos de contacto y localización de los Órganos Internos de Control de los Entes públicos en las entidades federativas. Cada Órgano Interno de Control puede estar asignado a uno o más Entes públicos dentro de su entidad federativa. Sin embargo, es importante resaltar que cada Ente público solo puede tener asignado un único Órgano Interno de Control , garantizando una relación exclusiva entre el Ente público y el OIC que lo atiende.{" "}
+            Esta sección integra los datos de contacto y localización de los
+            Órganos Internos de Control de los Entes públicos en las entidades
+            federativas. Cada Órgano Interno de Control puede estar asignado a
+            uno o más Entes públicos dentro de su entidad federativa. Sin
+            embargo, es importante resaltar que cada Ente público solo puede
+            tener asignado un único Órgano Interno de Control, garantizando una
+            relación exclusiva entre el Ente público y el OIC que lo atiende.
           </p>
         </CardContent>
       </Card>
 
-      <Separator />
+      <Separator className="mb-4" />
 
-      <div className="space-y-4">
-        <DataTable
+      <div className="flex-grow">
+        <AdjustableDataTable
           searchKey="correoElectronico"
-          columns={createColumns({ entesMap }, session)}
+          columns={columns}
           data={data}
+          columnsShow={columnVisibility}
         />
       </div>
     </div>
