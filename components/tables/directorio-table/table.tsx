@@ -12,63 +12,50 @@ import directus from "@/lib/directus";
 import { readItems, withToken } from "@directus/sdk";
 import { useCurrentSession } from "@/hooks/useCurrentSession";
 
-export const DirectorioTable = ({ data }: any) => {
+export const DirectorioTable = () => {
   const router = useRouter();
   const { session } = useCurrentSession();
-  const [entesMap, setEntesMap] = useState({});
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchEntesNames() {
-      if (data.length > 0 && session?.access_token) {
-        const ids = data
-          .flatMap((item: any) => [
-            item.oic,
-            ...(Array.isArray(item.sujetosObligados)
-              ? item.sujetosObligados
-              : [item.sujetosObligados]),
-          ])
-          .filter(Boolean);
-
+    async function fetchDirectorioData() {
+      if (session?.access_token) {
         try {
+          setLoading(true);
           const result = await directus.request(
             withToken(
               session.access_token,
-              readItems("entes", {
+              readItems("directorio", {
                 filter: {
-                  id: { _in: ids },
+                  entidad: { _eq: session.user.entidad },
                 },
-                fields: ["id", "nombre"],
+                fields: [
+                  "*",
+                  "oic.nombre",
+                  "sujetosObligados.nombre",
+                  "entidad.nombre",
+                ],
               })
             )
           );
-
-          const newEntesMap = result.reduce((acc: any, ente: any) => {
-            acc[ente.id] = ente.nombre;
-            return acc;
-          }, {});
-
-          setEntesMap(newEntesMap);
+          setData(result);
         } catch (error) {
-          console.error("Error al obtener los nombres de los entes:", error);
+          console.error("Error al obtener los datos del directorio:", error);
+        } finally {
+          setLoading(false);
         }
       }
     }
 
-    fetchEntesNames();
-  }, [data, session]);
+    fetchDirectorioData();
+  }, [session]);
 
-  const columns = createColumns({ entesMap }, session);
+  const columns = createColumns(session);
 
-  const columnVisibility = {
-    oic: true,
-    sujetosObligados: true,
-    puesto: true,
-    nombre: true,
-    correoElectronico: true,
-    telefono: true,
-    direccion: true,
-    actions: true,
-  };
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
 
   return (
     <div className="flex flex-col h-screen">
@@ -102,12 +89,7 @@ export const DirectorioTable = ({ data }: any) => {
       <Separator className="mb-4" />
 
       <div className="flex-grow">
-        <AdjustableDataTable
-          searchKey="correoElectronico"
-          columns={columns}
-          data={data}
-          columnsShow={columnVisibility}
-        />
+        <AdjustableDataTable searchKey="nombre" columns={columns} data={data} />
       </div>
     </div>
   );
