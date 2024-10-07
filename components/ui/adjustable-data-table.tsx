@@ -50,7 +50,7 @@ export function AdjustableDataTable<TData, TValue>({
         }
         className="w-full mb-4"
       />
-      <div className="rounded-md border overflow-hidden" style={{ height: '600px' }}> {/* Altura fija de 400px */}
+      <div className="rounded-md border overflow-hidden" style={{ height: '520px' }}> {/* Altura fija de 400px */}
         <div className="overflow-auto h-full">
           <table className="w-full border-collapse">
             <thead className="sticky top-0 z-10 bg-gray-200 dark:bg-gray-800">
