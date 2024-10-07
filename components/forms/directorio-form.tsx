@@ -47,10 +47,12 @@ const formSchema = z.object({
   }),
   telefono: z
     .string()
-    .regex(/^\d*$/, "El teléfono debe contener solo números")
-    .min(10, "El teléfono debe tener al menos 10 dígitos")
-    .nullish()
-    .transform((value) => value || ""),
+    .regex(
+      /^\d{10}$/,
+      "El teléfono debe contener exactamente 10 dígitos numéricos"
+    )
+    .optional()
+    .or(z.literal("")),
   direccion: z
     .string()
     .nullish()
@@ -255,7 +257,7 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
     e: React.ChangeEvent<HTMLInputElement>,
     onChange: (value: string) => void
   ) => {
-    const value = e.target.value.replace(/\D/g, "");
+    const value = e.target.value.replace(/\D/g, "").slice(0, 10); // Limitamos a 10 dígitos
     onChange(value);
   };
 
@@ -279,7 +281,8 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Órgano Interno de Control <span className="text-destructive">*</span>
+                        Órgano Interno de Control{" "}
+                        <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <Combobox
@@ -414,18 +417,18 @@ export const DirectorioForm: React.FC<DirectorioFormProps> = ({
                   name="telefono"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Teléfono</FormLabel>
+                      <FormLabel>Teléfono (opcional)</FormLabel>
                       <FormControl>
                         <Input
                           disabled={loading}
-                          placeholder="Teléfono"
+                          placeholder="Teléfono (10 dígitos)"
                           {...field}
                           value={field.value || ""}
                           onChange={(e) => handlePhoneChange(e, field.onChange)}
                         />
                       </FormControl>
                       <FormDescription>
-                        Ingrese un número de teléfono de contacto.
+                        Ingrese un número de teléfono de 10 dígitos (opcional).
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
