@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from "react";
 import { InfoIcon, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,6 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Image from "next/image";
 
 import icoSujetosObligados from "./icons-thead/sujetosObligados.svg";
@@ -30,12 +28,14 @@ const InfoAlert = () => {
     {
       icon: icoSujetosObligados,
       title: "Sujetos Obligados",
-      description: "Número total de Sujetos Obligados en la entidad federativa.",
+      description:
+        "Número total de Sujetos Obligados en la entidad federativa.",
     },
     {
       icon: icoOIC,
       title: "OIC",
-      description: "Número de Órganos Internos de Control en la entidad federativa.",
+      description:
+        "Número de Órganos Internos de Control en la entidad federativa.",
     },
     {
       icon: icoTribunal,
@@ -59,7 +59,7 @@ const InfoAlert = () => {
       icon: icoS3OIC,
       title: "Sistema 3 OIC",
       description:
-        "Órganos Internos de Control   conectados al Sistema de Servidores Públicos y Particulares Sancionados.",
+        "Órganos Internos de Control conectados al Sistema de Servidores Públicos y Particulares Sancionados.",
     },
     {
       icon: icoS3Tribunal,
@@ -96,37 +96,40 @@ const InfoAlert = () => {
           className="w-full relative z-10 bg-background hover:bg-primary/10 dark:bg-background dark:hover:bg-primary/20 border-2 border-primary transition-all duration-300 ease-in-out"
         >
           <InfoIcon className="h-4 w-4 mr-2 text-primary" />
-          <span className="font-medium">Explicación de los indicadores</span>
+          <span className="font-medium">Guía de Símbolos</span>
           <ChevronRight className="h-4 w-4 ml-auto text-primary" />
         </Button>
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl">
           <DialogHeader>
-            <DialogTitle>Descripción Detallada de los Indicadores</DialogTitle>
+            <DialogTitle className="text-2xl font-bold mb-2">
+              Descripción de los Símbolos
+            </DialogTitle>
+            <DialogDescription className="text-base">
+              Explora una explicación detallada sobre los símbolos y columnas
+              presentes en el Tablero Estadístico.
+            </DialogDescription>
           </DialogHeader>
-          <DialogDescription>
-            {" "}
-            Aquí puedes consultar la descripción y significado de cada uno de
-            los indicadores presentes en el Tablero Estadístico de Interconexión
-            Nacional.
-          </DialogDescription>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 mt-4">
             {columnInfo.map((info, index) => (
               <div
                 key={index}
-                className="flex items-center space-x-2 p-2 border rounded"
+                className="flex items-start space-x-4 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800"
               >
-                <Image
-                  src={info.icon}
-                  alt={info.title}
-                  width={24}
-                  height={24}
-                />
-                <div>
-                  <h3 className="font-semibold">{info.title}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                <div className="flex-shrink-0">
+                  <Image
+                    src={info.icon}
+                    alt={info.title}
+                    width={40}
+                    height={40}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex-grow">
+                  <h3 className="font-semibold text-sm">{info.title}</h3>
+                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
                     {info.description}
                   </p>
                 </div>
