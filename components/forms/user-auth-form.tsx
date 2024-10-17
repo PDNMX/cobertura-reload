@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation"
@@ -36,6 +36,10 @@ export default function UserAuthForm() {
   const [error, setError] = useState<string>("")
 
   const router = useRouter()
+  
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   const defaultValues = {
     email: "",
@@ -62,6 +66,17 @@ export default function UserAuthForm() {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      if (e.currentTarget === emailRef.current) {
+        passwordRef.current?.focus();
+      } else if (e.currentTarget === passwordRef.current) {
+        submitButtonRef.current?.focus();
+      }
+    }
+  };
+
   return (
     <>
       <Form {...form}>
@@ -81,6 +96,8 @@ export default function UserAuthForm() {
                     placeholder="Ingresa tu correo electrónico"
                     disabled={isLoading}
                     {...field}
+                    ref={emailRef}
+                    onKeyDown={handleKeyDown}
                   />
                 </FormControl>
                 <FormMessage />
@@ -99,6 +116,8 @@ export default function UserAuthForm() {
                     placeholder="Ingresa tu contraseña"
                     disabled={isLoading}
                     {...field}
+                    ref={passwordRef}
+                    onKeyDown={handleKeyDown}
                   />
                 </FormControl>
                 <FormMessage />
@@ -112,12 +131,11 @@ export default function UserAuthForm() {
           </Alert>
         )}
 
-          <Button disabled={isLoading} className="ml-auto w-full" type="submit">
+          <Button disabled={isLoading} className="ml-auto w-full" type="submit" ref={submitButtonRef}>
            Entrar{isLoading && <Loader2 className="animate-spin ml-1" />} 
           </Button>
         </form>
       </Form>
-      
     </>
   );
 }
