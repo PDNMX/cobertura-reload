@@ -37,6 +37,7 @@ import { EntesTable } from "@/components/tables/cell-entes-table/table";
 import { TabsColumnsSistemas } from "@/components/charts/tabs-columns-sistemas";
 
 import { ArrowUpDown, BarChart2 } from "lucide-react";
+import InfoAlert from "./info-alert"; // Importa el componente InfoAlert
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -53,9 +54,9 @@ export function DataTable<TData, TValue>({
   const [hoveredColumnId, setHoveredColumnId] = useState<string | null>(null);
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
   const [dialogContent, setDialogContent] = useState<React.ReactNode | null>(
-    null,
+    null
   );
-  const [isLoading, setIsLoading] = useState(true); // Estado de carga
+  const [isLoading, setIsLoading] = useState(true);
 
   const Table = React.forwardRef<
     HTMLTableElement,
@@ -256,7 +257,7 @@ export function DataTable<TData, TValue>({
 
       const respuestaDirectus = await fetchDataCell(entidad, tipoColumna);
       setDialogContent(
-        <EntesTable data={respuestaDirectus} columnsShow={columnasMostrar} />,
+        <EntesTable data={respuestaDirectus} columnsShow={columnasMostrar} />
       );
       setIsLoading(false);
       //setIsDialogOpen(true);
@@ -285,23 +286,21 @@ export function DataTable<TData, TValue>({
         dataEntidad = data.map((item) => ({
           ...item,
           count: Number(
-            ((item[tipoColumna] / item.resultOIC) * 100).toFixed(2),
+            ((item[tipoColumna] / item.resultOIC) * 100).toFixed(2)
           ),
         }));
       } else if (tipoColumna === "resultSistema3Tribunal") {
         dataEntidad = data.map((item) => ({
           ...item,
           count: Number(
-            ((item[tipoColumna] / item.resultTribunal) * 100).toFixed(2),
+            ((item[tipoColumna] / item.resultTribunal) * 100).toFixed(2)
           ),
         }));
       } else {
         dataEntidad = data.map((item) => ({
           ...item,
           count: Number(
-            ((item[tipoColumna] / item.resultSujetosObligados) * 100).toFixed(
-              2,
-            ),
+            ((item[tipoColumna] / item.resultSujetosObligados) * 100).toFixed(2)
           ),
         }));
       }
@@ -311,7 +310,7 @@ export function DataTable<TData, TValue>({
         const totalEntes = data.reduce((acc, item) => acc + item.resultOIC, 0);
         const conectados = data.reduce(
           (acc, item) => acc + item[tipoColumna],
-          0,
+          0
         );
         const porcentajeConectados = (conectados / totalEntes) * 100;
         dataNacional = [
@@ -325,11 +324,11 @@ export function DataTable<TData, TValue>({
       } else if (tipoColumna === "resultSistema3Tribunal") {
         const totalEntes = data.reduce(
           (acc, item) => acc + item.resultTribunal,
-          0,
+          0
         );
         const conectados = data.reduce(
           (acc, item) => acc + item[tipoColumna],
-          0,
+          0
         );
         const porcentajeConectados = (conectados / totalEntes) * 100;
         dataNacional = [
@@ -343,11 +342,11 @@ export function DataTable<TData, TValue>({
       } else {
         const totalEntes = data.reduce(
           (acc, item) => acc + item.resultSujetosObligados,
-          0,
+          0
         );
         const conectados = data.reduce(
           (acc, item) => acc + item[tipoColumna],
-          0,
+          0
         );
         const porcentajeConectados = (conectados / totalEntes) * 100;
         dataNacional = [
@@ -618,30 +617,30 @@ export function DataTable<TData, TValue>({
                 directus.request(ambitoQueries.resultSistema3OIC.federal),
                 directus.request(ambitoQueries.resultSistema3OIC.estatal),
                 directus.request(ambitoQueries.resultSistema3OIC.municipal),
-              ],
+              ]
             );
 
             const totalOICFederal = await directus.request(
-              ambitoQueries.resultOIC.federal,
+              ambitoQueries.resultOIC.federal
             );
             const totalOICEstatal = await directus.request(
-              ambitoQueries.resultOIC.estatal,
+              ambitoQueries.resultOIC.estatal
             );
             const totalOICMunicipal = await directus.request(
-              ambitoQueries.resultOIC.municipal,
+              ambitoQueries.resultOIC.municipal
             );
 
             totalFederal = totalOICFederal.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
             totalEstatal = totalOICEstatal.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
             totalMunicipal = totalOICMunicipal.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
           } else if (tipoColumna === "resultSistema3Tribunal") {
             [resultFederal, resultEstatal, resultMunicipal] = await Promise.all(
@@ -649,32 +648,32 @@ export function DataTable<TData, TValue>({
                 directus.request(ambitoQueries.resultSistema3Tribunal.federal),
                 directus.request(ambitoQueries.resultSistema3Tribunal.estatal),
                 directus.request(
-                  ambitoQueries.resultSistema3Tribunal.municipal,
+                  ambitoQueries.resultSistema3Tribunal.municipal
                 ),
-              ],
+              ]
             );
 
             const totalTribunalFederal = await directus.request(
-              ambitoQueries.resultTribunal.federal,
+              ambitoQueries.resultTribunal.federal
             );
             const totalTribunalEstatal = await directus.request(
-              ambitoQueries.resultTribunal.estatal,
+              ambitoQueries.resultTribunal.estatal
             );
             const totalTribunalMunicipal = await directus.request(
-              ambitoQueries.resultTribunal.municipal,
+              ambitoQueries.resultTribunal.municipal
             );
 
             totalFederal = totalTribunalFederal.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
             totalEstatal = totalTribunalEstatal.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
             totalMunicipal = totalTribunalMunicipal.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
           } else {
             [resultFederal, resultEstatal, resultMunicipal] = await Promise.all(
@@ -682,44 +681,44 @@ export function DataTable<TData, TValue>({
                 directus.request(ambitoQueries[tipoColumna].federal),
                 directus.request(ambitoQueries[tipoColumna].estatal),
                 directus.request(ambitoQueries[tipoColumna].municipal),
-              ],
+              ]
             );
 
             const totalSujetosFederal = await directus.request(
-              ambitoQueries.resultSujetosObligados.federal,
+              ambitoQueries.resultSujetosObligados.federal
             );
             const totalSujetosEstatal = await directus.request(
-              ambitoQueries.resultSujetosObligados.estatal,
+              ambitoQueries.resultSujetosObligados.estatal
             );
             const totalSujetosMunicipal = await directus.request(
-              ambitoQueries.resultSujetosObligados.municipal,
+              ambitoQueries.resultSujetosObligados.municipal
             );
 
             totalFederal = totalSujetosFederal.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
             totalEstatal = totalSujetosEstatal.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
             totalMunicipal = totalSujetosMunicipal.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
           }
 
           const federalConectados = resultFederal.reduce(
             (acc, item) => acc + Number(item.count),
-            0,
+            0
           );
           const estatalConectados = resultEstatal.reduce(
             (acc, item) => acc + Number(item.count),
-            0,
+            0
           );
           const municipalConectados = resultMunicipal.reduce(
             (acc, item) => acc + Number(item.count),
-            0,
+            0
           );
 
           const federalPorcentaje = (federalConectados / totalFederal) * 100;
@@ -1098,33 +1097,33 @@ export function DataTable<TData, TValue>({
             ]);
 
             const totalOICEjecutivo = await directus.request(
-              poderQueries.resultOIC.ejecutivo,
+              poderQueries.resultOIC.ejecutivo
             );
             const totalOICJudicial = await directus.request(
-              poderQueries.resultOIC.judicial,
+              poderQueries.resultOIC.judicial
             );
             const totalOICLegislativo = await directus.request(
-              poderQueries.resultOIC.legislativo,
+              poderQueries.resultOIC.legislativo
             );
             const totalOICAutonomo = await directus.request(
-              poderQueries.resultOIC.autonomo,
+              poderQueries.resultOIC.autonomo
             );
 
             totalEjecutivo = totalOICEjecutivo.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
             totalJudicial = totalOICJudicial.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
             totalLegislativo = totalOICLegislativo.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
             totalAutonomo = totalOICAutonomo.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
           } else if (tipoColumna === "resultSistema3Tribunal") {
             [
@@ -1140,33 +1139,33 @@ export function DataTable<TData, TValue>({
             ]);
 
             const totalTribunalEjecutivo = await directus.request(
-              poderQueries.resultTribunal.ejecutivo,
+              poderQueries.resultTribunal.ejecutivo
             );
             const totalTribunalJudicial = await directus.request(
-              poderQueries.resultTribunal.judicial,
+              poderQueries.resultTribunal.judicial
             );
             const totalTribunalLegislativo = await directus.request(
-              poderQueries.resultTribunal.legislativo,
+              poderQueries.resultTribunal.legislativo
             );
             const totalTribunalAutonomo = await directus.request(
-              poderQueries.resultTribunal.autonomo,
+              poderQueries.resultTribunal.autonomo
             );
 
             totalEjecutivo = totalTribunalEjecutivo.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
             totalJudicial = totalTribunalJudicial.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
             totalLegislativo = totalTribunalLegislativo.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
             totalAutonomo = totalTribunalAutonomo.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
           } else {
             [
@@ -1182,51 +1181,51 @@ export function DataTable<TData, TValue>({
             ]);
 
             const totalSujetosEjecutivo = await directus.request(
-              poderQueries.resultSujetosObligados.ejecutivo,
+              poderQueries.resultSujetosObligados.ejecutivo
             );
             const totalSujetosJudicial = await directus.request(
-              poderQueries.resultSujetosObligados.judicial,
+              poderQueries.resultSujetosObligados.judicial
             );
             const totalSujetosLegislativo = await directus.request(
-              poderQueries.resultSujetosObligados.legislativo,
+              poderQueries.resultSujetosObligados.legislativo
             );
             const totalSujetosAutonomo = await directus.request(
-              poderQueries.resultSujetosObligados.autonomo,
+              poderQueries.resultSujetosObligados.autonomo
             );
 
             totalEjecutivo = totalSujetosEjecutivo.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
             totalJudicial = totalSujetosJudicial.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
             totalLegislativo = totalSujetosLegislativo.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
             totalAutonomo = totalSujetosAutonomo.reduce(
               (acc, item) => acc + Number(item.count),
-              0,
+              0
             );
           }
 
           const ejecutivoConectados = resultEjecutivo.reduce(
             (acc, item) => acc + Number(item.count),
-            0,
+            0
           );
           const judicialConectados = resultJudicial.reduce(
             (acc, item) => acc + Number(item.count),
-            0,
+            0
           );
           const legislativoConectados = resultLegislativo.reduce(
             (acc, item) => acc + Number(item.count),
-            0,
+            0
           );
           const autonomoConectados = resultAutonomo.reduce(
             (acc, item) => acc + Number(item.count),
-            0,
+            0
           );
 
           const ejecutivoPorcentaje =
@@ -1277,7 +1276,7 @@ export function DataTable<TData, TValue>({
           dataNacional={dataNacional}
           dataAmbito={dataAmbito}
           dataPoder={dataPoder}
-        />,
+        />
       );
     }
   };
@@ -1285,14 +1284,21 @@ export function DataTable<TData, TValue>({
   return (
     <>
       <div className="flex items-center py-4">
-        <Input
-          placeholder={`Filtrar por nombre...`}
-          value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn(searchKey)?.setFilterValue(event.target.value)
-          }
-          className="w-full"
-        />
+        <div className="w-3/4 pr-4">
+          <Input
+            placeholder={`Filtrar por nombre...`}
+            value={
+              (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""
+            }
+            onChange={(event) =>
+              table.getColumn(searchKey)?.setFilterValue(event.target.value)
+            }
+            className="w-full"
+          />
+        </div>
+        <div className="w-1/4">
+          <InfoAlert />
+        </div>
       </div>
       <ScrollArea className="rounded-md border h-[calc(80vh-100px)]">
         <Table className="relative w-full">
@@ -1306,17 +1312,20 @@ export function DataTable<TData, TValue>({
                       key={header.id}
                       onClick={() => {
                         if (canSort) {
-                          header.column.toggleSorting(header.column.getIsSorted() === "asc");
+                          header.column.toggleSorting(
+                            header.column.getIsSorted() === "asc"
+                          );
                         } else {
                           handleCellClick(header);
                         }
                       }}
-                      className="cursor-pointer py-2 relative group transition-colors duration-200 hover:bg-gray-300 dark:hover:bg-gray-700">
+                      className="cursor-pointer py-2 relative group transition-colors duration-200 hover:bg-gray-300 dark:hover:bg-gray-700"
+                    >
                       <div className="flex items-center justify-center relative">
                         <span>
                           {flexRender(
                             header.column.columnDef.header,
-                            header.getContext(),
+                            header.getContext()
                           )}
                         </span>
                         <span className="text-gray-600 dark:text-gray-200 absolute right-0 pr-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -1345,7 +1354,8 @@ export function DataTable<TData, TValue>({
                     hoveredRowId === row.id
                       ? "bg-gray-100 dark:bg-gray-700"
                       : ""
-                  }>
+                  }
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
@@ -1361,10 +1371,11 @@ export function DataTable<TData, TValue>({
                         hoveredColumnId === cell.column.id
                           ? "bg-gray-300 dark:bg-gray-500"
                           : ""
-                      } text-center`}>
+                      } text-center`}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext(),
+                        cell.getContext()
                       )}
                     </TableCell>
                   ))}
@@ -1374,7 +1385,8 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center text-xl">
+                  className="h-24 text-center text-xl"
+                >
                   Sin resultados
                 </TableCell>
               </TableRow>
@@ -1386,12 +1398,13 @@ export function DataTable<TData, TValue>({
                 {footerGroup.headers.map((header) => (
                   <TableCell
                     key={header.id}
-                    className="text-center py-2 px-0.5 text-muted-foreground">
+                    className="text-center py-2 px-0.5 text-muted-foreground"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
                           header.column.columnDef.footer,
-                          header.getContext(),
+                          header.getContext()
                         )}
                   </TableCell>
                 ))}
@@ -1429,7 +1442,8 @@ export function DataTable<TData, TValue>({
             <Button
               onClick={() => setIsDialogOpen(false)}
               className="mt-4"
-              disabled={isLoading}>
+              disabled={isLoading}
+            >
               Cerrar
             </Button>
           </DialogFooter>
