@@ -1,9 +1,10 @@
 // @ts-nocheck
 "use client";
-
+import fs from "fs";
+import path from "path";
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { Loader2, Download, Check, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +34,7 @@ import { Input } from "@/components/ui/input";
 
 import directus from "@/lib/directus";
 import { readItems } from "@directus/sdk";
+import * as XLSX from "xlsx";
 import { EntesTable } from "@/components/tables/cell-entes-table/table";
 import { TabsColumnsSistemas } from "@/components/charts/tabs-columns-sistemas";
 
@@ -160,11 +162,12 @@ export function DataTable<TData, TValue>({
 
     const options = {
       filter,
+      fields: ["*", "entidad.nombre", "municipio.nombre"], // Incluir campos relacionados
       ...(entidad === null && {
         aggregate: { count: ["*"] },
-        groupBy: ["entidad"],
+        groupBy: ["entidad.id"],
       }),
-      ...(entidad !== null && { sort: ["nombre"], limit: "-1", fields: ["*"] }),
+      ...(entidad !== null && { sort: ["nombre"], limit: "-1" }),
     };
 
     try {
@@ -261,6 +264,131 @@ export function DataTable<TData, TValue>({
       );
       setIsLoading(false);
       //setIsDialogOpen(true);
+
+      // Función para procesar los datos antes de exportar a XLSX
+      const processDataForXLSX = (data) => {
+        return data.map((item) => ({
+          ID: item.id,
+          "Nombre del Ente Público": item.nombre,
+          "Tipo de Autoridad": getTipoAutoridad(
+            item.controlOIC,
+            item.controlTribunal
+          ),
+          "Ambito de Gobierno": item.ambitoGobierno,
+          "Poder de Gobierno": item.poderGobierno,
+          "Sistema 1": item.sistema1 ? "Sí" : "No",
+          "Sistema 2": item.sistema2 ? "Sí" : "No",
+          "Sistema 3": item.sistema3 ? "Sí" : "No",
+          "Sistema 6": item.sistema6 ? "Sí" : "No",
+          Entidad: item.entidad?.nombre || "N/A",
+          Municipio: item.municipio?.nombre || "N/A",
+          // Añade aquí más campos si es necesario
+        }));
+      };
+
+      // Función de exportación para XLSX (datos procesados)
+      const exportToXLSX = async () => {
+        const processedData = processDataForXLSX(respuestaDirectus);
+
+        // Crear una nueva hoja de trabajo
+        const ws = XLSX.utils.json_to_sheet([]);
+
+        // Agregar el encabezado
+        const header = [
+          [
+            {
+              v: "Secretaría Ejecutiva del Sistema Nacional Anticorrupción",
+              s: { font: { bold: true, sz: 14 } },
+            },
+          ],
+          [
+            {
+              v: "PLATAFORMA DIGITAL NACIONAL",
+              s: { font: { bold: true, sz: 14 } },
+            },
+          ],
+          [""], // Espacio en blanco
+          [
+            {
+              v: "Tablero Estadístico de Interconexión Nacional",
+              s: { font: { bold: true, sz: 14 } },
+            },
+          ],
+          [""], // Espacio en blanco
+          [
+            { v: "Fecha de generación:", s: { font: { bold: true } } },
+            { v: new Date().toLocaleString() },
+          ],
+          [""], // Espacio en blanco
+          [""], // Espacio adicional antes de los datos
+        ];
+
+        // Añadir el encabezado y los datos
+        XLSX.utils.sheet_add_aoa(ws, header, { origin: "A1" });
+        XLSX.utils.sheet_add_json(ws, processedData, { origin: -1 });
+
+        // Ajustar el ancho de las columnas
+        ws["!cols"] = [{ wch: 20 }, { wch: 30 }, { wch: 100 }];
+
+        // Aplicar estilos
+        const range = XLSX.utils.decode_range(ws["!ref"]);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+          for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cellAddress = { c: C, r: R };
+            const cellRef = XLSX.utils.encode_cell(cellAddress);
+            if (!ws[cellRef]) continue;
+
+            ws[cellRef].s = {
+              font: { name: "Calibri", sz: 11 },
+              alignment: {
+                vertical: "center",
+                horizontal: "left",
+                wrapText: true,
+              },
+            };
+
+            if (R < 4) {
+              ws[cellRef].s.font.bold = true;
+            }
+          }
+        }
+
+        // Crear el libro de trabajo y añadir la hoja
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Datos");
+
+        // Escribir el archivo Excel
+        XLSX.writeFileXLSX(wb, "tablero_cobertura.xlsx");
+      };
+
+      // Función de exportación para CSV (datos originales)
+      const exportToCSV = () => {
+        const csvContent = convertToCSV(respuestaDirectus);
+        downloadFile(csvContent, "text/csv", "export_origin.csv");
+      };
+
+      // Función de exportación para JSON (datos originales)
+      const exportToJSON = () => {
+        const jsonContent = JSON.stringify(respuestaDirectus, null, 2);
+        downloadFile(jsonContent, "application/json", "export_origin.json");
+      };
+
+      setDialogContent(
+        <>
+          <EntesTable data={respuestaDirectus} columnsShow={columnasMostrar} />
+          <div className="flex justify-end mt-4">
+            <Button onClick={exportToXLSX} className="mr-2">
+              <Download className="mr-2 h-4 w-4" /> XLSX
+            </Button>
+            <Button onClick={exportToCSV} className="mr-2">
+              <Download className="mr-2 h-4 w-4" /> CSV
+            </Button>
+            <Button onClick={exportToJSON}>
+              <Download className="mr-2 h-4 w-4" /> JSON
+            </Button>
+          </div>
+        </>
+      );
     } else if (cell.column) {
       const tipoColumna = cell.column.id;
       if (
@@ -1280,6 +1408,48 @@ export function DataTable<TData, TValue>({
       );
     }
   };
+  // Función auxiliar para determinar el tipo de autoridad
+  const getTipoAutoridad = (controlOIC, controlTribunal) => {
+    if (!controlOIC && !controlTribunal) return "Sujeto Obligado";
+    if (controlOIC && !controlTribunal) return "Autoridad Resolutora";
+    if (!controlOIC && controlTribunal) return "TJA";
+    return "Otro"; // Para cualquier otra combinación
+  };
+  // Función para convertir a CSV (datos originales)
+  const convertToCSV = (data) => {
+    const headers = Object.keys(data[0]).join(",");
+    const rows = data.map((row) =>
+      Object.values(row)
+        .map((value) =>
+          typeof value === "string" && value.includes(",")
+            ? `"${value}"`
+            : value
+        )
+        .join(",")
+    );
+    return [headers, ...rows].join("\n");
+  };
+
+  const downloadFile = (content, type, filename) => {
+    const blob = new Blob([content], { type });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  // Modificar la renderización de las celdas para usar íconos
+  const renderCell = (value, columnId) => {
+    if (columnId.startsWith("sistema")) {
+      return value ? (
+        <Check className="text-green-500" />
+      ) : (
+        <X className="text-red-500" />
+      );
+    }
+    return value;
+  };
 
   return (
     <>
@@ -1428,14 +1598,10 @@ export function DataTable<TData, TValue>({
             {isLoading ? (
               <div className="flex flex-row items-start gap-2">
                 Cargando datos...
-                <Loader2 className="animate-spin ml-1" />{" "}
-                {/* Mensaje de carga */}
+                <Loader2 className="animate-spin ml-1" />
               </div>
             ) : (
-              <>
-                {dialogContent}
-                {isLoading && <Loader2 className="animate-spin ml-1" />}
-              </>
+              <>{dialogContent}</>
             )}
           </div>
           <DialogFooter>
