@@ -1,4 +1,3 @@
-version: "3"
 services:
 
   frontend:
@@ -17,8 +16,6 @@ services:
     depends_on:
       - db
     environment:
-      KEY: ${DIRECTUS_KEY}
-      SECRET: ${DIRECTUS_SECRET}
       ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL}
       ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
       PUBLIC_URL: ${NEXT_PUBLIC_BACKEND_URL}
@@ -36,6 +33,8 @@ services:
       WEBSOCKETS_GRAPHQL_ENABLED: 0
       CORS_CREDENTIALS: 1
       CORS_ENABLED: 1
+      CORS_ORIGIN: "*"
+      CORS_METHODS: "GET,POST,PATCH,DELETE"
 
   db:
     image: postgres:14-alpine
@@ -46,8 +45,10 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     volumes:
       - postgres:/var/lib/postgresql/data
+      #- ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
     #ports:
       #- 5432:5432
-      
+
 volumes:
   postgres: {}
