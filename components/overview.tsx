@@ -272,7 +272,7 @@ const data: EntityData[] = [
     s1: 1,
     s2: 81,
     s3: 0,
-    s6: 0,
+    s6: 1,
   },
   {
     entidad: "28",
