@@ -36,6 +36,7 @@ export const DirectorioTable = () => {
                   "sujetosObligados.nombre",
                   "entidad.nombre",
                 ],
+                limit: -1,
               })
             )
           );
