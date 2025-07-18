@@ -42,9 +42,9 @@ const data: EntityData[] = [
   },
   {
     entidad: "02",
-    totalSO: 132,
+    totalSO: 138,
     totalOIC: 95,
-    s1: 1,
+    s1: 6,
     s2: 0,
     s3: 0,
     s6: 0,
@@ -56,7 +56,7 @@ const data: EntityData[] = [
     s1: 127,
     s2: 127,
     s3: 20,
-    s6: 34,
+    s6: 37,
   },
   {
     entidad: "04",
