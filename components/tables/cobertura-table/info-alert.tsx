@@ -79,11 +79,11 @@ const InfoAlert = () => {
       description:
         "Porcentaje de Sujetos Obligados conectados a los Sistemas 1, 2 y 6.",
     },
-    {
-      icon: camp,
-      title: "Campeonato S1",
-      description: "Porcentaje de avance en la interconexión al Sistema 1.",
-    },
+    // {
+    //   icon: camp,
+    //   title: "Campeonato S1",
+    //   description: "Porcentaje de avance en la interconexión al Sistema 1.",
+    // },
   ];
 
   return (

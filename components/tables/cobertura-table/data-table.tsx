@@ -154,10 +154,10 @@ export function DataTable<TData, TValue>({
           { sistema6: { _eq: true } },
         ],
       }),
-      ...(tipoColumna === "resultCampeonatoS1" && {
-        sistema1: { _eq: true },
-        controlOIC: { _eq: false },
-      }),
+      // ...(tipoColumna === "resultCampeonatoS1" && {
+      //   sistema1: { _eq: true },
+      //   controlOIC: { _eq: false },
+      // }),
     };
 
     const options = {

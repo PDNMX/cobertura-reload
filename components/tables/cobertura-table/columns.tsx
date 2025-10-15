@@ -243,73 +243,73 @@ export const columns: ColumnDef<any>[] = [
     footer: "-",
     enableSorting: true,
   },
-  {
-    accessorKey: "resultCampeonatoS1",
-    header: () => (
-      <div className="flex items-center">
-        <Image
-          className="m-auto cursor-pointer"
-          src={camp}
-          alt="Campeonato"
-          width={35}
-        />
-      </div>
-    ),
-    cell: ({ row, table }) => {
-      const campeonatoValue = row.getValue("resultCampeonatoS1") as number;
-      const sortedRows = table.getSortedRowModel().rows;
-      const currentSortingState = table.getState().sorting;
+  // {
+  //   accessorKey: "resultCampeonatoS1",
+  //   header: () => (
+  //     <div className="flex items-center">
+  //       <Image
+  //         className="m-auto cursor-pointer"
+  //         src={camp}
+  //         alt="Campeonato"
+  //         width={35}
+  //       />
+  //     </div>
+  //   ),
+  //   cell: ({ row, table }) => {
+  //     const campeonatoValue = row.getValue("resultCampeonatoS1") as number;
+  //     const sortedRows = table.getSortedRowModel().rows;
+  //     const currentSortingState = table.getState().sorting;
 
-      let ranking = "";
-      if (
-        currentSortingState.length > 0 &&
-        currentSortingState[0].id === "resultCampeonatoS1"
-      ) {
-        // Ordenar las filas por el valor de resultCampeonatoS1 en orden descendente
-        const rankedRows = sortedRows.sort(
-          (a, b) =>
-            (b.getValue("resultCampeonatoS1") as number) -
-            (a.getValue("resultCampeonatoS1") as number)
-        );
+  //     let ranking = "";
+  //     if (
+  //       currentSortingState.length > 0 &&
+  //       currentSortingState[0].id === "resultCampeonatoS1"
+  //     ) {
+  //       // Ordenar las filas por el valor de resultCampeonatoS1 en orden descendente
+  //       const rankedRows = sortedRows.sort(
+  //         (a, b) =>
+  //           (b.getValue("resultCampeonatoS1") as number) -
+  //           (a.getValue("resultCampeonatoS1") as number)
+  //       );
 
-        let currentRank = 1;
-        let currentValue = rankedRows[0].getValue(
-          "resultCampeonatoS1"
-        ) as number;
-        let sameRankCount = 0;
+  //       let currentRank = 1;
+  //       let currentValue = rankedRows[0].getValue(
+  //         "resultCampeonatoS1"
+  //       ) as number;
+  //       let sameRankCount = 0;
 
-        // Recorrer las filas ordenadas para asignar rankings
-        for (let i = 0; i < rankedRows.length; i++) {
-          const rowValue = rankedRows[i].getValue(
-            "resultCampeonatoS1"
-          ) as number;
-          if (rowValue < currentValue) {
-            currentRank += sameRankCount > 0 ? 1 : sameRankCount;
-            currentValue = rowValue;
-            sameRankCount = 0;
-          }
-          sameRankCount++;
-          if (rowValue === campeonatoValue) {
-            ranking = `${currentRank}°`;
-            break;
-          }
-        }
-      }
+  //       // Recorrer las filas ordenadas para asignar rankings
+  //       for (let i = 0; i < rankedRows.length; i++) {
+  //         const rowValue = rankedRows[i].getValue(
+  //           "resultCampeonatoS1"
+  //         ) as number;
+  //         if (rowValue < currentValue) {
+  //           currentRank += sameRankCount > 0 ? 1 : sameRankCount;
+  //           currentValue = rowValue;
+  //           sameRankCount = 0;
+  //         }
+  //         sameRankCount++;
+  //         if (rowValue === campeonatoValue) {
+  //           ranking = `${currentRank}°`;
+  //           break;
+  //         }
+  //       }
+  //     }
 
-      return (
-        <div data-entidad={row.original.entidad} className="relative">
-          <div className="text-center">
-            <span>{campeonatoValue}%</span>
-          </div>
-          {ranking && (
-            <span className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-blue-100 text-blue-800 text-xs font-medium px-1.5 py-0.5 rounded">
-              {ranking}
-            </span>
-          )}
-        </div>
-      );
-    },
-    footer: "-",
-    enableSorting: true,
-  },
+  //     return (
+  //       <div data-entidad={row.original.entidad} className="relative">
+  //         <div className="text-center">
+  //           <span>{campeonatoValue}%</span>
+  //         </div>
+  //         {ranking && (
+  //           <span className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-blue-100 text-blue-800 text-xs font-medium px-1.5 py-0.5 rounded">
+  //             {ranking}
+  //           </span>
+  //         )}
+  //       </div>
+  //     );
+  //   },
+  //   footer: "-",
+  //   enableSorting: true,
+  // },
 ];
