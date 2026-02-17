@@ -9,7 +9,12 @@ import InfoAlert from "./info-alert"; // Importa el nuevo componente
 
 import marcoGeoestadisticoInegi from "./data-entidades";
 
-export const CoberturaTable = ({ data }: any) => {
+interface CoberturaTableProps {
+  data: any;
+  showHeader?: boolean;
+}
+
+export const CoberturaTable = ({ data, showHeader = true }: CoberturaTableProps) => {
   const datosConNombres = data.map((dato) => {
     const entidadEncontrada = marcoGeoestadisticoInegi.find(
       (entidad) => entidad.id === dato.entidad
@@ -22,15 +27,19 @@ export const CoberturaTable = ({ data }: any) => {
 
   return (
     <>
-      <div className="flex items-start justify-between">
-        <Heading
-          title={`Tablero Estadístico de Interconexión Nacional`}
-          description={
-            "Visualiza en tiempo real el avance de los Entes Públicos en la interconexión con los sistemas de la Plataforma Digital Nacional."
-          }
-        />
-      </div>
-      <Separator />
+      {showHeader && (
+        <>
+          <div className="flex items-start justify-between">
+            <Heading
+              title={`Tablero Estadístico de Interconexión Nacional`}
+              description={
+                "Visualiza en tiempo real el avance de los Entes Públicos en la interconexión con los sistemas de la Plataforma Digital Nacional."
+              }
+            />
+          </div>
+          <Separator />
+        </>
+      )}
 
       <DataTable
         searchKey="nombreEntidad"

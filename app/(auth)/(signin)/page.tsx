@@ -1,24 +1,68 @@
 // @ts-nocheck
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { CoberturaTable } from "@/components/tables/cobertura-table/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Heading } from "@/components/ui/heading";
+import { Separator } from "@/components/ui/separator";
+import { DashboardStatsCards } from "@/components/dashboard-stats-cards";
+import { AvanceMapa } from "@/components/charts/avance-mapa";
+import { AvanceBarChart } from "@/components/charts/avance-bar-chart";
+import { AmbitoBarChart } from "@/components/charts/ambito-bar-chart";
+import { PoderBarChart } from "@/components/charts/poder-bar-chart";
+import { EntidadBarChart } from "@/components/charts/entidad-bar-chart";
 import directus from "@/lib/directus";
-import { Loader2 } from "lucide-react";
+import { Loader2, Table2, Map, BarChart3, Building2, Layers, Users } from "lucide-react";
 import { readItems } from "@directus/sdk";
+
+import marcoGeoestadisticoInegi from "@/components/tables/cobertura-table/data-entidades";
+
+// Componente para selector de sistema reutilizable
+const SistemaSelector = ({ selectedSistema, setSelectedSistema }) => {
+  const sistemas = [
+    { key: "resultSistema1", label: "Sistema 1", color: "#F29888" },
+    { key: "resultSistema2", label: "Sistema 2", color: "#B25FAC" },
+    { key: "resultSistema3OIC", label: "Sistema 3", color: "#9085DA" },
+    { key: "resultSistema6", label: "Sistema 6", color: "#42A5CC" },
+  ];
+
+  return (
+    <div className="flex flex-wrap gap-2 mb-4">
+      {sistemas.map((sistema) => (
+        <button
+          key={sistema.key}
+          onClick={() => setSelectedSistema(sistema.key)}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            selectedSistema === sistema.key
+              ? "text-white shadow-md"
+              : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+          }`}
+          style={{
+            backgroundColor: selectedSistema === sistema.key ? sistema.color : undefined,
+          }}
+        >
+          {sistema.label}
+        </button>
+      ))}
+    </div>
+  );
+};
 
 export default function AuthenticationPage() {
   const [entes, setEntes] = useState([]);
-  const [isLoading, setIsLoading] = useState(true); // Estado de carga
-  const [error, setError] = useState(null); // Manejo de errores
+  const [dataAmbito, setDataAmbito] = useState({});
+  const [dataPoder, setDataPoder] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedSistema, setSelectedSistema] = useState("resultSistema1");
 
   useEffect(() => {
-    async function fetchCombinarResultadosDirectus() {
+    async function fetchAllData() {
       setIsLoading(true);
       try {
-        // Realizar ambas solicitudes en paralelo
+        // Queries principales por entidad
         const solicitudes = {
-          // resultSujetosObligados
           resultSujetosObligados: directus.request(
             readItems("entes", {
               filter: { controlOIC: { _eq: false } },
@@ -26,7 +70,6 @@ export default function AuthenticationPage() {
               groupBy: ["entidad"],
             })
           ),
-          // resultOIC
           resultOIC: directus.request(
             readItems("entes", {
               filter: {
@@ -39,7 +82,6 @@ export default function AuthenticationPage() {
               groupBy: ["entidad"],
             })
           ),
-          // resultTribunal
           resultTribunal: directus.request(
             readItems("entes", {
               filter: { controlTribunal: { _eq: true } },
@@ -47,7 +89,6 @@ export default function AuthenticationPage() {
               groupBy: ["entidad"],
             })
           ),
-          // resultSistema1
           resultSistema1: directus.request(
             readItems("entes", {
               filter: { sistema1: { _eq: true }, controlOIC: { _eq: false } },
@@ -55,7 +96,6 @@ export default function AuthenticationPage() {
               groupBy: ["entidad"],
             })
           ),
-          // resultSistema2
           resultSistema2: directus.request(
             readItems("entes", {
               filter: { sistema2: { _eq: true }, controlOIC: { _eq: false } },
@@ -63,7 +103,6 @@ export default function AuthenticationPage() {
               groupBy: ["entidad"],
             })
           ),
-          // resultSistema3OIC
           resultSistema3OIC: directus.request(
             readItems("entes", {
               filter: {
@@ -77,7 +116,6 @@ export default function AuthenticationPage() {
               groupBy: ["entidad"],
             })
           ),
-          // resultSistema3Tribunal
           resultSistema3Tribunal: directus.request(
             readItems("entes", {
               filter: {
@@ -89,7 +127,6 @@ export default function AuthenticationPage() {
               groupBy: ["entidad"],
             })
           ),
-          // resultSistema6
           resultSistema6: directus.request(
             readItems("entes", {
               filter: { sistema6: { _eq: true }, controlOIC: { _eq: false } },
@@ -99,21 +136,292 @@ export default function AuthenticationPage() {
           ),
         };
 
-        const resultados = await Promise.all(Object.values(solicitudes));
+        // Queries por ámbito de gobierno
+        const ambitoQueries = {
+          totalFederal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Federal" }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          totalEstatal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Estatal" }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          totalMunicipal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Municipal" }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          totalOICFederal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Federal" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          totalOICEstatal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Estatal" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          totalOICMunicipal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Municipal" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s1Federal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Federal" }, sistema1: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s1Estatal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Estatal" }, sistema1: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s1Municipal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Municipal" }, sistema1: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s2Federal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Federal" }, sistema2: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s2Estatal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Estatal" }, sistema2: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s2Municipal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Municipal" }, sistema2: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s3Federal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Federal" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s3Estatal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Estatal" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s3Municipal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Municipal" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s6Federal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Federal" }, sistema6: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s6Estatal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Estatal" }, sistema6: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s6Municipal: directus.request(
+            readItems("entes", {
+              filter: { ambitoGobierno: { _eq: "Municipal" }, sistema6: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+        };
 
+        // Queries por poder de gobierno
+        const poderQueries = {
+          totalEjecutivo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Ejecutivo" }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          totalJudicial: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Judicial" }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          totalLegislativo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Legislativo" }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          totalAutonomo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Autonomo" }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          totalOICEjecutivo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Ejecutivo" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          totalOICJudicial: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Judicial" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          totalOICLegislativo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Legislativo" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          totalOICAutonomo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Autonomo" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s1Ejecutivo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Ejecutivo" }, sistema1: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s1Judicial: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Judicial" }, sistema1: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s1Legislativo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Legislativo" }, sistema1: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s1Autonomo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Autonomo" }, sistema1: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s2Ejecutivo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Ejecutivo" }, sistema2: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s2Judicial: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Judicial" }, sistema2: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s2Legislativo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Legislativo" }, sistema2: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s2Autonomo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Autonomo" }, sistema2: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s3Ejecutivo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Ejecutivo" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s3Judicial: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Judicial" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s3Legislativo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Legislativo" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s3Autonomo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Autonomo" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s6Ejecutivo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Ejecutivo" }, sistema6: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s6Judicial: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Judicial" }, sistema6: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s6Legislativo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Legislativo" }, sistema6: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+          s6Autonomo: directus.request(
+            readItems("entes", {
+              filter: { poderGobierno: { _eq: "Autonomo" }, sistema6: { _eq: true }, controlOIC: { _eq: false } },
+              aggregate: { count: ["*"] },
+            })
+          ),
+        };
+
+        // Ejecutar todas las queries en paralelo
+        const [resultados, ambitoResults, poderResults] = await Promise.all([
+          Promise.all(Object.values(solicitudes)),
+          Promise.all(Object.entries(ambitoQueries).map(async ([key, query]) => {
+            const result = await query;
+            return [key, result[0]?.count || 0];
+          })),
+          Promise.all(Object.entries(poderQueries).map(async ([key, query]) => {
+            const result = await query;
+            return [key, result[0]?.count || 0];
+          })),
+        ]);
+
+        // Procesar datos de entidades
         const combinedData = resultados.reduce((acumulador, result, index) => {
           const conteoAgrupamiento = Object.keys(solicitudes)[index];
           result.forEach((item) => {
             const { entidad, count } = item;
             acumulador[entidad] = {
               ...acumulador[entidad],
-              [conteoAgrupamiento]: parseInt(count, 10) || 0, // Convertir a número o usar 0 si es undefined/NaN
+              [conteoAgrupamiento]: parseInt(count, 10) || 0,
             };
           });
           return acumulador;
         }, {});
 
-        // Asegurar que todas las entidades tengan conteos
         for (const entidad in combinedData) {
           for (const conteoAgrupamiento in solicitudes) {
             combinedData[entidad][conteoAgrupamiento] =
@@ -121,7 +429,6 @@ export default function AuthenticationPage() {
           }
         }
 
-        // Calcular el campeonato y conexiones para cada entidad
         for (const entidad in combinedData) {
           const totalSO = combinedData[entidad].resultSujetosObligados;
           const sistema1 = combinedData[entidad].resultSistema1;
@@ -135,14 +442,14 @@ export default function AuthenticationPage() {
               diferencia = porcentaje;
             }
             const campeonato = porcentaje + (diferencia * totalSO) / 2700;
-            combinedData[entidad].resultCampeonatoS1 = Math.round(campeonato); // Redondear y almacenar como número
+            combinedData[entidad].resultCampeonatoS1 = Math.round(campeonato);
 
             const conexiones =
               (100 * (sistema1 + sistema2 + sistema6)) / (3 * totalSO);
-            combinedData[entidad].resultConexiones = Math.round(conexiones); // Redondear y almacenar como número
+            combinedData[entidad].resultConexiones = Math.round(conexiones);
           } else {
-            combinedData[entidad].resultCampeonatoS1 = 0; // Almacenar como número
-            combinedData[entidad].resultConexiones = 0; // Almacenar como número
+            combinedData[entidad].resultCampeonatoS1 = 0;
+            combinedData[entidad].resultConexiones = 0;
           }
         }
 
@@ -152,33 +459,328 @@ export default function AuthenticationPage() {
             ...count,
           })
         );
-        //console.log(resultadoFinal);
         setEntes(resultadoFinal);
+
+        // Procesar datos de ámbito
+        const ambitoData = Object.fromEntries(ambitoResults);
+        const totalFederal = Number(ambitoData.totalFederal);
+        const totalEstatal = Number(ambitoData.totalEstatal);
+        const totalMunicipal = Number(ambitoData.totalMunicipal);
+        const totalOICFederal = Number(ambitoData.totalOICFederal);
+        const totalOICEstatal = Number(ambitoData.totalOICEstatal);
+        const totalOICMunicipal = Number(ambitoData.totalOICMunicipal);
+
+        const ambitoPorSistema = {
+          resultSistema1: [
+            { ambito: "Federal", count: totalFederal > 0 ? parseFloat(((Number(ambitoData.s1Federal) / totalFederal) * 100).toFixed(2)) : 0, conectados: Number(ambitoData.s1Federal), totalEntes: totalFederal },
+            { ambito: "Estatal", count: totalEstatal > 0 ? parseFloat(((Number(ambitoData.s1Estatal) / totalEstatal) * 100).toFixed(2)) : 0, conectados: Number(ambitoData.s1Estatal), totalEntes: totalEstatal },
+            { ambito: "Municipal", count: totalMunicipal > 0 ? parseFloat(((Number(ambitoData.s1Municipal) / totalMunicipal) * 100).toFixed(2)) : 0, conectados: Number(ambitoData.s1Municipal), totalEntes: totalMunicipal },
+          ],
+          resultSistema2: [
+            { ambito: "Federal", count: totalFederal > 0 ? parseFloat(((Number(ambitoData.s2Federal) / totalFederal) * 100).toFixed(2)) : 0, conectados: Number(ambitoData.s2Federal), totalEntes: totalFederal },
+            { ambito: "Estatal", count: totalEstatal > 0 ? parseFloat(((Number(ambitoData.s2Estatal) / totalEstatal) * 100).toFixed(2)) : 0, conectados: Number(ambitoData.s2Estatal), totalEntes: totalEstatal },
+            { ambito: "Municipal", count: totalMunicipal > 0 ? parseFloat(((Number(ambitoData.s2Municipal) / totalMunicipal) * 100).toFixed(2)) : 0, conectados: Number(ambitoData.s2Municipal), totalEntes: totalMunicipal },
+          ],
+          resultSistema3OIC: [
+            { ambito: "Federal", count: totalOICFederal > 0 ? parseFloat(((Number(ambitoData.s3Federal) / totalOICFederal) * 100).toFixed(2)) : 0, conectados: Number(ambitoData.s3Federal), totalEntes: totalOICFederal },
+            { ambito: "Estatal", count: totalOICEstatal > 0 ? parseFloat(((Number(ambitoData.s3Estatal) / totalOICEstatal) * 100).toFixed(2)) : 0, conectados: Number(ambitoData.s3Estatal), totalEntes: totalOICEstatal },
+            { ambito: "Municipal", count: totalOICMunicipal > 0 ? parseFloat(((Number(ambitoData.s3Municipal) / totalOICMunicipal) * 100).toFixed(2)) : 0, conectados: Number(ambitoData.s3Municipal), totalEntes: totalOICMunicipal },
+          ],
+          resultSistema6: [
+            { ambito: "Federal", count: totalFederal > 0 ? parseFloat(((Number(ambitoData.s6Federal) / totalFederal) * 100).toFixed(2)) : 0, conectados: Number(ambitoData.s6Federal), totalEntes: totalFederal },
+            { ambito: "Estatal", count: totalEstatal > 0 ? parseFloat(((Number(ambitoData.s6Estatal) / totalEstatal) * 100).toFixed(2)) : 0, conectados: Number(ambitoData.s6Estatal), totalEntes: totalEstatal },
+            { ambito: "Municipal", count: totalMunicipal > 0 ? parseFloat(((Number(ambitoData.s6Municipal) / totalMunicipal) * 100).toFixed(2)) : 0, conectados: Number(ambitoData.s6Municipal), totalEntes: totalMunicipal },
+          ],
+        };
+        setDataAmbito(ambitoPorSistema);
+
+        // Procesar datos de poder
+        const poderData = Object.fromEntries(poderResults);
+        const totalEjecutivo = Number(poderData.totalEjecutivo);
+        const totalJudicial = Number(poderData.totalJudicial);
+        const totalLegislativo = Number(poderData.totalLegislativo);
+        const totalAutonomo = Number(poderData.totalAutonomo);
+        const totalOICEjecutivo = Number(poderData.totalOICEjecutivo);
+        const totalOICJudicial = Number(poderData.totalOICJudicial);
+        const totalOICLegislativo = Number(poderData.totalOICLegislativo);
+        const totalOICAutonomo = Number(poderData.totalOICAutonomo);
+
+        const poderPorSistema = {
+          resultSistema1: [
+            { poder: "Ejecutivo", count: totalEjecutivo > 0 ? parseFloat(((Number(poderData.s1Ejecutivo) / totalEjecutivo) * 100).toFixed(2)) : 0, conectados: Number(poderData.s1Ejecutivo), totalEntes: totalEjecutivo },
+            { poder: "Judicial", count: totalJudicial > 0 ? parseFloat(((Number(poderData.s1Judicial) / totalJudicial) * 100).toFixed(2)) : 0, conectados: Number(poderData.s1Judicial), totalEntes: totalJudicial },
+            { poder: "Legislativo", count: totalLegislativo > 0 ? parseFloat(((Number(poderData.s1Legislativo) / totalLegislativo) * 100).toFixed(2)) : 0, conectados: Number(poderData.s1Legislativo), totalEntes: totalLegislativo },
+            { poder: "OCAS", count: totalAutonomo > 0 ? parseFloat(((Number(poderData.s1Autonomo) / totalAutonomo) * 100).toFixed(2)) : 0, conectados: Number(poderData.s1Autonomo), totalEntes: totalAutonomo },
+          ],
+          resultSistema2: [
+            { poder: "Ejecutivo", count: totalEjecutivo > 0 ? parseFloat(((Number(poderData.s2Ejecutivo) / totalEjecutivo) * 100).toFixed(2)) : 0, conectados: Number(poderData.s2Ejecutivo), totalEntes: totalEjecutivo },
+            { poder: "Judicial", count: totalJudicial > 0 ? parseFloat(((Number(poderData.s2Judicial) / totalJudicial) * 100).toFixed(2)) : 0, conectados: Number(poderData.s2Judicial), totalEntes: totalJudicial },
+            { poder: "Legislativo", count: totalLegislativo > 0 ? parseFloat(((Number(poderData.s2Legislativo) / totalLegislativo) * 100).toFixed(2)) : 0, conectados: Number(poderData.s2Legislativo), totalEntes: totalLegislativo },
+            { poder: "OCAS", count: totalAutonomo > 0 ? parseFloat(((Number(poderData.s2Autonomo) / totalAutonomo) * 100).toFixed(2)) : 0, conectados: Number(poderData.s2Autonomo), totalEntes: totalAutonomo },
+          ],
+          resultSistema3OIC: [
+            { poder: "Ejecutivo", count: totalOICEjecutivo > 0 ? parseFloat(((Number(poderData.s3Ejecutivo) / totalOICEjecutivo) * 100).toFixed(2)) : 0, conectados: Number(poderData.s3Ejecutivo), totalEntes: totalOICEjecutivo },
+            { poder: "Judicial", count: totalOICJudicial > 0 ? parseFloat(((Number(poderData.s3Judicial) / totalOICJudicial) * 100).toFixed(2)) : 0, conectados: Number(poderData.s3Judicial), totalEntes: totalOICJudicial },
+            { poder: "Legislativo", count: totalOICLegislativo > 0 ? parseFloat(((Number(poderData.s3Legislativo) / totalOICLegislativo) * 100).toFixed(2)) : 0, conectados: Number(poderData.s3Legislativo), totalEntes: totalOICLegislativo },
+            { poder: "OCAS", count: totalOICAutonomo > 0 ? parseFloat(((Number(poderData.s3Autonomo) / totalOICAutonomo) * 100).toFixed(2)) : 0, conectados: Number(poderData.s3Autonomo), totalEntes: totalOICAutonomo },
+          ],
+          resultSistema6: [
+            { poder: "Ejecutivo", count: totalEjecutivo > 0 ? parseFloat(((Number(poderData.s6Ejecutivo) / totalEjecutivo) * 100).toFixed(2)) : 0, conectados: Number(poderData.s6Ejecutivo), totalEntes: totalEjecutivo },
+            { poder: "Judicial", count: totalJudicial > 0 ? parseFloat(((Number(poderData.s6Judicial) / totalJudicial) * 100).toFixed(2)) : 0, conectados: Number(poderData.s6Judicial), totalEntes: totalJudicial },
+            { poder: "Legislativo", count: totalLegislativo > 0 ? parseFloat(((Number(poderData.s6Legislativo) / totalLegislativo) * 100).toFixed(2)) : 0, conectados: Number(poderData.s6Legislativo), totalEntes: totalLegislativo },
+            { poder: "OCAS", count: totalAutonomo > 0 ? parseFloat(((Number(poderData.s6Autonomo) / totalAutonomo) * 100).toFixed(2)) : 0, conectados: Number(poderData.s6Autonomo), totalEntes: totalAutonomo },
+          ],
+        };
+        setDataPoder(poderPorSistema);
+
       } catch (error) {
-        setError(error); // Establecer mensaje de error
+        setError(error);
         console.error("Error al cargar los datos:", error.message);
       } finally {
         setIsLoading(false);
       }
     }
-    fetchCombinarResultadosDirectus();
+    fetchAllData();
   }, []);
 
+  // Calcular estadísticas nacionales para las cards
+  const statsNacionales = useMemo(() => {
+    if (entes.length === 0) {
+      return {
+        sistema1: { conectados: 0, total: 0, porcentaje: 0 },
+        sistema2: { conectados: 0, total: 0, porcentaje: 0 },
+        sistema3: { conectados: 0, total: 0, porcentaje: 0 },
+        sistema6: { conectados: 0, total: 0, porcentaje: 0 },
+      };
+    }
+
+    const totalSO = entes.reduce((acc, e) => acc + (e.resultSujetosObligados || 0), 0);
+    const totalOIC = entes.reduce((acc, e) => acc + (e.resultOIC || 0), 0);
+
+    const s1Conectados = entes.reduce((acc, e) => acc + (e.resultSistema1 || 0), 0);
+    const s2Conectados = entes.reduce((acc, e) => acc + (e.resultSistema2 || 0), 0);
+    const s3Conectados = entes.reduce((acc, e) => acc + (e.resultSistema3OIC || 0), 0);
+    const s6Conectados = entes.reduce((acc, e) => acc + (e.resultSistema6 || 0), 0);
+
+    return {
+      sistema1: {
+        conectados: s1Conectados,
+        total: totalSO,
+        porcentaje: totalSO > 0 ? (s1Conectados / totalSO) * 100 : 0,
+      },
+      sistema2: {
+        conectados: s2Conectados,
+        total: totalSO,
+        porcentaje: totalSO > 0 ? (s2Conectados / totalSO) * 100 : 0,
+      },
+      sistema3: {
+        conectados: s3Conectados,
+        total: totalOIC,
+        porcentaje: totalOIC > 0 ? (s3Conectados / totalOIC) * 100 : 0,
+      },
+      sistema6: {
+        conectados: s6Conectados,
+        total: totalSO,
+        porcentaje: totalSO > 0 ? (s6Conectados / totalSO) * 100 : 0,
+      },
+    };
+  }, [entes]);
+
+  // Preparar datos para el mapa (con nombres de entidad)
+  const dataEntidadConNombres = useMemo(() => {
+    return entes.map((dato) => {
+      const entidadEncontrada = marcoGeoestadisticoInegi.find(
+        (entidad) => entidad.id === dato.entidad
+      );
+      const nombreEntidad = entidadEncontrada?.nombre || "Entidad no encontrada";
+
+      let count = 0;
+      if (selectedSistema === "resultSistema3OIC") {
+        count = dato.resultOIC > 0
+          ? Number(((dato.resultSistema3OIC / dato.resultOIC) * 100).toFixed(2))
+          : 0;
+      } else if (selectedSistema === "resultSistema3Tribunal") {
+        count = dato.resultTribunal > 0
+          ? Number(((dato.resultSistema3Tribunal / dato.resultTribunal) * 100).toFixed(2))
+          : 0;
+      } else {
+        count = dato.resultSujetosObligados > 0
+          ? Number(((dato[selectedSistema] / dato.resultSujetosObligados) * 100).toFixed(2))
+          : 0;
+      }
+
+      return {
+        ...dato,
+        nombreEntidad,
+        count,
+      };
+    });
+  }, [entes, selectedSistema]);
+
+  // Datos para gráfico nacional (todos los sistemas)
+  const dataNacional = useMemo(() => {
+    if (entes.length === 0) return [];
+
+    const totalSO = entes.reduce((acc, e) => acc + (e.resultSujetosObligados || 0), 0);
+    const totalOIC = entes.reduce((acc, e) => acc + (e.resultOIC || 0), 0);
+
+    return [
+      {
+        sistema: "Sistema 1",
+        count: totalSO > 0 ? parseFloat(((entes.reduce((acc, e) => acc + (e.resultSistema1 || 0), 0) / totalSO) * 100).toFixed(2)) : 0,
+        conectados: entes.reduce((acc, e) => acc + (e.resultSistema1 || 0), 0),
+        totalEntes: totalSO,
+      },
+      {
+        sistema: "Sistema 2",
+        count: totalSO > 0 ? parseFloat(((entes.reduce((acc, e) => acc + (e.resultSistema2 || 0), 0) / totalSO) * 100).toFixed(2)) : 0,
+        conectados: entes.reduce((acc, e) => acc + (e.resultSistema2 || 0), 0),
+        totalEntes: totalSO,
+      },
+      {
+        sistema: "Sistema 3 OIC",
+        count: totalOIC > 0 ? parseFloat(((entes.reduce((acc, e) => acc + (e.resultSistema3OIC || 0), 0) / totalOIC) * 100).toFixed(2)) : 0,
+        conectados: entes.reduce((acc, e) => acc + (e.resultSistema3OIC || 0), 0),
+        totalEntes: totalOIC,
+      },
+      {
+        sistema: "Sistema 6",
+        count: totalSO > 0 ? parseFloat(((entes.reduce((acc, e) => acc + (e.resultSistema6 || 0), 0) / totalSO) * 100).toFixed(2)) : 0,
+        conectados: entes.reduce((acc, e) => acc + (e.resultSistema6 || 0), 0),
+        totalEntes: totalSO,
+      },
+    ];
+  }, [entes]);
+
+  const COLORES_SISTEMAS = {
+    resultSistema1: "#F29888",
+    resultSistema2: "#B25FAC",
+    resultSistema3OIC: "#9085DA",
+    resultSistema6: "#42A5CC",
+  };
+
   return (
-    <div className="p-4">
-      {isLoading ? (
-        <div className="flex flex-row items-start gap-2">
-          Cargando datos... 
-          <Loader2 className="animate-spin ml-1" />{" "}
-          {/* Mensaje de carga */}
-        </div> // Mensaje de carga
-      ) : error ? (
-        <div>Error al cargar los datos: {error.message}</div> // Mensaje de error
-      ) : (
-        <ScrollArea className="w-full h-full">
-          <CoberturaTable data={entes} />
-        </ScrollArea>
-      )}
-    </div>
+    <ScrollArea className="h-full">
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <Heading
+            title="Tablero Estadístico de Interconexión Nacional"
+            description="Visualiza en tiempo real el avance de los Entes Públicos en la interconexión con los sistemas de la Plataforma Digital Nacional."
+          />
+        </div>
+        <Separator />
+
+        {isLoading ? (
+          <div className="flex flex-row items-center justify-center gap-2 py-20">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="text-lg">Cargando datos...</span>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20 text-red-500">
+            Error al cargar los datos: {error.message}
+          </div>
+        ) : (
+          <>
+            {/* Cards de estadísticas */}
+            <DashboardStatsCards stats={statsNacionales} />
+
+            {/* Sistema de Tabs */}
+            <Tabs defaultValue="tabla" className="space-y-4">
+              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 lg:w-auto">
+                <TabsTrigger value="tabla" className="flex items-center gap-2">
+                  <Table2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Tabla</span>
+                </TabsTrigger>
+                <TabsTrigger value="mapa" className="flex items-center gap-2">
+                  <Map className="h-4 w-4" />
+                  <span className="hidden sm:inline">Mapa</span>
+                </TabsTrigger>
+                <TabsTrigger value="avance" className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Nacional</span>
+                </TabsTrigger>
+                <TabsTrigger value="entidad" className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Entidad</span>
+                </TabsTrigger>
+                <TabsTrigger value="ambito" className="flex items-center gap-2">
+                  <Layers className="h-4 w-4" />
+                  <span className="hidden sm:inline">Ámbito</span>
+                </TabsTrigger>
+                <TabsTrigger value="poder" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  <span className="hidden sm:inline">Poder</span>
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Tab: Tabla de Cobertura */}
+              <TabsContent value="tabla" className="space-y-4">
+                <div className="rounded-md border">
+                  <CoberturaTable data={entes} showHeader={false} />
+                </div>
+              </TabsContent>
+
+              {/* Tab: Mapa Nacional */}
+              <TabsContent value="mapa" className="space-y-4">
+                <SistemaSelector
+                  selectedSistema={selectedSistema}
+                  setSelectedSistema={setSelectedSistema}
+                />
+                <AvanceMapa
+                  data={dataEntidadConNombres}
+                  baseColor={COLORES_SISTEMAS[selectedSistema]}
+                />
+              </TabsContent>
+
+              {/* Tab: Avance por Sistema */}
+              <TabsContent value="avance" className="space-y-4">
+                <AvanceBarChart data={dataNacional} />
+              </TabsContent>
+
+              {/* Tab: Por Entidad */}
+              <TabsContent value="entidad" className="space-y-4">
+                <SistemaSelector
+                  selectedSistema={selectedSistema}
+                  setSelectedSistema={setSelectedSistema}
+                />
+                <EntidadBarChart
+                  data={dataEntidadConNombres}
+                  selectedColumn={selectedSistema}
+                />
+              </TabsContent>
+
+              {/* Tab: Por Ámbito */}
+              <TabsContent value="ambito" className="space-y-4">
+                <SistemaSelector
+                  selectedSistema={selectedSistema}
+                  setSelectedSistema={setSelectedSistema}
+                />
+                {dataAmbito[selectedSistema] && (
+                  <AmbitoBarChart
+                    data={dataAmbito[selectedSistema]}
+                    tipoColumna={selectedSistema}
+                  />
+                )}
+              </TabsContent>
+
+              {/* Tab: Por Poder */}
+              <TabsContent value="poder" className="space-y-4">
+                <SistemaSelector
+                  selectedSistema={selectedSistema}
+                  setSelectedSistema={setSelectedSistema}
+                />
+                {dataPoder[selectedSistema] && (
+                  <PoderBarChart
+                    data={dataPoder[selectedSistema]}
+                    tipoColumna={selectedSistema}
+                  />
+                )}
+              </TabsContent>
+            </Tabs>
+          </>
+        )}
+      </div>
+    </ScrollArea>
   );
 }
