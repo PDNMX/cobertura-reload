@@ -688,89 +688,108 @@ export default function AuthenticationPage() {
           </div>
         ) : (
           <>
-            {/* Resumen de Entes Públicos vs OIC */}
-            <ResumenConexiones
-              entesConectados={resumenConexiones.entesConectados}
-              totalEntes={resumenConexiones.totalEntes}
-              oicConectados={resumenConexiones.oicConectados}
-              totalOIC={resumenConexiones.totalOIC}
-            />
+            {/* Sistema de Tabs - Diseño moderno y responsivo */}
+            <Tabs defaultValue="general" className="space-y-4">
+              <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+                <TabsList className="w-full flex justify-between bg-gradient-to-r from-muted/80 to-muted/40 backdrop-blur-sm border border-border/50">
+                  <TabsTrigger value="general" className="flex-1 flex items-center justify-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    <span className="hidden sm:inline">General</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="tabla" className="flex-1 flex items-center justify-center gap-2">
+                    <Table2 className="h-4 w-4" />
+                    <span className="hidden sm:inline">Tabla</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="avance" className="flex-1 flex items-center justify-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    <span className="hidden sm:inline">Nacional</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="entidad" className="flex-1 flex items-center justify-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    <span className="hidden sm:inline">Entidad</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="mapa" className="flex-1 flex items-center justify-center gap-2">
+                    <Map className="h-4 w-4" />
+                    <span className="hidden sm:inline">Mapa</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="ambito" className="flex-1 flex items-center justify-center gap-2">
+                    <Layers className="h-4 w-4" />
+                    <span className="hidden sm:inline">Ámbito</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="poder" className="flex-1 flex items-center justify-center gap-2">
+                    <Users className="h-4 w-4" />
+                    <span className="hidden sm:inline">Poder</span>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
-            {/* Cards de estadísticas - Funcionan como filtro principal */}
-            <DashboardStatsCards
-              stats={statsNacionales}
-              selectedSistema={selectedSistema}
-              onSelectSistema={setSelectedSistema}
-            />
-
-            {/* Sistema de Tabs */}
-            <Tabs defaultValue="tabla" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 lg:w-auto">
-                <TabsTrigger value="tabla" className="flex items-center gap-2">
-                  <Table2 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Tabla</span>
-                </TabsTrigger>
-                <TabsTrigger value="resumen" className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  <span className="hidden sm:inline">Resumen</span>
-                </TabsTrigger>
-                <TabsTrigger value="mapa" className="flex items-center gap-2">
-                  <Map className="h-4 w-4" />
-                  <span className="hidden sm:inline">Mapa</span>
-                </TabsTrigger>
-                <TabsTrigger value="avance" className="flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Nacional</span>
-                </TabsTrigger>
-                <TabsTrigger value="entidad" className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Entidad</span>
-                </TabsTrigger>
-                <TabsTrigger value="ambito" className="flex items-center gap-2">
-                  <Layers className="h-4 w-4" />
-                  <span className="hidden sm:inline">Ámbito</span>
-                </TabsTrigger>
-                <TabsTrigger value="poder" className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  <span className="hidden sm:inline">Poder</span>
-                </TabsTrigger>
-              </TabsList>
+              {/* Tab: General */}
+              <TabsContent value="general" className="space-y-4">
+                <ResumenEntidad data={entes} />
+              </TabsContent>
 
               {/* Tab: Tabla de Cobertura */}
               <TabsContent value="tabla" className="space-y-4">
+                {/* Cards de Entes Públicos y OIC solo en Tabla */}
+                <ResumenConexiones
+                  entesConectados={resumenConexiones.entesConectados}
+                  totalEntes={resumenConexiones.totalEntes}
+                  oicConectados={resumenConexiones.oicConectados}
+                  totalOIC={resumenConexiones.totalOIC}
+                />
                 <div className="rounded-md border">
                   <CoberturaTable data={entes} showHeader={false} />
                 </div>
               </TabsContent>
 
-              {/* Tab: Resumen por Entidad */}
-              <TabsContent value="resumen" className="space-y-4">
-                <ResumenEntidad data={entes} />
-              </TabsContent>
-
-              {/* Tab: Mapa Nacional */}
-              <TabsContent value="mapa" className="space-y-4">
-                <AvanceMapa
-                  data={dataEntidadConNombres}
-                  baseColor={COLORES_SISTEMAS[selectedSistema]}
-                />
-              </TabsContent>
-
               {/* Tab: Avance por Sistema */}
               <TabsContent value="avance" className="space-y-4">
+                {/* Cards de Entes Públicos y OIC */}
+                <ResumenConexiones
+                  entesConectados={resumenConexiones.entesConectados}
+                  totalEntes={resumenConexiones.totalEntes}
+                  oicConectados={resumenConexiones.oicConectados}
+                  totalOIC={resumenConexiones.totalOIC}
+                />
                 <AvanceBarChart data={dataNacional} />
               </TabsContent>
 
               {/* Tab: Por Entidad */}
               <TabsContent value="entidad" className="space-y-4">
+                {/* Cards seleccionables para filtrar */}
+                <DashboardStatsCards
+                  stats={statsNacionales}
+                  selectedSistema={selectedSistema}
+                  onSelectSistema={setSelectedSistema}
+                />
                 <EntidadBarChart
                   data={dataEntidadConNombres}
                   selectedColumn={selectedSistema}
                 />
               </TabsContent>
 
+              {/* Tab: Mapa Nacional */}
+              <TabsContent value="mapa" className="space-y-4">
+                {/* Cards seleccionables para filtrar */}
+                <DashboardStatsCards
+                  stats={statsNacionales}
+                  selectedSistema={selectedSistema}
+                  onSelectSistema={setSelectedSistema}
+                />
+                <AvanceMapa
+                  data={dataEntidadConNombres}
+                  baseColor={COLORES_SISTEMAS[selectedSistema]}
+                />
+              </TabsContent>
+
               {/* Tab: Por Ámbito */}
               <TabsContent value="ambito" className="space-y-4">
+                {/* Cards seleccionables para filtrar */}
+                <DashboardStatsCards
+                  stats={statsNacionales}
+                  selectedSistema={selectedSistema}
+                  onSelectSistema={setSelectedSistema}
+                />
                 {dataAmbito[selectedSistema] && (
                   <AmbitoBarChart
                     data={dataAmbito[selectedSistema]}
@@ -781,6 +800,12 @@ export default function AuthenticationPage() {
 
               {/* Tab: Por Poder */}
               <TabsContent value="poder" className="space-y-4">
+                {/* Cards seleccionables para filtrar */}
+                <DashboardStatsCards
+                  stats={statsNacionales}
+                  selectedSistema={selectedSistema}
+                  onSelectSistema={setSelectedSistema}
+                />
                 {dataPoder[selectedSistema] && (
                   <PoderBarChart
                     data={dataPoder[selectedSistema]}
