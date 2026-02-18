@@ -2,57 +2,29 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
 import { CoberturaTable } from "@/components/tables/cobertura-table/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
-import { DashboardStatsCards } from "@/components/dashboard-stats-cards";
+import { DashboardStatsCards, ResumenConexiones } from "@/components/dashboard-stats-cards";
 import { AvanceMapa } from "@/components/charts/avance-mapa";
 import { AvanceBarChart } from "@/components/charts/avance-bar-chart";
 import { AmbitoBarChart } from "@/components/charts/ambito-bar-chart";
 import { PoderBarChart } from "@/components/charts/poder-bar-chart";
 import { EntidadBarChart } from "@/components/charts/entidad-bar-chart";
 import directus from "@/lib/directus";
-import { Loader2, Table2, Map, BarChart3, Building2, Layers, Users } from "lucide-react";
+import { Loader2, Table2, Map, BarChart3, Building2, Layers, Users, FileText } from "lucide-react";
+import { ResumenEntidad } from "@/components/resumen-entidad";
 import { readItems } from "@directus/sdk";
 
 import marcoGeoestadisticoInegi from "@/components/tables/cobertura-table/data-entidades";
 
-// Componente para selector de sistema reutilizable
-const SistemaSelector = ({ selectedSistema, setSelectedSistema }) => {
-  const sistemas = [
-    { key: "resultSistema1", label: "Sistema 1", color: "#F29888" },
-    { key: "resultSistema2", label: "Sistema 2", color: "#B25FAC" },
-    { key: "resultSistema3OIC", label: "Sistema 3", color: "#9085DA" },
-    { key: "resultSistema6", label: "Sistema 6", color: "#42A5CC" },
-  ];
-
-  return (
-    <div className="flex flex-wrap gap-2 mb-4">
-      {sistemas.map((sistema) => (
-        <button
-          key={sistema.key}
-          onClick={() => setSelectedSistema(sistema.key)}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            selectedSistema === sistema.key
-              ? "text-white shadow-md"
-              : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-          }`}
-          style={{
-            backgroundColor: selectedSistema === sistema.key ? sistema.color : undefined,
-          }}
-        >
-          {sistema.label}
-        </button>
-      ))}
-    </div>
-  );
-};
+// El SistemaSelector ya no es necesario - las cards actúan como filtro principal
 
 export default function AuthenticationPage() {
   const [entes, setEntes] = useState([]);
   const [dataAmbito, setDataAmbito] = useState({});
   const [dataPoder, setDataPoder] = useState({});
+  const [entesConectadosCount, setEntesConectadosCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSistema, setSelectedSistema] = useState("resultSistema1");
@@ -396,8 +368,23 @@ export default function AuthenticationPage() {
           ),
         };
 
+        // Query para contar entes conectados en al menos uno de S1, S2 o S6
+        const entesConectadosQuery = directus.request(
+          readItems("entes", {
+            filter: {
+              controlOIC: { _eq: false },
+              _or: [
+                { sistema1: { _eq: true } },
+                { sistema2: { _eq: true } },
+                { sistema6: { _eq: true } },
+              ],
+            },
+            aggregate: { count: ["*"] },
+          })
+        );
+
         // Ejecutar todas las queries en paralelo
-        const [resultados, ambitoResults, poderResults] = await Promise.all([
+        const [resultados, ambitoResults, poderResults, entesConectadosResult] = await Promise.all([
           Promise.all(Object.values(solicitudes)),
           Promise.all(Object.entries(ambitoQueries).map(async ([key, query]) => {
             const result = await query;
@@ -407,7 +394,11 @@ export default function AuthenticationPage() {
             const result = await query;
             return [key, result[0]?.count || 0];
           })),
+          entesConectadosQuery,
         ]);
+
+        // Guardar el conteo de entes conectados
+        setEntesConectadosCount(Number(entesConectadosResult[0]?.count || 0));
 
         // Procesar datos de entidades
         const combinedData = resultados.reduce((acumulador, result, index) => {
@@ -586,6 +577,22 @@ export default function AuthenticationPage() {
     };
   }, [entes]);
 
+  // Calcular resumen de Entes Públicos vs OIC
+  const resumenConexiones = useMemo(() => {
+    if (entes.length === 0) {
+      return { entesConectados: 0, totalEntes: 0, oicConectados: 0, totalOIC: 0 };
+    }
+
+    const totalEntes = entes.reduce((acc, e) => acc + (e.resultSujetosObligados || 0), 0);
+    const totalOIC = entes.reduce((acc, e) => acc + (e.resultOIC || 0), 0);
+
+    // OIC conectados en S3
+    const oicConectados = entes.reduce((acc, e) => acc + (e.resultSistema3OIC || 0), 0);
+
+    // entesConectadosCount viene de la query directa (controlOIC=false AND (S1 OR S2 OR S6))
+    return { entesConectados: entesConectadosCount, totalEntes, oicConectados, totalOIC };
+  }, [entes, entesConectadosCount]);
+
   // Preparar datos para el mapa (con nombres de entidad)
   const dataEntidadConNombres = useMemo(() => {
     return entes.map((dato) => {
@@ -660,8 +667,7 @@ export default function AuthenticationPage() {
   };
 
   return (
-    <ScrollArea className="h-full">
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+    <div className="space-y-4 p-4 md:p-8 pt-6 pb-10">
         {/* Header */}
         <div className="flex items-start justify-between">
           <Heading
@@ -682,15 +688,31 @@ export default function AuthenticationPage() {
           </div>
         ) : (
           <>
-            {/* Cards de estadísticas */}
-            <DashboardStatsCards stats={statsNacionales} />
+            {/* Resumen de Entes Públicos vs OIC */}
+            <ResumenConexiones
+              entesConectados={resumenConexiones.entesConectados}
+              totalEntes={resumenConexiones.totalEntes}
+              oicConectados={resumenConexiones.oicConectados}
+              totalOIC={resumenConexiones.totalOIC}
+            />
+
+            {/* Cards de estadísticas - Funcionan como filtro principal */}
+            <DashboardStatsCards
+              stats={statsNacionales}
+              selectedSistema={selectedSistema}
+              onSelectSistema={setSelectedSistema}
+            />
 
             {/* Sistema de Tabs */}
             <Tabs defaultValue="tabla" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 lg:w-auto">
+              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 lg:w-auto">
                 <TabsTrigger value="tabla" className="flex items-center gap-2">
                   <Table2 className="h-4 w-4" />
                   <span className="hidden sm:inline">Tabla</span>
+                </TabsTrigger>
+                <TabsTrigger value="resumen" className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  <span className="hidden sm:inline">Resumen</span>
                 </TabsTrigger>
                 <TabsTrigger value="mapa" className="flex items-center gap-2">
                   <Map className="h-4 w-4" />
@@ -721,12 +743,13 @@ export default function AuthenticationPage() {
                 </div>
               </TabsContent>
 
+              {/* Tab: Resumen por Entidad */}
+              <TabsContent value="resumen" className="space-y-4">
+                <ResumenEntidad data={entes} />
+              </TabsContent>
+
               {/* Tab: Mapa Nacional */}
               <TabsContent value="mapa" className="space-y-4">
-                <SistemaSelector
-                  selectedSistema={selectedSistema}
-                  setSelectedSistema={setSelectedSistema}
-                />
                 <AvanceMapa
                   data={dataEntidadConNombres}
                   baseColor={COLORES_SISTEMAS[selectedSistema]}
@@ -740,10 +763,6 @@ export default function AuthenticationPage() {
 
               {/* Tab: Por Entidad */}
               <TabsContent value="entidad" className="space-y-4">
-                <SistemaSelector
-                  selectedSistema={selectedSistema}
-                  setSelectedSistema={setSelectedSistema}
-                />
                 <EntidadBarChart
                   data={dataEntidadConNombres}
                   selectedColumn={selectedSistema}
@@ -752,10 +771,6 @@ export default function AuthenticationPage() {
 
               {/* Tab: Por Ámbito */}
               <TabsContent value="ambito" className="space-y-4">
-                <SistemaSelector
-                  selectedSistema={selectedSistema}
-                  setSelectedSistema={setSelectedSistema}
-                />
                 {dataAmbito[selectedSistema] && (
                   <AmbitoBarChart
                     data={dataAmbito[selectedSistema]}
@@ -766,10 +781,6 @@ export default function AuthenticationPage() {
 
               {/* Tab: Por Poder */}
               <TabsContent value="poder" className="space-y-4">
-                <SistemaSelector
-                  selectedSistema={selectedSistema}
-                  setSelectedSistema={setSelectedSistema}
-                />
                 {dataPoder[selectedSistema] && (
                   <PoderBarChart
                     data={dataPoder[selectedSistema]}
@@ -780,7 +791,6 @@ export default function AuthenticationPage() {
             </Tabs>
           </>
         )}
-      </div>
-    </ScrollArea>
+    </div>
   );
 }
