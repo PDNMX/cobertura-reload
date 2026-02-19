@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Combobox } from "@/components/ui/combobox";
 import { cn } from "@/lib/utils";
-import { MapPin, Search, Users, Building2, Scale, TrendingUp, CheckCircle2, XCircle, Loader2, Globe, ChevronRight } from "lucide-react";
+import { MapPin, Search, Users, Building2, Scale, TrendingUp, CheckCircle2, XCircle, Loader2, Globe, ChevronRight, Layers, Gavel } from "lucide-react";
 import marcoGeoestadisticoInegi from "@/components/tables/cobertura-table/data-entidades";
 import {
   PieChart,
@@ -24,9 +24,12 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
+  LabelList,
 } from "recharts";
 import directus from "@/lib/directus";
 import { readItems } from "@directus/sdk";
+import { AvanceMapa } from "@/components/charts/avance-mapa";
+import { EntidadBarChart } from "@/components/charts/entidad-bar-chart";
 
 // Total de municipios según catálogo oficial
 const TOTAL_MUNICIPIOS_CATALOGO = 2475;
@@ -78,6 +81,14 @@ interface EntidadData {
 
 interface ResumenEntidadProps {
   data: EntidadData[];
+  dataAmbito: Record<string, any[]>;
+  dataPoder: Record<string, any[]>;
+  resumenConexiones: {
+    entesConectados: number;
+    totalEntes: number;
+    oicConectados: number;
+    totalOIC: number;
+  };
 }
 
 // Función helper para formatear porcentaje (sin decimales si es 100% o 0%)
@@ -133,51 +144,6 @@ const DonutChart = ({ conectados, total, color, nombre, shortName, descripcion }
   );
 };
 
-// Componente de KPI Card grande
-const KPICardLarge = ({ title, value, subtitle, icon: Icon, color, percentage, secondaryValue, secondaryLabel }) => (
-  <Card className="relative overflow-hidden">
-    <div
-      className="absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full opacity-10"
-      style={{ backgroundColor: color }}
-    />
-    <CardContent className="pt-6">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-sm text-muted-foreground">{title}</p>
-          <p className="text-3xl font-bold mt-1" style={{ color }}>
-            {typeof value === "number" ? value.toLocaleString() : value}
-          </p>
-          {subtitle && (
-            <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
-          )}
-          {secondaryValue !== undefined && (
-            <p className="text-xs mt-2">
-              <span className="font-medium">{secondaryValue.toLocaleString()}</span>
-              <span className="text-muted-foreground"> {secondaryLabel}</span>
-            </p>
-          )}
-          {percentage !== undefined && (
-            <div className="mt-2">
-              <div className="h-1.5 rounded-full overflow-hidden bg-muted">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(percentage, 100)}%`, backgroundColor: color }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-        <div
-          className="p-3 rounded-xl ml-4"
-          style={{ backgroundColor: `${color}15` }}
-        >
-          <Icon className="h-6 w-6" style={{ color }} />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-);
-
 // Componente de mini card para entidades
 const EntidadMiniCard = ({ nombre, porcentaje, color, onClick }) => (
   <div
@@ -203,11 +169,176 @@ const EntidadMiniCard = ({ nombre, porcentaje, color, onClick }) => (
   </div>
 );
 
-export function ResumenEntidad({ data }: ResumenEntidadProps) {
+// Card seleccionable de sistema para filtrar
+const SistemaFilterCard = ({ sistema, config, stats, isSelected, onClick }) => {
+  const Icon = config.icon;
+  const porcentaje = stats.porcentaje;
+
+  return (
+    <div
+      onClick={onClick}
+      className={cn(
+        "p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 relative overflow-hidden",
+        isSelected
+          ? "shadow-xl scale-[1.02]"
+          : "border-border/50 hover:border-border hover:shadow-md bg-card/50"
+      )}
+      style={{
+        borderColor: isSelected ? config.color : undefined,
+        backgroundColor: isSelected ? `${config.color}10` : undefined,
+      }}
+    >
+      {/* Barra de color en la parte superior cuando está seleccionado */}
+      {isSelected && (
+        <div
+          className="absolute top-0 left-0 right-0 h-1"
+          style={{ backgroundColor: config.color }}
+        />
+      )}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              "p-2.5 rounded-xl transition-all",
+              isSelected ? "shadow-md" : ""
+            )}
+            style={{
+              backgroundColor: isSelected ? `${config.color}25` : `${config.color}10`,
+            }}
+          >
+            <Icon
+              className="h-5 w-5 transition-all"
+              style={{ color: config.color }}
+            />
+          </div>
+          <div>
+            <p
+              className={cn(
+                "font-bold text-base transition-all",
+                isSelected ? "" : "text-muted-foreground"
+              )}
+              style={{ color: isSelected ? config.color : undefined }}
+            >
+              {config.nombre}
+            </p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p
+            className={cn(
+              "text-2xl font-bold transition-all",
+              !isSelected && "text-muted-foreground"
+            )}
+            style={{ color: isSelected ? config.color : undefined }}
+          >
+            {formatPorcentaje(porcentaje)}
+          </p>
+        </div>
+      </div>
+      {/* Barra de progreso */}
+      <div className="mt-3 h-1.5 rounded-full overflow-hidden bg-muted/50">
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{
+            width: `${porcentaje}%`,
+            backgroundColor: config.color,
+            opacity: isSelected ? 1 : 0.5
+          }}
+        />
+      </div>
+    </div>
+  );
+};
+
+// Indicador compacto de totales
+const TotalesIndicador = ({
+  totalEntes,
+  totalOIC,
+  entesConectados,
+  oicConectados,
+  totalMunicipios,
+  municipiosRegistrados,
+  coberturaPromedio
+}) => {
+  const porcentajeEntes = totalEntes > 0 ? (entesConectados / totalEntes) * 100 : 0;
+  const porcentajeOIC = totalOIC > 0 ? (oicConectados / totalOIC) * 100 : 0;
+  const porcentajeMunicipios = totalMunicipios > 0 ? (municipiosRegistrados / totalMunicipios) * 100 : 0;
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {/* Entes Públicos */}
+      <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 rounded-xl p-4 border border-blue-500/20 dark:border-blue-400/30">
+        <div className="flex items-center gap-2 mb-2">
+          <Building2 className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+          <span className="text-xs font-medium text-blue-600 dark:text-blue-300">Entes Públicos</span>
+        </div>
+        <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{totalEntes.toLocaleString()}</p>
+        <div className="flex items-center gap-1 mt-1">
+          <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">{entesConectados.toLocaleString()}</span>
+          <span className="text-xs text-muted-foreground">conectados</span>
+          <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 ml-auto">{formatPorcentaje(porcentajeEntes)}</span>
+        </div>
+        <div className="h-1.5 rounded-full overflow-hidden bg-blue-500/20 dark:bg-blue-400/20 mt-2">
+          <div className="h-full rounded-full bg-blue-500 dark:bg-blue-400" style={{ width: `${Math.min(porcentajeEntes, 100)}%` }} />
+        </div>
+      </div>
+
+      {/* OIC */}
+      <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 dark:from-amber-500/20 dark:to-amber-600/10 rounded-xl p-4 border border-amber-500/20 dark:border-amber-400/30">
+        <div className="flex items-center gap-2 mb-2">
+          <Scale className="h-4 w-4 text-amber-500 dark:text-amber-400" />
+          <span className="text-xs font-medium text-amber-600 dark:text-amber-300">OIC / Autoridades</span>
+        </div>
+        <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{totalOIC.toLocaleString()}</p>
+        <div className="flex items-center gap-1 mt-1">
+          <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">{oicConectados.toLocaleString()}</span>
+          <span className="text-xs text-muted-foreground">conectados</span>
+          <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 ml-auto">{formatPorcentaje(porcentajeOIC)}</span>
+        </div>
+        <div className="h-1.5 rounded-full overflow-hidden bg-amber-500/20 dark:bg-amber-400/20 mt-2">
+          <div className="h-full rounded-full bg-amber-500 dark:bg-amber-400" style={{ width: `${Math.min(porcentajeOIC, 100)}%` }} />
+        </div>
+      </div>
+
+      {/* Cobertura Promedio */}
+      <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 dark:from-emerald-500/20 dark:to-emerald-600/10 rounded-xl p-4 border border-emerald-500/20 dark:border-emerald-400/30">
+        <div className="flex items-center gap-2 mb-2">
+          <TrendingUp className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
+          <span className="text-xs font-medium text-emerald-600 dark:text-emerald-300">Cobertura Promedio</span>
+        </div>
+        <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{coberturaPromedio.toFixed(2)}%</p>
+        <p className="text-xs text-muted-foreground mt-1">Promedio S1, S2 y S6</p>
+        <div className="h-1.5 rounded-full overflow-hidden bg-emerald-500/20 dark:bg-emerald-400/20 mt-2">
+          <div className="h-full rounded-full bg-emerald-500 dark:bg-emerald-400" style={{ width: `${Math.min(coberturaPromedio, 100)}%` }} />
+        </div>
+      </div>
+
+      {/* Municipios */}
+      <div className="bg-gradient-to-br from-violet-500/10 to-violet-600/5 dark:from-violet-500/20 dark:to-violet-600/10 rounded-xl p-4 border border-violet-500/20 dark:border-violet-400/30">
+        <div className="flex items-center gap-2 mb-2">
+          <MapPin className="h-4 w-4 text-violet-500 dark:text-violet-400" />
+          <span className="text-xs font-medium text-violet-600 dark:text-violet-300">Municipios</span>
+        </div>
+        <p className="text-2xl font-bold text-violet-600 dark:text-violet-400">{totalMunicipios.toLocaleString()}</p>
+        <div className="flex items-center gap-1 mt-1">
+          <span className="text-xs text-violet-600 dark:text-violet-400 font-medium">{municipiosRegistrados?.toLocaleString() || 0}</span>
+          <span className="text-xs text-muted-foreground">registrados</span>
+        </div>
+        <div className="h-1.5 rounded-full overflow-hidden bg-violet-500/20 dark:bg-violet-400/20 mt-2">
+          <div className="h-full rounded-full bg-violet-500 dark:bg-violet-400" style={{ width: `${Math.min(porcentajeMunicipios, 100)}%` }} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones }: ResumenEntidadProps) {
   const [selectedEntidad, setSelectedEntidad] = useState<string>("");
+  const [selectedSistema, setSelectedSistema] = useState<string>("resultSistema1");
   const [municipiosData, setMunicipiosData] = useState(null);
   const [municipiosNacionales, setMunicipiosNacionales] = useState(null);
   const [loadingMunicipios, setLoadingMunicipios] = useState(false);
+  const [entesConectadosEntidad, setEntesConectadosEntidad] = useState(0);
 
   // Lista de entidades ordenadas alfabéticamente para el Combobox
   const entidadesOptions = useMemo(() => {
@@ -260,9 +391,7 @@ export function ResumenEntidad({ data }: ResumenEntidadProps) {
   useEffect(() => {
     async function fetchMunicipiosNacionales() {
       try {
-        // Contar entes con municipio registrado y municipios únicos conectados por sistema
         const [entesConMunicipio, s1Municipios, s2Municipios, s3Municipios, s6Municipios] = await Promise.all([
-          // Total de entes que tienen municipio registrado
           directus.request(
             readItems("entes", {
               filter: { controlOIC: { _eq: false }, municipio: { _nnull: true } },
@@ -315,7 +444,7 @@ export function ResumenEntidad({ data }: ResumenEntidadProps) {
     fetchMunicipiosNacionales();
   }, []);
 
-  // Cache de municipios por entidad para evitar recargas
+  // Cache de municipios por entidad
   const [municipiosCache, setMunicipiosCache] = useState<Record<string, any>>({});
 
   // Cargar datos de municipios cuando se selecciona una entidad
@@ -323,18 +452,18 @@ export function ResumenEntidad({ data }: ResumenEntidadProps) {
     async function fetchMunicipiosData() {
       if (!selectedEntidad) {
         setMunicipiosData(null);
+        setEntesConectadosEntidad(0);
         return;
       }
 
-      // Verificar si ya tenemos los datos en cache
       if (municipiosCache[selectedEntidad]) {
         setMunicipiosData(municipiosCache[selectedEntidad]);
+        setEntesConectadosEntidad(municipiosCache[selectedEntidad].entesConectados || 0);
         return;
       }
 
       setLoadingMunicipios(true);
       try {
-        // Consulta 1: Total de municipios del catálogo para esta entidad usando id_entidad
         const catalogoMunicipios = await directus.request(
           readItems("municipio", {
             filter: { id_entidad: { _eq: selectedEntidad } },
@@ -344,7 +473,6 @@ export function ResumenEntidad({ data }: ResumenEntidadProps) {
 
         const totalCatalogo = Number(catalogoMunicipios[0]?.count || 0);
 
-        // Consulta 2: Obtener municipios registrados y conectados desde entes (como estaba funcionando)
         const [entesConMunicipio, s1Municipios, s2Municipios, s3Municipios, s6Municipios] = await Promise.all([
           directus.request(
             readItems("entes", {
@@ -383,6 +511,22 @@ export function ResumenEntidad({ data }: ResumenEntidadProps) {
           ),
         ]);
 
+        // Query adicional para entes conectados de la entidad
+        const entesConectadosResult = await directus.request(
+          readItems("entes", {
+            filter: {
+              entidad: { _eq: selectedEntidad },
+              controlOIC: { _eq: false },
+              _or: [
+                { sistema1: { _eq: true } },
+                { sistema2: { _eq: true } },
+                { sistema6: { _eq: true } },
+              ],
+            },
+            aggregate: { count: ["*"] },
+          })
+        );
+
         const result = {
           totalCatalogo,
           entesConMunicipio: Number(entesConMunicipio[0]?.count || 0),
@@ -391,11 +535,12 @@ export function ResumenEntidad({ data }: ResumenEntidadProps) {
           s2: Number(s2Municipios[0]?.countDistinct?.municipio || 0),
           s3: Number(s3Municipios[0]?.countDistinct?.municipio || 0),
           s6: Number(s6Municipios[0]?.countDistinct?.municipio || 0),
+          entesConectados: Number(entesConectadosResult[0]?.count || 0),
         };
 
-        // Guardar en cache
         setMunicipiosCache(prev => ({ ...prev, [selectedEntidad]: result }));
         setMunicipiosData(result);
+        setEntesConectadosEntidad(result.entesConectados);
       } catch (error) {
         console.error("Error al cargar datos de municipios:", error);
         setMunicipiosData(null);
@@ -430,27 +575,32 @@ export function ResumenEntidad({ data }: ResumenEntidadProps) {
   const estadisticas = selectedEntidad ? estadisticasEntidad : statsNacionales;
   const currentMunicipios = selectedEntidad ? municipiosData : municipiosNacionales;
 
-  // Datos para la gráfica de barras comparativa
-  const barChartData = useMemo(() => {
-    if (!estadisticas) return [];
-    return [
-      { name: "S1", fullName: "Sistema 1", porcentaje: estadisticas.sistemas.resultSistema1.porcentaje, fill: SISTEMAS_CONFIG.resultSistema1.color },
-      { name: "S2", fullName: "Sistema 2", porcentaje: estadisticas.sistemas.resultSistema2.porcentaje, fill: SISTEMAS_CONFIG.resultSistema2.color },
-      { name: "S3", fullName: "Sistema 3", porcentaje: estadisticas.sistemas.resultSistema3OIC.porcentaje, fill: SISTEMAS_CONFIG.resultSistema3OIC.color },
-      { name: "S6", fullName: "Sistema 6", porcentaje: estadisticas.sistemas.resultSistema6.porcentaje, fill: SISTEMAS_CONFIG.resultSistema6.color },
-    ];
-  }, [estadisticas]);
+  // Datos para el mapa (con nombres de entidad)
+  const dataMapaConNombres = useMemo(() => {
+    return data.map((dato) => {
+      const entidadEncontrada = marcoGeoestadisticoInegi.find(
+        (entidad) => entidad.id === dato.entidad
+      );
+      const nombreEntidad = entidadEncontrada?.nombre || "Entidad no encontrada";
 
-  // Datos para gráfica de municipios conectados
-  const municipiosChartData = useMemo(() => {
-    if (!currentMunicipios) return [];
-    return [
-      { name: "S1", fullName: "Sistema 1", value: currentMunicipios.s1, fill: SISTEMAS_CONFIG.resultSistema1.color },
-      { name: "S2", fullName: "Sistema 2", value: currentMunicipios.s2, fill: SISTEMAS_CONFIG.resultSistema2.color },
-      { name: "S3", fullName: "Sistema 3", value: currentMunicipios.s3, fill: SISTEMAS_CONFIG.resultSistema3OIC.color },
-      { name: "S6", fullName: "Sistema 6", value: currentMunicipios.s6, fill: SISTEMAS_CONFIG.resultSistema6.color },
-    ];
-  }, [currentMunicipios]);
+      let count = 0;
+      if (selectedSistema === "resultSistema3OIC") {
+        count = dato.resultOIC > 0
+          ? Number(((dato.resultSistema3OIC / dato.resultOIC) * 100).toFixed(2))
+          : 0;
+      } else {
+        count = dato.resultSujetosObligados > 0
+          ? Number(((dato[selectedSistema] / dato.resultSujetosObligados) * 100).toFixed(2))
+          : 0;
+      }
+
+      return {
+        ...dato,
+        nombreEntidad,
+        count,
+      };
+    });
+  }, [data, selectedSistema]);
 
   // Top 5 entidades con mejor avance
   const topEntidades = useMemo(() => {
@@ -482,18 +632,24 @@ export function ResumenEntidad({ data }: ResumenEntidadProps) {
       .slice(0, 5);
   }, [data]);
 
-  // Custom tooltip para mostrar nombre completo del sistema
-  const CustomBarTooltip = ({ active, payload, label }) => {
+  // Cobertura promedio
+  const coberturaPromedio = useMemo(() => {
+    if (!estadisticas) return 0;
+    return (
+      estadisticas.sistemas.resultSistema1.porcentaje +
+      estadisticas.sistemas.resultSistema2.porcentaje +
+      estadisticas.sistemas.resultSistema6.porcentaje
+    ) / 3;
+  }, [estadisticas]);
+
+  // Custom tooltip para ámbito y poder
+  const CustomAmbitoPoderTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
+      const { conectados, totalEntes, count } = payload[0].payload;
       return (
         <div className="bg-background border rounded-lg shadow-lg p-3">
-          <p className="font-medium">{data.fullName}</p>
-          <p className="text-sm" style={{ color: data.fill }}>
-            {payload[0].dataKey === "porcentaje"
-              ? `${Number(payload[0].value).toFixed(2)}%`
-              : `${payload[0].value} municipios`}
-          </p>
+          <p className="font-medium">{`${conectados} de ${totalEntes}`}</p>
+          <p className="text-sm" style={{ color: SISTEMAS_CONFIG[selectedSistema].color }}>{`${count}%`}</p>
         </div>
       );
     }
@@ -511,187 +667,180 @@ export function ResumenEntidad({ data }: ResumenEntidadProps) {
             </div>
             <div>
               <CardTitle className="text-xl">
-                {selectedEntidad ? "Resumen por Entidad" : "Resumen General"}
+                {selectedEntidad ? nombreEntidad : "República Mexicana"}
               </CardTitle>
               <CardDescription>
                 {selectedEntidad
-                  ? "Estadísticas de la entidad seleccionada"
-                  : "Vista general de todas las entidades federativas"}
+                  ? "Dashboard de Interconexión con la PDN"
+                  : "32 Entidades Federativas y Federación"}
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="w-full md:w-[500px]">
+          <div className="w-full md:w-[400px]">
             <Combobox
               options={entidadesOptions}
               value={selectedEntidad}
               onChange={setSelectedEntidad}
-              placeholder="Ver Resumen Nacional"
+              placeholder="Seleccionar entidad federativa..."
             />
           </div>
-          <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1.5">
-            <Search className="h-3.5 w-3.5" />
-            {selectedEntidad
-              ? "Selecciona otra entidad o limpia para ver el resumen nacional"
-              : "Selecciona una entidad para ver su detalle específico"}
-          </p>
         </CardContent>
       </Card>
 
       {estadisticas && (
         <>
-          {/* Header */}
-          <div className="flex items-center gap-4 py-2">
-            <div className="h-12 w-1 rounded-full bg-primary" />
-            <div>
-              <h2 className="text-3xl font-bold">
-                {selectedEntidad ? nombreEntidad : "República Mexicana"}
-              </h2>
-              <p className="text-muted-foreground">
-                {selectedEntidad
-                  ? "Dashboard de Interconexión con la PDN"
-                  : "32 Entidades Federativas y Federación"}
-              </p>
-            </div>
-          </div>
+          {/* Indicadores compactos de totales */}
+          <TotalesIndicador
+            totalEntes={estadisticas.totalEntes}
+            totalOIC={estadisticas.totalOIC}
+            entesConectados={
+              selectedEntidad
+                ? currentMunicipios?.entesConectados || 0
+                : resumenConexiones?.entesConectados || 0
+            }
+            oicConectados={
+              selectedEntidad
+                ? estadisticas.sistemas.resultSistema3OIC.conectados
+                : resumenConexiones?.oicConectados || 0
+            }
+            totalMunicipios={currentMunicipios?.totalCatalogo || (selectedEntidad ? 0 : TOTAL_MUNICIPIOS_CATALOGO)}
+            municipiosRegistrados={currentMunicipios?.municipiosRegistrados}
+            coberturaPromedio={coberturaPromedio}
+          />
 
-          {/* KPIs principales */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <KPICardLarge
-              title="Entes Públicos"
-              value={estadisticas.totalEntes}
-              subtitle="Sujetos obligados registrados"
-              icon={Building2}
-              color="#3b82f6"
-            />
-            <KPICardLarge
-              title="OIC / Autoridades"
-              value={estadisticas.totalOIC}
-              subtitle="Órganos de control"
-              icon={Scale}
-              color="#f59e0b"
-            />
-            <KPICardLarge
-              title="Cobertura Promedio"
-              value={`${(
-                (estadisticas.sistemas.resultSistema1.porcentaje +
-                  estadisticas.sistemas.resultSistema2.porcentaje +
-                  estadisticas.sistemas.resultSistema6.porcentaje) / 3
-              ).toFixed(2)}%`}
-              subtitle="Promedio S1, S2 y S6"
-              icon={TrendingUp}
-              color="#10b981"
-              percentage={(
-                (estadisticas.sistemas.resultSistema1.porcentaje +
-                  estadisticas.sistemas.resultSistema2.porcentaje +
-                  estadisticas.sistemas.resultSistema6.porcentaje) / 3
-              )}
-            />
-            <KPICardLarge
-              title="Municipios"
-              value={currentMunicipios?.totalCatalogo || TOTAL_MUNICIPIOS_CATALOGO}
-              subtitle="Total en catálogo"
-              icon={MapPin}
-              color="#8b5cf6"
-              secondaryValue={currentMunicipios?.municipiosRegistrados}
-              secondaryLabel="con entes registrados"
-            />
-          </div>
-
-          {/* Gráficas de Donut por sistema */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-primary/10">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                </div>
-                Avance por Sistema
-              </CardTitle>
-              <CardDescription>
-                Porcentaje de conexión en cada sistema de la PDN
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {Object.entries(SISTEMAS_CONFIG).map(([key, config]) => {
-                  const stats = estadisticas.sistemas[key];
-                  return (
-                    <div key={key} className="flex flex-col items-center p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
-                      <DonutChart
-                        conectados={stats.conectados}
-                        total={stats.total}
-                        color={config.color}
-                        nombre={config.nombre}
-                        shortName={config.shortName}
-                        descripcion={config.descripcion}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Gráficas comparativas */}
-          <div className="grid gap-4 md:grid-cols-2">
-            {/* Comparativa de avance */}
-            <Card>
+          {/* Gráficas de Donut por sistema y Municipios lado a lado */}
+          <div className="grid gap-4 lg:grid-cols-4">
+            {/* Avance por Sistema - 3/4 del espacio */}
+            <Card className="lg:col-span-3">
               <CardHeader>
-                <CardTitle className="text-base">Comparativa de Avance</CardTitle>
-                <CardDescription>Porcentaje de conexión por sistema</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-primary/10">
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                  </div>
+                  Avance por Sistema
+                </CardTitle>
+                <CardDescription>
+                  Porcentaje de conexión en cada sistema de la PDN
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={barChartData} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-                      <XAxis type="number" domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
-                      <YAxis type="category" dataKey="name" width={40} />
-                      <Tooltip content={<CustomBarTooltip />} />
-                      <Bar dataKey="porcentaje" radius={[0, 4, 4, 0]}>
-                        {barChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {Object.entries(SISTEMAS_CONFIG).map(([key, config]) => {
+                    const stats = estadisticas.sistemas[key];
+                    return (
+                      <div key={key} className="flex flex-col items-center p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+                        <DonutChart
+                          conectados={stats.conectados}
+                          total={stats.total}
+                          color={config.color}
+                          nombre={config.nombre}
+                          shortName={config.shortName}
+                          descripcion={config.descripcion}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Municipios conectados */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Municipios Conectados por Sistema</CardTitle>
-                <CardDescription>
-                  De {currentMunicipios?.totalCatalogo?.toLocaleString() || TOTAL_MUNICIPIOS_CATALOGO.toLocaleString()} municipios en catálogo
+            {/* Municipios Conectados por Sistema - 1/4 del espacio */}
+            <Card className="lg:col-span-1">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <div className="p-1.5 rounded-lg bg-violet-500/10">
+                    <MapPin className="h-4 w-4 text-violet-500" />
+                  </div>
+                  Municipios
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  {currentMunicipios?.municipiosRegistrados || 0} de {currentMunicipios?.totalCatalogo || (selectedEntidad ? 0 : TOTAL_MUNICIPIOS_CATALOGO)} registrados
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                {(selectedEntidad && loadingMunicipios) ? (
-                  <div className="h-64 flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  </div>
-                ) : currentMunicipios ? (
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={municipiosChartData}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip content={<CustomBarTooltip />} />
-                        <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                          {municipiosChartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
+              <CardContent className="pt-0">
+                {currentMunicipios ? (
+                  <div className="space-y-3">
+                    {/* Sistema 1 */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium" style={{ color: '#F29888' }}>S1</span>
+                        <span className="text-xs font-bold" style={{ color: '#F29888' }}>
+                          {currentMunicipios.s1 || 0}
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full overflow-hidden bg-muted">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s1 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
+                            backgroundColor: '#F29888'
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Sistema 2 */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium" style={{ color: '#B25FAC' }}>S2</span>
+                        <span className="text-xs font-bold" style={{ color: '#B25FAC' }}>
+                          {currentMunicipios.s2 || 0}
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full overflow-hidden bg-muted">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s2 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
+                            backgroundColor: '#B25FAC'
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Sistema 3 */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium" style={{ color: '#9085DA' }}>S3</span>
+                        <span className="text-xs font-bold" style={{ color: '#9085DA' }}>
+                          {currentMunicipios.s3 || 0}
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full overflow-hidden bg-muted">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s3 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
+                            backgroundColor: '#9085DA'
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Sistema 6 */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium" style={{ color: '#42A5CC' }}>S6</span>
+                        <span className="text-xs font-bold" style={{ color: '#42A5CC' }}>
+                          {currentMunicipios.s6 || 0}
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full overflow-hidden bg-muted">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s6 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
+                            backgroundColor: '#42A5CC'
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 ) : (
-                  <div className="h-64 flex items-center justify-center text-muted-foreground">
-                    Cargando datos de municipios...
+                  <div className="flex items-center justify-center h-32 text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
                   </div>
                 )}
               </CardContent>
@@ -747,6 +896,104 @@ export function ResumenEntidad({ data }: ResumenEntidadProps) {
             </div>
           )}
 
+          {/* Sección de gráficas detalladas (solo en vista nacional) */}
+          {!selectedEntidad && (
+            <>
+              {/* Separador visual */}
+              <div className="flex items-center gap-4 py-4">
+                <div className="h-px flex-1 bg-border" />
+                <span className="text-sm font-medium text-muted-foreground">Análisis Detallado por Sistema</span>
+                <div className="h-px flex-1 bg-border" />
+              </div>
+
+              {/* Cards de filtro por sistema */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {Object.entries(SISTEMAS_CONFIG).map(([key, config]) => (
+                  <SistemaFilterCard
+                    key={key}
+                    sistema={key}
+                    config={config}
+                    stats={estadisticas.sistemas[key]}
+                    isSelected={selectedSistema === key}
+                    onClick={() => setSelectedSistema(key)}
+                  />
+                ))}
+              </div>
+
+              {/* Mapa a la izquierda, Ámbito y Poder a la derecha */}
+              <div className="grid gap-4 lg:grid-cols-2">
+                {/* Mapa de México */}
+                <AvanceMapa
+                  data={dataMapaConNombres}
+                  baseColor={SISTEMAS_CONFIG[selectedSistema].color}
+                />
+
+                {/* Gráficas de Ámbito y Poder apiladas */}
+                <div className="flex flex-col gap-4">
+                  {/* Por Ámbito */}
+                  <Card className="flex-1">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Layers className="h-4 w-4" style={{ color: SISTEMAS_CONFIG[selectedSistema].color }} />
+                        Por Ámbito de Gobierno
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1">
+                      {dataAmbito[selectedSistema] && (
+                        <div className="h-[220px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={dataAmbito[selectedSistema]}>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                              <XAxis dataKey="ambito" fontSize={12} />
+                              <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} fontSize={11} />
+                              <Tooltip content={<CustomAmbitoPoderTooltip />} />
+                              <Bar dataKey="count" fill={SISTEMAS_CONFIG[selectedSistema].color} radius={[4, 4, 0, 0]}>
+                                <LabelList dataKey="count" position="top" fontSize={11} formatter={(v) => `${v}%`} />
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Por Poder */}
+                  <Card className="flex-1">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Gavel className="h-4 w-4" style={{ color: SISTEMAS_CONFIG[selectedSistema].color }} />
+                        Por Poder de Gobierno
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1">
+                      {dataPoder[selectedSistema] && (
+                        <div className="h-[220px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={dataPoder[selectedSistema]}>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                              <XAxis dataKey="poder" fontSize={12} />
+                              <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} fontSize={11} />
+                              <Tooltip content={<CustomAmbitoPoderTooltip />} />
+                              <Bar dataKey="count" fill={SISTEMAS_CONFIG[selectedSistema].color} radius={[4, 4, 0, 0]}>
+                                <LabelList dataKey="count" position="top" fontSize={11} formatter={(v) => `${v}%`} />
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Gráfica original de Entidad (la que usan para reportes) */}
+              <EntidadBarChart
+                data={data}
+                selectedColumn={selectedSistema}
+              />
+            </>
+          )}
+
           {/* Detalle de conexión por sistema (solo en vista de entidad) */}
           {selectedEntidad && (
             <Card>
@@ -793,7 +1040,7 @@ export function ResumenEntidad({ data }: ResumenEntidadProps) {
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Avance</span>
                             <span className="text-2xl font-bold" style={{ color: config.color }}>
-                              {stats.porcentaje.toFixed(2)}%
+                              {formatPorcentaje(stats.porcentaje)}
                             </span>
                           </div>
 

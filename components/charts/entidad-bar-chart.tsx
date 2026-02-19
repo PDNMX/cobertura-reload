@@ -67,11 +67,14 @@ export const EntidadBarChart = ({ data, selectedColumn }: any) => {
         ...dato,
         nombreEntidad: entidadEncontrada?.nombre || "Entidad no encontrada",
         abreviacion: entidadEncontrada?.abreviacion || "NA",
+        idEntidad: entidadEncontrada?.id || "99",
         count: parseFloat(percentage.toFixed(2)), // Almacenar el porcentaje
         originalCount, // Almacenar el conteo original para el tooltip
         total, // Almacenar el total para el tooltip
       };
-    });
+    })
+    // Ordenar por id de entidad (Federación primero, luego por orden numérico)
+    .sort((a, b) => a.idEntidad.localeCompare(b.idEntidad));
 
     return (
       <Card>

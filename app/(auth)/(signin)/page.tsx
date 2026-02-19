@@ -5,20 +5,11 @@ import { CoberturaTable } from "@/components/tables/cobertura-table/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
-import { DashboardStatsCards, ResumenConexiones } from "@/components/dashboard-stats-cards";
-import { AvanceMapa } from "@/components/charts/avance-mapa";
-import { AvanceBarChart } from "@/components/charts/avance-bar-chart";
-import { AmbitoBarChart } from "@/components/charts/ambito-bar-chart";
-import { PoderBarChart } from "@/components/charts/poder-bar-chart";
-import { EntidadBarChart } from "@/components/charts/entidad-bar-chart";
+import { ResumenConexiones } from "@/components/dashboard-stats-cards";
 import directus from "@/lib/directus";
-import { Loader2, Table2, Map, BarChart3, Building2, Layers, Users, FileText } from "lucide-react";
+import { Loader2, Table2, LayoutDashboard } from "lucide-react";
 import { ResumenEntidad } from "@/components/resumen-entidad";
 import { readItems } from "@directus/sdk";
-
-import marcoGeoestadisticoInegi from "@/components/tables/cobertura-table/data-entidades";
-
-// El SistemaSelector ya no es necesario - las cards actúan como filtro principal
 
 export default function AuthenticationPage() {
   const [entes, setEntes] = useState([]);
@@ -27,7 +18,6 @@ export default function AuthenticationPage() {
   const [entesConectadosCount, setEntesConectadosCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedSistema, setSelectedSistema] = useState("resultSistema1");
 
   useEffect(() => {
     async function fetchAllData() {
@@ -534,49 +524,6 @@ export default function AuthenticationPage() {
     fetchAllData();
   }, []);
 
-  // Calcular estadísticas nacionales para las cards
-  const statsNacionales = useMemo(() => {
-    if (entes.length === 0) {
-      return {
-        sistema1: { conectados: 0, total: 0, porcentaje: 0 },
-        sistema2: { conectados: 0, total: 0, porcentaje: 0 },
-        sistema3: { conectados: 0, total: 0, porcentaje: 0 },
-        sistema6: { conectados: 0, total: 0, porcentaje: 0 },
-      };
-    }
-
-    const totalSO = entes.reduce((acc, e) => acc + (e.resultSujetosObligados || 0), 0);
-    const totalOIC = entes.reduce((acc, e) => acc + (e.resultOIC || 0), 0);
-
-    const s1Conectados = entes.reduce((acc, e) => acc + (e.resultSistema1 || 0), 0);
-    const s2Conectados = entes.reduce((acc, e) => acc + (e.resultSistema2 || 0), 0);
-    const s3Conectados = entes.reduce((acc, e) => acc + (e.resultSistema3OIC || 0), 0);
-    const s6Conectados = entes.reduce((acc, e) => acc + (e.resultSistema6 || 0), 0);
-
-    return {
-      sistema1: {
-        conectados: s1Conectados,
-        total: totalSO,
-        porcentaje: totalSO > 0 ? (s1Conectados / totalSO) * 100 : 0,
-      },
-      sistema2: {
-        conectados: s2Conectados,
-        total: totalSO,
-        porcentaje: totalSO > 0 ? (s2Conectados / totalSO) * 100 : 0,
-      },
-      sistema3: {
-        conectados: s3Conectados,
-        total: totalOIC,
-        porcentaje: totalOIC > 0 ? (s3Conectados / totalOIC) * 100 : 0,
-      },
-      sistema6: {
-        conectados: s6Conectados,
-        total: totalSO,
-        porcentaje: totalSO > 0 ? (s6Conectados / totalSO) * 100 : 0,
-      },
-    };
-  }, [entes]);
-
   // Calcular resumen de Entes Públicos vs OIC
   const resumenConexiones = useMemo(() => {
     if (entes.length === 0) {
@@ -592,79 +539,6 @@ export default function AuthenticationPage() {
     // entesConectadosCount viene de la query directa (controlOIC=false AND (S1 OR S2 OR S6))
     return { entesConectados: entesConectadosCount, totalEntes, oicConectados, totalOIC };
   }, [entes, entesConectadosCount]);
-
-  // Preparar datos para el mapa (con nombres de entidad)
-  const dataEntidadConNombres = useMemo(() => {
-    return entes.map((dato) => {
-      const entidadEncontrada = marcoGeoestadisticoInegi.find(
-        (entidad) => entidad.id === dato.entidad
-      );
-      const nombreEntidad = entidadEncontrada?.nombre || "Entidad no encontrada";
-
-      let count = 0;
-      if (selectedSistema === "resultSistema3OIC") {
-        count = dato.resultOIC > 0
-          ? Number(((dato.resultSistema3OIC / dato.resultOIC) * 100).toFixed(2))
-          : 0;
-      } else if (selectedSistema === "resultSistema3Tribunal") {
-        count = dato.resultTribunal > 0
-          ? Number(((dato.resultSistema3Tribunal / dato.resultTribunal) * 100).toFixed(2))
-          : 0;
-      } else {
-        count = dato.resultSujetosObligados > 0
-          ? Number(((dato[selectedSistema] / dato.resultSujetosObligados) * 100).toFixed(2))
-          : 0;
-      }
-
-      return {
-        ...dato,
-        nombreEntidad,
-        count,
-      };
-    });
-  }, [entes, selectedSistema]);
-
-  // Datos para gráfico nacional (todos los sistemas)
-  const dataNacional = useMemo(() => {
-    if (entes.length === 0) return [];
-
-    const totalSO = entes.reduce((acc, e) => acc + (e.resultSujetosObligados || 0), 0);
-    const totalOIC = entes.reduce((acc, e) => acc + (e.resultOIC || 0), 0);
-
-    return [
-      {
-        sistema: "Sistema 1",
-        count: totalSO > 0 ? parseFloat(((entes.reduce((acc, e) => acc + (e.resultSistema1 || 0), 0) / totalSO) * 100).toFixed(2)) : 0,
-        conectados: entes.reduce((acc, e) => acc + (e.resultSistema1 || 0), 0),
-        totalEntes: totalSO,
-      },
-      {
-        sistema: "Sistema 2",
-        count: totalSO > 0 ? parseFloat(((entes.reduce((acc, e) => acc + (e.resultSistema2 || 0), 0) / totalSO) * 100).toFixed(2)) : 0,
-        conectados: entes.reduce((acc, e) => acc + (e.resultSistema2 || 0), 0),
-        totalEntes: totalSO,
-      },
-      {
-        sistema: "Sistema 3 OIC",
-        count: totalOIC > 0 ? parseFloat(((entes.reduce((acc, e) => acc + (e.resultSistema3OIC || 0), 0) / totalOIC) * 100).toFixed(2)) : 0,
-        conectados: entes.reduce((acc, e) => acc + (e.resultSistema3OIC || 0), 0),
-        totalEntes: totalOIC,
-      },
-      {
-        sistema: "Sistema 6",
-        count: totalSO > 0 ? parseFloat(((entes.reduce((acc, e) => acc + (e.resultSistema6 || 0), 0) / totalSO) * 100).toFixed(2)) : 0,
-        conectados: entes.reduce((acc, e) => acc + (e.resultSistema6 || 0), 0),
-        totalEntes: totalSO,
-      },
-    ];
-  }, [entes]);
-
-  const COLORES_SISTEMAS = {
-    resultSistema1: "#F29888",
-    resultSistema2: "#B25FAC",
-    resultSistema3OIC: "#9085DA",
-    resultSistema6: "#42A5CC",
-  };
 
   return (
     <div className="space-y-4 p-4 md:p-8 pt-6 pb-10">
@@ -688,49 +562,40 @@ export default function AuthenticationPage() {
           </div>
         ) : (
           <>
-            {/* Sistema de Tabs - Diseño moderno y responsivo */}
-            <Tabs defaultValue="general" className="space-y-4">
-              <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-                <TabsList className="w-full flex justify-between bg-gradient-to-r from-muted/80 to-muted/40 backdrop-blur-sm border border-border/50">
-                  <TabsTrigger value="general" className="flex-1 flex items-center justify-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    <span className="hidden sm:inline">General</span>
+            {/* Sistema de navegación - Dashboard y Tabla */}
+            <Tabs defaultValue="general" className="space-y-6">
+              <div className="flex justify-center">
+                <TabsList className="inline-flex h-11 items-center justify-center rounded-full bg-muted p-1 text-muted-foreground">
+                  <TabsTrigger
+                    value="general"
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm gap-2"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
                   </TabsTrigger>
-                  <TabsTrigger value="tabla" className="flex-1 flex items-center justify-center gap-2">
+                  <TabsTrigger
+                    value="tabla"
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm gap-2"
+                  >
                     <Table2 className="h-4 w-4" />
-                    <span className="hidden sm:inline">Tabla</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="avance" className="flex-1 flex items-center justify-center gap-2">
-                    <BarChart3 className="h-4 w-4" />
-                    <span className="hidden sm:inline">Nacional</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="entidad" className="flex-1 flex items-center justify-center gap-2">
-                    <Building2 className="h-4 w-4" />
-                    <span className="hidden sm:inline">Entidad</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="mapa" className="flex-1 flex items-center justify-center gap-2">
-                    <Map className="h-4 w-4" />
-                    <span className="hidden sm:inline">Mapa</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="ambito" className="flex-1 flex items-center justify-center gap-2">
-                    <Layers className="h-4 w-4" />
-                    <span className="hidden sm:inline">Ámbito</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="poder" className="flex-1 flex items-center justify-center gap-2">
-                    <Users className="h-4 w-4" />
-                    <span className="hidden sm:inline">Poder</span>
+                    Tabla de Datos
                   </TabsTrigger>
                 </TabsList>
               </div>
 
-              {/* Tab: General */}
+              {/* Tab: General - Todo el resumen consolidado */}
               <TabsContent value="general" className="space-y-4">
-                <ResumenEntidad data={entes} />
+                <ResumenEntidad
+                  data={entes}
+                  dataAmbito={dataAmbito}
+                  dataPoder={dataPoder}
+                  resumenConexiones={resumenConexiones}
+                />
               </TabsContent>
 
               {/* Tab: Tabla de Cobertura */}
               <TabsContent value="tabla" className="space-y-4">
-                {/* Cards de Entes Públicos y OIC solo en Tabla */}
+                {/* Cards de Entes Públicos y OIC */}
                 <ResumenConexiones
                   entesConectados={resumenConexiones.entesConectados}
                   totalEntes={resumenConexiones.totalEntes}
@@ -740,78 +605,6 @@ export default function AuthenticationPage() {
                 <div className="rounded-md border">
                   <CoberturaTable data={entes} showHeader={false} />
                 </div>
-              </TabsContent>
-
-              {/* Tab: Avance por Sistema */}
-              <TabsContent value="avance" className="space-y-4">
-                {/* Cards de Entes Públicos y OIC */}
-                <ResumenConexiones
-                  entesConectados={resumenConexiones.entesConectados}
-                  totalEntes={resumenConexiones.totalEntes}
-                  oicConectados={resumenConexiones.oicConectados}
-                  totalOIC={resumenConexiones.totalOIC}
-                />
-                <AvanceBarChart data={dataNacional} />
-              </TabsContent>
-
-              {/* Tab: Por Entidad */}
-              <TabsContent value="entidad" className="space-y-4">
-                {/* Cards seleccionables para filtrar */}
-                <DashboardStatsCards
-                  stats={statsNacionales}
-                  selectedSistema={selectedSistema}
-                  onSelectSistema={setSelectedSistema}
-                />
-                <EntidadBarChart
-                  data={dataEntidadConNombres}
-                  selectedColumn={selectedSistema}
-                />
-              </TabsContent>
-
-              {/* Tab: Mapa Nacional */}
-              <TabsContent value="mapa" className="space-y-4">
-                {/* Cards seleccionables para filtrar */}
-                <DashboardStatsCards
-                  stats={statsNacionales}
-                  selectedSistema={selectedSistema}
-                  onSelectSistema={setSelectedSistema}
-                />
-                <AvanceMapa
-                  data={dataEntidadConNombres}
-                  baseColor={COLORES_SISTEMAS[selectedSistema]}
-                />
-              </TabsContent>
-
-              {/* Tab: Por Ámbito */}
-              <TabsContent value="ambito" className="space-y-4">
-                {/* Cards seleccionables para filtrar */}
-                <DashboardStatsCards
-                  stats={statsNacionales}
-                  selectedSistema={selectedSistema}
-                  onSelectSistema={setSelectedSistema}
-                />
-                {dataAmbito[selectedSistema] && (
-                  <AmbitoBarChart
-                    data={dataAmbito[selectedSistema]}
-                    tipoColumna={selectedSistema}
-                  />
-                )}
-              </TabsContent>
-
-              {/* Tab: Por Poder */}
-              <TabsContent value="poder" className="space-y-4">
-                {/* Cards seleccionables para filtrar */}
-                <DashboardStatsCards
-                  stats={statsNacionales}
-                  selectedSistema={selectedSistema}
-                  onSelectSistema={setSelectedSistema}
-                />
-                {dataPoder[selectedSistema] && (
-                  <PoderBarChart
-                    data={dataPoder[selectedSistema]}
-                    tipoColumna={selectedSistema}
-                  />
-                )}
               </TabsContent>
             </Tabs>
           </>
