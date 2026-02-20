@@ -7,9 +7,18 @@ import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { ResumenConexiones } from "@/components/dashboard-stats-cards";
 import directus from "@/lib/directus";
-import { Loader2, Table2, LayoutDashboard } from "lucide-react";
+import { Loader2, Table2, LayoutDashboard, Radio, X, Info, AlertCircle, ExternalLink } from "lucide-react";
 import { ResumenEntidad } from "@/components/resumen-entidad";
 import { readItems } from "@directus/sdk";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function AuthenticationPage() {
   const [entes, setEntes] = useState([]);
@@ -18,6 +27,7 @@ export default function AuthenticationPage() {
   const [entesConectadosCount, setEntesConectadosCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
 
   useEffect(() => {
     async function fetchAllData() {
@@ -542,12 +552,63 @@ export default function AuthenticationPage() {
 
   return (
     <div className="space-y-4 p-4 md:p-8 pt-6 pb-10">
-        {/* Header */}
+        {/* Pop-up de disclaimer al entrar */}
+        <Dialog open={showDisclaimer} onOpenChange={setShowDisclaimer}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-xl">
+                <Info className="h-6 w-6 text-primary" />
+                Información Importante
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                La información presentada en este tablero se actualiza de manera constante
+                y es proporcionada directamente por las <strong>Secretarías Ejecutivas de los
+                Sistemas Estatales Anticorrupción (SESEA)</strong> de cada entidad federativa.
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                La <strong>Secretaría Ejecutiva del Sistema Nacional Anticorrupción (SESNA)</strong> no
+                es responsable de la veracidad, exactitud o actualización de los datos reportados
+                por cada entidad. Para mayor información sobre los datos de una entidad específica,
+                favor de contactar a la SESEA correspondiente.
+              </p>
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                <Radio className="h-4 w-4 text-primary animate-pulse" />
+                <span className="text-sm font-medium text-primary">
+                  Datos actualizados en tiempo real
+                </span>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button onClick={() => setShowDisclaimer(false)}>
+                Entendido
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Header mejorado */}
         <div className="flex items-start justify-between">
-          <Heading
-            title="Tablero Estadístico de Interconexión Nacional"
-            description="Visualiza en tiempo real el avance de los Entes Públicos en la interconexión con los sistemas de la Plataforma Digital Nacional."
-          />
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">
+              Tablero Estadístico de Interconexión Nacional
+            </h2>
+            <div className="flex items-center gap-3 mt-2">
+              <p className="text-sm text-muted-foreground">
+                Visualiza el avance de los Entes Públicos en la interconexión con los sistemas de la PDN
+              </p>
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                  Tiempo Real
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
         <Separator />
 
@@ -602,6 +663,21 @@ export default function AuthenticationPage() {
                   oicConectados={resumenConexiones.oicConectados}
                   totalOIC={resumenConexiones.totalOIC}
                 />
+
+                {/* Banner informativo */}
+                <Alert className="border-primary/30 bg-primary/5">
+                  <Info className="h-4 w-4 text-primary" />
+                  <AlertTitle className="text-primary font-semibold">
+                    Consulta el listado completo de Entes Públicos
+                  </AlertTitle>
+                  <AlertDescription className="text-muted-foreground">
+                    <p className="mb-2">
+                      Al dar clic en cualquier celda de la tabla podrás ver el detalle de los Entes Públicos
+                      registrados y su estado de conexión con cada sistema de la PDN.
+                    </p>
+                  </AlertDescription>
+                </Alert>
+
                 <div className="rounded-md border">
                   <CoberturaTable data={entes} showHeader={false} />
                 </div>
