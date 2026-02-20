@@ -12,9 +12,11 @@ import marcoGeoestadisticoInegi from "./data-entidades";
 interface CoberturaTableProps {
   data: any;
   showHeader?: boolean;
+  hideNameFilter?: boolean;
+  showInfoAlert?: boolean;
 }
 
-export const CoberturaTable = ({ data, showHeader = true }: CoberturaTableProps) => {
+export const CoberturaTable = ({ data, showHeader = true, hideNameFilter = false, showInfoAlert = true }: CoberturaTableProps) => {
   const datosConNombres = data.map((dato) => {
     const entidadEncontrada = marcoGeoestadisticoInegi.find(
       (entidad) => entidad.id === dato.entidad
@@ -45,6 +47,8 @@ export const CoberturaTable = ({ data, showHeader = true }: CoberturaTableProps)
         searchKey="nombreEntidad"
         columns={columns}
         data={datosConNombres}
+        hideNameFilter={hideNameFilter}
+        showInfoAlert={showInfoAlert}
       />
     </>
   );

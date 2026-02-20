@@ -1,14 +1,14 @@
 // @ts-nocheck
 "use client";
 import { useEffect, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { CoberturaTable } from "@/components/tables/cobertura-table/table";
 import InfoAlert from "@/components/tables/cobertura-table/info-alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { ResumenConexiones } from "@/components/dashboard-stats-cards";
 import directus from "@/lib/directus";
-import { Loader2, Table2, LayoutDashboard, Radio, X, Info, AlertCircle, ExternalLink } from "lucide-react";
+import { Loader2, Table2, LayoutDashboard, Radio, Info, Home, Share2, ArrowLeft } from "lucide-react";
 import { ResumenEntidad } from "@/components/resumen-entidad";
 import { readItems } from "@directus/sdk";
 import {
@@ -20,15 +20,23 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { EntidadInfo, getEntidadById } from "@/lib/entidades-slugs";
+import Link from "next/link";
 
-export default function AuthenticationPage() {
+interface EntidadPageClientProps {
+  entidadInfo: EntidadInfo;
+}
+
+export default function EntidadPageClient({ entidadInfo }: EntidadPageClientProps) {
+  const router = useRouter();
   const [entes, setEntes] = useState([]);
   const [dataAmbito, setDataAmbito] = useState({});
   const [dataPoder, setDataPoder] = useState({});
   const [entesConectadosCount, setEntesConectadosCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showDisclaimer, setShowDisclaimer] = useState(true);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     async function fetchAllData() {
@@ -547,148 +555,97 @@ export default function AuthenticationPage() {
     // OIC conectados en S3
     const oicConectados = entes.reduce((acc, e) => acc + (e.resultSistema3OIC || 0), 0);
 
-    // entesConectadosCount viene de la query directa (controlOIC=false AND (S1 OR S2 OR S6))
     return { entesConectados: entesConectadosCount, totalEntes, oicConectados, totalOIC };
   }, [entes, entesConectadosCount]);
 
+  // Copiar URL al portapapeles
+  const handleCopyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Error al copiar:", err);
+    }
+  };
+
   return (
     <div className="space-y-4 p-4 md:p-8 pt-6 pb-10">
-        {/* Pop-up de disclaimer al entrar */}
-        <Dialog open={showDisclaimer} onOpenChange={setShowDisclaimer}>
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-xl">
-                <Info className="h-6 w-6 text-primary" />
-                Información Importante
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                La información presentada en este tablero se actualiza de manera constante
-                y es proporcionada directamente por las <strong>Secretarías Ejecutivas de los
-                Sistemas Estatales Anticorrupción (SESEA)</strong> de cada entidad federativa.
-              </p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                La <strong>Secretaría Ejecutiva del Sistema Nacional Anticorrupción (SESNA)</strong> no
-                es responsable de la veracidad, exactitud o actualización de los datos reportados
-                por cada entidad. Para mayor información sobre los datos de una entidad específica,
-                favor de contactar a la SESEA correspondiente.
-              </p>
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
-                <Radio className="h-4 w-4 text-primary animate-pulse" />
-                <span className="text-sm font-medium text-primary">
-                  Datos actualizados en tiempo real
-                </span>
+      {isLoading ? (
+        <div className="flex flex-row items-center justify-center gap-2 py-20">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="text-lg">Cargando datos de {entidadInfo.nombre}...</span>
+        </div>
+      ) : error ? (
+        <div className="text-center py-20 text-red-500">
+          Error al cargar los datos: {error.message}
+        </div>
+      ) : (
+        <>
+          {/* Header con navegación y compartir */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* Navegación y título */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Ver todas las entidades
+                </Link>
               </div>
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+                  {entidadInfo.nombre}
+                </h2>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                    Tiempo Real
+                  </span>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                Estadísticas de interconexión con la Plataforma Digital Nacional
+              </p>
             </div>
-            <div className="flex justify-end">
-              <Button onClick={() => setShowDisclaimer(false)}>
-                Entendido
+
+            {/* Botones de acción */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopyUrl}
+                className="gap-2"
+              >
+                <Share2 className="h-4 w-4" />
+                {copied ? "¡Copiado!" : "Compartir"}
               </Button>
+              <Link href="/">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Home className="h-4 w-4" />
+                  Nacional
+                </Button>
+              </Link>
             </div>
-          </DialogContent>
-        </Dialog>
-
-        {isLoading ? (
-          <div className="flex flex-row items-center justify-center gap-2 py-20">
-            <Loader2 className="h-8 w-8 animate-spin" />
-            <span className="text-lg">Cargando datos...</span>
           </div>
-        ) : error ? (
-          <div className="text-center py-20 text-red-500">
-            Error al cargar los datos: {error.message}
-          </div>
-        ) : (
-          <>
-            {/* Header con pestañas integradas */}
-            <Tabs defaultValue="general" className="space-y-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                {/* Título y badge de tiempo real */}
-                <div>
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-                      Tablero Estadístico de Interconexión Nacional
-                    </h2>
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                      </span>
-                      <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                        Tiempo Real
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Avance de los Entes Públicos en la interconexión con los sistemas de la PDN
-                  </p>
-                </div>
 
-                {/* Pestañas a la derecha */}
-                <TabsList className="inline-flex h-10 items-center justify-center rounded-full bg-muted p-1 text-muted-foreground">
-                  <TabsTrigger
-                    value="general"
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm gap-2"
-                  >
-                    <LayoutDashboard className="h-4 w-4" />
-                    Dashboard
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="tabla"
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm gap-2"
-                  >
-                    <Table2 className="h-4 w-4" />
-                    Tabla de Datos
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+          <Separator />
 
-              <Separator />
-
-              {/* Tab: General - Todo el resumen consolidado */}
-              <TabsContent value="general" className="space-y-4">
-                <ResumenEntidad
-                  data={entes}
-                  dataAmbito={dataAmbito}
-                  dataPoder={dataPoder}
-                  resumenConexiones={resumenConexiones}
-                />
-              </TabsContent>
-
-              {/* Tab: Tabla de Cobertura */}
-              <TabsContent value="tabla" className="space-y-4">
-                {/* Cards de Entes Públicos y OIC */}
-                <ResumenConexiones
-                  entesConectados={resumenConexiones.entesConectados}
-                  totalEntes={resumenConexiones.totalEntes}
-                  oicConectados={resumenConexiones.oicConectados}
-                  totalOIC={resumenConexiones.totalOIC}
-                />
-
-                {/* Banner informativo con guía de símbolos */}
-                <Alert className="border-primary/30 bg-primary/5">
-                  <div className="flex items-start gap-3">
-                    <InfoAlert variant="icon" className="mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <AlertTitle className="text-primary font-semibold flex items-center gap-2">
-                        Consulta el listado completo de Entes Públicos
-                        <span className="text-xs font-normal text-muted-foreground">(Clic en el icono para ver guía de símbolos)</span>
-                      </AlertTitle>
-                      <AlertDescription className="text-muted-foreground">
-                        Al dar clic en cualquier celda de la tabla podrás ver el detalle de los Entes Públicos
-                        registrados y su estado de conexión con cada sistema de la PDN.
-                      </AlertDescription>
-                    </div>
-                  </div>
-                </Alert>
-
-                <div className="rounded-md border">
-                  <CoberturaTable data={entes} showHeader={false} hideNameFilter={true} showInfoAlert={false} />
-                </div>
-              </TabsContent>
-            </Tabs>
-          </>
-        )}
+          {/* Contenido */}
+          <ResumenEntidad
+            data={entes}
+            dataAmbito={dataAmbito}
+            dataPoder={dataPoder}
+            resumenConexiones={resumenConexiones}
+            initialEntidadId={entidadInfo.id}
+          />
+        </>
+      )}
     </div>
   );
 }

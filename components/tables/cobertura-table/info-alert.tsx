@@ -21,7 +21,12 @@ import icoTribunal from "./icons-thead/tribunal.svg";
 import icoOIC from "./icons-thead/oic.svg";
 import camp from "./icons-thead/cal.svg";
 
-const InfoAlert = () => {
+interface InfoAlertProps {
+  variant?: "button" | "icon";
+  className?: string;
+}
+
+const InfoAlert = ({ variant = "button", className = "" }: InfoAlertProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const columnInfo = [
@@ -88,18 +93,28 @@ const InfoAlert = () => {
 
   return (
     <>
-      <div className="relative">
-        <div className="absolute inset-0 bg-primary/20 dark:bg-primary/30 rounded-lg blur-sm animate-pulse"></div>
-        <Button
-          variant="outline"
+      {variant === "button" ? (
+        <div className="relative">
+          <div className="absolute inset-0 bg-primary/20 dark:bg-primary/30 rounded-lg blur-sm animate-pulse"></div>
+          <Button
+            variant="outline"
+            onClick={() => setIsOpen(true)}
+            className="w-full relative z-10 bg-background hover:bg-primary/10 dark:bg-background dark:hover:bg-primary/20 border-2 border-primary transition-all duration-300 ease-in-out"
+          >
+            <InfoIcon className="h-4 w-4 mr-2 text-primary" />
+            <span className="font-medium">Guía de Símbolos</span>
+            <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+          </Button>
+        </div>
+      ) : (
+        <button
           onClick={() => setIsOpen(true)}
-          className="w-full relative z-10 bg-background hover:bg-primary/10 dark:bg-background dark:hover:bg-primary/20 border-2 border-primary transition-all duration-300 ease-in-out"
+          className={`inline-flex items-center justify-center rounded-full p-1 hover:bg-primary/20 transition-colors cursor-pointer ${className}`}
+          title="Ver guía de símbolos"
         >
-          <InfoIcon className="h-4 w-4 mr-2 text-primary" />
-          <span className="font-medium">Guía de Símbolos</span>
-          <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-        </Button>
-      </div>
+          <InfoIcon className="h-4 w-4 text-primary" />
+        </button>
+      )}
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-5xl">
@@ -116,20 +131,20 @@ const InfoAlert = () => {
             {columnInfo.map((info, index) => (
               <div
                 key={index}
-                className="flex items-start space-x-4 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800"
+                className="flex items-start space-x-4 p-4 border border-border/60 rounded-xl bg-card/80 dark:bg-card hover:bg-accent/30 dark:hover:bg-accent/20 transition-colors shadow-sm"
               >
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 p-2 rounded-lg bg-muted/50 dark:bg-muted">
                   <Image
                     src={info.icon}
                     alt={info.title}
                     width={40}
                     height={40}
-                    className="mt-1"
+                    className="mt-0"
                   />
                 </div>
                 <div className="flex-grow">
-                  <h3 className="font-semibold text-sm">{info.title}</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                  <h3 className="font-bold text-sm text-foreground">{info.title}</h3>
+                  <p className="text-xs text-foreground/70 mt-1 leading-relaxed">
                     {info.description}
                   </p>
                 </div>

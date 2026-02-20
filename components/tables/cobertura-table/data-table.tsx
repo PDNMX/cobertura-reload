@@ -45,12 +45,16 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   searchKey: string;
+  hideNameFilter?: boolean;
+  showInfoAlert?: boolean;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
+  hideNameFilter = false,
+  showInfoAlert = true,
 }: DataTableProps<TData, TValue>) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hoveredColumnId, setHoveredColumnId] = useState<string | null>(null);
@@ -1453,23 +1457,30 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
-      <div className="flex items-center py-4">
-        <div className="w-3/4 pr-4">
-          <Input
-            placeholder={`Filtrar por nombre...`}
-            value={
-              (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) =>
-              table.getColumn(searchKey)?.setFilterValue(event.target.value)
-            }
-            className="w-full"
-          />
+      {/* Mostrar filtro y/o InfoAlert según las props */}
+      {(!hideNameFilter || showInfoAlert) && (
+        <div className="flex items-center justify-between py-4 gap-4">
+          {!hideNameFilter && (
+            <div className="flex-1">
+              <Input
+                placeholder={`Filtrar por nombre...`}
+                value={
+                  (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""
+                }
+                onChange={(event) =>
+                  table.getColumn(searchKey)?.setFilterValue(event.target.value)
+                }
+                className="w-full max-w-md"
+              />
+            </div>
+          )}
+          {showInfoAlert && (
+            <div className={hideNameFilter ? "ml-auto" : ""}>
+              <InfoAlert />
+            </div>
+          )}
         </div>
-        <div className="w-1/4">
-          <InfoAlert />
-        </div>
-      </div>
+      )}
       <ScrollArea className="rounded-md border h-[calc(80vh-100px)]">
         <Table className="relative w-full">
           <TableHeader className="sticky bottom-0 bg-gray-200 dark:bg-gray-800">

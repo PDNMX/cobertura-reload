@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Combobox } from "@/components/ui/combobox";
 import { cn } from "@/lib/utils";
-import { MapPin, Search, Users, Building2, Scale, TrendingUp, CheckCircle2, XCircle, Loader2, Globe, ChevronRight, Layers, Gavel } from "lucide-react";
+import { MapPin, Search, Users, Building2, Scale, TrendingUp, CheckCircle2, XCircle, Loader2, Globe, ChevronRight, Layers, Gavel, BarChart2 } from "lucide-react";
 import marcoGeoestadisticoInegi from "@/components/tables/cobertura-table/data-entidades";
 import {
   PieChart,
@@ -104,7 +104,7 @@ const DonutChart = ({ conectados, total, color, nombre, shortName, descripcion }
   const porcentaje = total > 0 ? (conectados / total) * 100 : 0;
   const data = [
     { name: "Conectados", value: conectados, color: color },
-    { name: "Pendientes", value: Math.max(0, total - conectados), color: "#e5e7eb" },
+    { name: "Pendientes", value: Math.max(0, total - conectados), color: "var(--muted)" },
   ];
 
   return (
@@ -124,7 +124,7 @@ const DonutChart = ({ conectados, total, color, nombre, shortName, descripcion }
               endAngle={-270}
             >
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+                <Cell key={`cell-${index}`} fill={index === 0 ? entry.color : "#cbd5e1"} className="dark:opacity-80" />
               ))}
             </Pie>
           </PieChart>
@@ -135,9 +135,9 @@ const DonutChart = ({ conectados, total, color, nombre, shortName, descripcion }
           </span>
         </div>
       </div>
-      <span className="text-sm font-semibold mt-2" style={{ color }}>{nombre}</span>
-      <span className="text-xs text-muted-foreground">{descripcion}</span>
-      <span className="text-xs text-muted-foreground mt-1">
+      <span className="text-sm font-bold mt-2" style={{ color }}>{nombre}</span>
+      <span className="text-xs text-foreground/60 text-center">{descripcion}</span>
+      <span className="text-xs font-semibold text-foreground/70 mt-1">
         {conectados.toLocaleString()} / {total.toLocaleString()}
       </span>
     </div>
@@ -148,18 +148,18 @@ const DonutChart = ({ conectados, total, color, nombre, shortName, descripcion }
 const EntidadMiniCard = ({ nombre, porcentaje, color, onClick }) => (
   <div
     onClick={onClick}
-    className="p-3 rounded-lg border bg-card hover:bg-muted/50 cursor-pointer transition-all hover:shadow-md group"
+    className="p-3 rounded-lg border border-border/60 bg-card/80 dark:bg-card hover:bg-accent/50 dark:hover:bg-accent/30 cursor-pointer transition-all hover:shadow-md group"
   >
     <div className="flex items-center justify-between">
-      <span className="text-sm font-medium truncate flex-1">{nombre}</span>
+      <span className="text-sm font-medium truncate flex-1 text-foreground">{nombre}</span>
       <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
     </div>
     <div className="mt-2">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xs text-muted-foreground">Avance</span>
+        <span className="text-xs text-foreground/60">Avance</span>
         <span className="text-sm font-bold" style={{ color }}>{porcentaje.toFixed(2)}%</span>
       </div>
-      <div className="h-1.5 rounded-full overflow-hidden bg-muted">
+      <div className="h-2 rounded-full overflow-hidden bg-muted/60 dark:bg-muted">
         <div
           className="h-full rounded-full transition-all duration-300"
           style={{ width: `${porcentaje}%`, backgroundColor: color }}
@@ -267,64 +267,72 @@ const TotalesIndicador = ({
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       {/* Entes Públicos */}
-      <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 rounded-xl p-4 border border-blue-500/20 dark:border-blue-400/30">
+      <div className="bg-gradient-to-br from-blue-500/15 to-blue-600/5 dark:from-blue-500/25 dark:to-blue-700/15 rounded-xl p-4 border border-blue-500/30 dark:border-blue-400/40 shadow-sm">
         <div className="flex items-center gap-2 mb-2">
-          <Building2 className="h-4 w-4 text-blue-500 dark:text-blue-400" />
-          <span className="text-xs font-medium text-blue-600 dark:text-blue-300">Entes Públicos</span>
+          <div className="p-1.5 rounded-lg bg-blue-500/20 dark:bg-blue-400/25">
+            <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-300" />
+          </div>
+          <span className="text-xs font-semibold text-blue-700 dark:text-blue-200">Entes Públicos</span>
         </div>
-        <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{totalEntes.toLocaleString()}</p>
+        <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{totalEntes.toLocaleString()}</p>
         <div className="flex items-center gap-1 mt-1">
-          <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">{entesConectados.toLocaleString()}</span>
-          <span className="text-xs text-muted-foreground">conectados</span>
-          <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 ml-auto">{formatPorcentaje(porcentajeEntes)}</span>
+          <span className="text-xs text-blue-700 dark:text-blue-300 font-semibold">{entesConectados.toLocaleString()}</span>
+          <span className="text-xs text-foreground/60">conectados</span>
+          <span className="text-xs font-bold text-blue-700 dark:text-blue-300 ml-auto">{formatPorcentaje(porcentajeEntes)}</span>
         </div>
-        <div className="h-1.5 rounded-full overflow-hidden bg-blue-500/20 dark:bg-blue-400/20 mt-2">
+        <div className="h-2 rounded-full overflow-hidden bg-blue-500/25 dark:bg-blue-400/30 mt-2">
           <div className="h-full rounded-full bg-blue-500 dark:bg-blue-400" style={{ width: `${Math.min(porcentajeEntes, 100)}%` }} />
         </div>
       </div>
 
       {/* OIC */}
-      <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 dark:from-amber-500/20 dark:to-amber-600/10 rounded-xl p-4 border border-amber-500/20 dark:border-amber-400/30">
+      <div className="bg-gradient-to-br from-amber-500/15 to-amber-600/5 dark:from-amber-500/25 dark:to-amber-700/15 rounded-xl p-4 border border-amber-500/30 dark:border-amber-400/40 shadow-sm">
         <div className="flex items-center gap-2 mb-2">
-          <Scale className="h-4 w-4 text-amber-500 dark:text-amber-400" />
-          <span className="text-xs font-medium text-amber-600 dark:text-amber-300">OIC / Autoridades</span>
+          <div className="p-1.5 rounded-lg bg-amber-500/20 dark:bg-amber-400/25">
+            <Scale className="h-4 w-4 text-amber-600 dark:text-amber-300" />
+          </div>
+          <span className="text-xs font-semibold text-amber-700 dark:text-amber-200">OIC / Autoridades</span>
         </div>
-        <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{totalOIC.toLocaleString()}</p>
+        <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">{totalOIC.toLocaleString()}</p>
         <div className="flex items-center gap-1 mt-1">
-          <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">{oicConectados.toLocaleString()}</span>
-          <span className="text-xs text-muted-foreground">conectados</span>
-          <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 ml-auto">{formatPorcentaje(porcentajeOIC)}</span>
+          <span className="text-xs text-amber-700 dark:text-amber-300 font-semibold">{oicConectados.toLocaleString()}</span>
+          <span className="text-xs text-foreground/60">conectados</span>
+          <span className="text-xs font-bold text-amber-700 dark:text-amber-300 ml-auto">{formatPorcentaje(porcentajeOIC)}</span>
         </div>
-        <div className="h-1.5 rounded-full overflow-hidden bg-amber-500/20 dark:bg-amber-400/20 mt-2">
+        <div className="h-2 rounded-full overflow-hidden bg-amber-500/25 dark:bg-amber-400/30 mt-2">
           <div className="h-full rounded-full bg-amber-500 dark:bg-amber-400" style={{ width: `${Math.min(porcentajeOIC, 100)}%` }} />
         </div>
       </div>
 
       {/* Cobertura Promedio */}
-      <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 dark:from-emerald-500/20 dark:to-emerald-600/10 rounded-xl p-4 border border-emerald-500/20 dark:border-emerald-400/30">
+      <div className="bg-gradient-to-br from-emerald-500/15 to-emerald-600/5 dark:from-emerald-500/25 dark:to-emerald-700/15 rounded-xl p-4 border border-emerald-500/30 dark:border-emerald-400/40 shadow-sm">
         <div className="flex items-center gap-2 mb-2">
-          <TrendingUp className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
-          <span className="text-xs font-medium text-emerald-600 dark:text-emerald-300">Cobertura Promedio</span>
+          <div className="p-1.5 rounded-lg bg-emerald-500/20 dark:bg-emerald-400/25">
+            <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
+          </div>
+          <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-200">Cobertura Promedio</span>
         </div>
-        <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{coberturaPromedio.toFixed(2)}%</p>
-        <p className="text-xs text-muted-foreground mt-1">Promedio S1, S2 y S6</p>
-        <div className="h-1.5 rounded-full overflow-hidden bg-emerald-500/20 dark:bg-emerald-400/20 mt-2">
+        <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{coberturaPromedio.toFixed(2)}%</p>
+        <p className="text-xs text-foreground/60 mt-1">Promedio S1, S2 y S6</p>
+        <div className="h-2 rounded-full overflow-hidden bg-emerald-500/25 dark:bg-emerald-400/30 mt-2">
           <div className="h-full rounded-full bg-emerald-500 dark:bg-emerald-400" style={{ width: `${Math.min(coberturaPromedio, 100)}%` }} />
         </div>
       </div>
 
       {/* Municipios */}
-      <div className="bg-gradient-to-br from-violet-500/10 to-violet-600/5 dark:from-violet-500/20 dark:to-violet-600/10 rounded-xl p-4 border border-violet-500/20 dark:border-violet-400/30">
+      <div className="bg-gradient-to-br from-violet-500/15 to-violet-600/5 dark:from-violet-500/25 dark:to-violet-700/15 rounded-xl p-4 border border-violet-500/30 dark:border-violet-400/40 shadow-sm">
         <div className="flex items-center gap-2 mb-2">
-          <MapPin className="h-4 w-4 text-violet-500 dark:text-violet-400" />
-          <span className="text-xs font-medium text-violet-600 dark:text-violet-300">Municipios</span>
+          <div className="p-1.5 rounded-lg bg-violet-500/20 dark:bg-violet-400/25">
+            <MapPin className="h-4 w-4 text-violet-600 dark:text-violet-300" />
+          </div>
+          <span className="text-xs font-semibold text-violet-700 dark:text-violet-200">Municipios</span>
         </div>
-        <p className="text-2xl font-bold text-violet-600 dark:text-violet-400">{totalMunicipios.toLocaleString()}</p>
+        <p className="text-2xl font-bold text-violet-700 dark:text-violet-300">{totalMunicipios.toLocaleString()}</p>
         <div className="flex items-center gap-1 mt-1">
-          <span className="text-xs text-violet-600 dark:text-violet-400 font-medium">{municipiosRegistrados?.toLocaleString() || 0}</span>
-          <span className="text-xs text-muted-foreground">registrados</span>
+          <span className="text-xs text-violet-700 dark:text-violet-300 font-semibold">{municipiosRegistrados?.toLocaleString() || 0}</span>
+          <span className="text-xs text-foreground/60">registrados</span>
         </div>
-        <div className="h-1.5 rounded-full overflow-hidden bg-violet-500/20 dark:bg-violet-400/20 mt-2">
+        <div className="h-2 rounded-full overflow-hidden bg-violet-500/25 dark:bg-violet-400/30 mt-2">
           <div className="h-full rounded-full bg-violet-500 dark:bg-violet-400" style={{ width: `${Math.min(porcentajeMunicipios, 100)}%` }} />
         </div>
       </div>
@@ -658,79 +666,82 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones 
 
   return (
     <div className="space-y-6">
-      {/* Selector de entidad */}
-      <Card className="border-t-4 border-t-primary bg-gradient-to-br from-background to-muted/20">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-primary/10">
-              {selectedEntidad ? <MapPin className="h-6 w-6 text-primary" /> : <Globe className="h-6 w-6 text-primary" />}
+      {/* Card principal con selector y estadísticas integradas */}
+      <Card className="border-t-4 border-t-primary">
+        <CardHeader className="pb-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-xl bg-primary/10">
+                {selectedEntidad ? <MapPin className="h-6 w-6 text-primary" /> : <Globe className="h-6 w-6 text-primary" />}
+              </div>
+              <div>
+                <CardTitle className="text-xl">
+                  {selectedEntidad ? nombreEntidad : "República Mexicana"}
+                </CardTitle>
+                <CardDescription>
+                  {selectedEntidad
+                    ? "Dashboard de Interconexión con la PDN"
+                    : "32 Entidades Federativas y Federación"}
+                </CardDescription>
+              </div>
             </div>
-            <div>
-              <CardTitle className="text-xl">
-                {selectedEntidad ? nombreEntidad : "República Mexicana"}
-              </CardTitle>
-              <CardDescription>
-                {selectedEntidad
-                  ? "Dashboard de Interconexión con la PDN"
-                  : "32 Entidades Federativas y Federación"}
-              </CardDescription>
+            <div className="w-full md:w-[350px]">
+              <Combobox
+                options={entidadesOptions}
+                value={selectedEntidad}
+                onChange={setSelectedEntidad}
+                placeholder="Seleccionar entidad federativa..."
+              />
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="w-full md:w-[400px]">
-            <Combobox
-              options={entidadesOptions}
-              value={selectedEntidad}
-              onChange={setSelectedEntidad}
-              placeholder="Seleccionar entidad federativa..."
+
+        {estadisticas && (
+          <CardContent className="space-y-6">
+            {/* Título de Resumen General */}
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-border" />
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Resumen General</span>
+              </div>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+
+            {/* Indicadores compactos de totales */}
+            <TotalesIndicador
+              totalEntes={estadisticas.totalEntes}
+              totalOIC={estadisticas.totalOIC}
+              entesConectados={
+                selectedEntidad
+                  ? currentMunicipios?.entesConectados || 0
+                  : resumenConexiones?.entesConectados || 0
+              }
+              oicConectados={
+                selectedEntidad
+                  ? estadisticas.sistemas.resultSistema3OIC.conectados
+                  : resumenConexiones?.oicConectados || 0
+              }
+              totalMunicipios={currentMunicipios?.totalCatalogo || (selectedEntidad ? 0 : TOTAL_MUNICIPIOS_CATALOGO)}
+              municipiosRegistrados={currentMunicipios?.municipiosRegistrados}
+              coberturaPromedio={coberturaPromedio}
             />
-          </div>
-        </CardContent>
-      </Card>
 
-      {estadisticas && (
-        <>
-          {/* Indicadores compactos de totales */}
-          <TotalesIndicador
-            totalEntes={estadisticas.totalEntes}
-            totalOIC={estadisticas.totalOIC}
-            entesConectados={
-              selectedEntidad
-                ? currentMunicipios?.entesConectados || 0
-                : resumenConexiones?.entesConectados || 0
-            }
-            oicConectados={
-              selectedEntidad
-                ? estadisticas.sistemas.resultSistema3OIC.conectados
-                : resumenConexiones?.oicConectados || 0
-            }
-            totalMunicipios={currentMunicipios?.totalCatalogo || (selectedEntidad ? 0 : TOTAL_MUNICIPIOS_CATALOGO)}
-            municipiosRegistrados={currentMunicipios?.municipiosRegistrados}
-            coberturaPromedio={coberturaPromedio}
-          />
-
-          {/* Gráficas de Donut por sistema y Municipios lado a lado */}
-          <div className="grid gap-4 lg:grid-cols-4">
-            {/* Avance por Sistema - 3/4 del espacio */}
-            <Card className="lg:col-span-3">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-primary/10">
+            {/* Gráficas de Donut por sistema y Municipios */}
+            <div className="grid gap-4 lg:grid-cols-4">
+              {/* Avance por Sistema - 3/4 del espacio */}
+              <div className="lg:col-span-3">
+                <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-primary/20 dark:bg-primary/25">
                     <TrendingUp className="h-4 w-4 text-primary" />
                   </div>
-                  Avance por Sistema
-                </CardTitle>
-                <CardDescription>
-                  Porcentaje de conexión en cada sistema de la PDN
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                  <span className="text-foreground">Avance por Sistema</span>
+                </h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {Object.entries(SISTEMAS_CONFIG).map(([key, config]) => {
                     const stats = estadisticas.sistemas[key];
                     return (
-                      <div key={key} className="flex flex-col items-center p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div key={key} className="flex flex-col items-center p-4 rounded-xl border border-border/50 bg-card/50 dark:bg-card/80 hover:bg-accent/30 dark:hover:bg-accent/20 transition-colors shadow-sm">
                         <DonutChart
                           conectados={stats.conectados}
                           total={stats.total}
@@ -743,265 +754,271 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones 
                     );
                   })}
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Municipios Conectados por Sistema - 1/4 del espacio */}
-            <Card className="lg:col-span-1">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <div className="p-1.5 rounded-lg bg-violet-500/10">
-                    <MapPin className="h-4 w-4 text-violet-500" />
-                  </div>
-                  Municipios
-                </CardTitle>
-                <CardDescription className="text-xs">
-                  {currentMunicipios?.municipiosRegistrados || 0} de {currentMunicipios?.totalCatalogo || (selectedEntidad ? 0 : TOTAL_MUNICIPIOS_CATALOGO)} registrados
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                {currentMunicipios ? (
-                  <div className="space-y-3">
-                    {/* Sistema 1 */}
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium" style={{ color: '#F29888' }}>S1</span>
-                        <span className="text-xs font-bold" style={{ color: '#F29888' }}>
-                          {currentMunicipios.s1 || 0}
-                        </span>
-                      </div>
-                      <div className="h-2 rounded-full overflow-hidden bg-muted">
-                        <div
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{
-                            width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s1 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
-                            backgroundColor: '#F29888'
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Sistema 2 */}
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium" style={{ color: '#B25FAC' }}>S2</span>
-                        <span className="text-xs font-bold" style={{ color: '#B25FAC' }}>
-                          {currentMunicipios.s2 || 0}
-                        </span>
-                      </div>
-                      <div className="h-2 rounded-full overflow-hidden bg-muted">
-                        <div
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{
-                            width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s2 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
-                            backgroundColor: '#B25FAC'
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Sistema 3 */}
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium" style={{ color: '#9085DA' }}>S3</span>
-                        <span className="text-xs font-bold" style={{ color: '#9085DA' }}>
-                          {currentMunicipios.s3 || 0}
-                        </span>
-                      </div>
-                      <div className="h-2 rounded-full overflow-hidden bg-muted">
-                        <div
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{
-                            width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s3 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
-                            backgroundColor: '#9085DA'
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Sistema 6 */}
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium" style={{ color: '#42A5CC' }}>S6</span>
-                        <span className="text-xs font-bold" style={{ color: '#42A5CC' }}>
-                          {currentMunicipios.s6 || 0}
-                        </span>
-                      </div>
-                      <div className="h-2 rounded-full overflow-hidden bg-muted">
-                        <div
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{
-                            width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s6 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
-                            backgroundColor: '#42A5CC'
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-32 text-muted-foreground">
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Solo mostrar ranking de entidades en vista nacional */}
-          {!selectedEntidad && (
-            <div className="grid gap-4 md:grid-cols-2">
-              {/* Top entidades */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    Mayor Avance
-                  </CardTitle>
-                  <CardDescription>Entidades con mejor cobertura promedio</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {topEntidades.map((entidad, index) => (
-                    <EntidadMiniCard
-                      key={entidad.id}
-                      nombre={`${index + 1}. ${entidad.nombre}`}
-                      porcentaje={entidad.promedio}
-                      color="#10b981"
-                      onClick={() => setSelectedEntidad(entidad.id)}
-                    />
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* Entidades que requieren atención */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <XCircle className="h-5 w-5 text-red-500" />
-                    Requieren Atención
-                  </CardTitle>
-                  <CardDescription>Entidades con menor cobertura promedio</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {entidadesAtencion.map((entidad, index) => (
-                    <EntidadMiniCard
-                      key={entidad.id}
-                      nombre={`${index + 1}. ${entidad.nombre}`}
-                      porcentaje={entidad.promedio}
-                      color="#ef4444"
-                      onClick={() => setSelectedEntidad(entidad.id)}
-                    />
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* Sección de gráficas detalladas (solo en vista nacional) */}
-          {!selectedEntidad && (
-            <>
-              {/* Separador visual */}
-              <div className="flex items-center gap-4 py-4">
-                <div className="h-px flex-1 bg-border" />
-                <span className="text-sm font-medium text-muted-foreground">Análisis Detallado por Sistema</span>
-                <div className="h-px flex-1 bg-border" />
               </div>
 
-              {/* Cards de filtro por sistema */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {Object.entries(SISTEMAS_CONFIG).map(([key, config]) => (
-                  <SistemaFilterCard
-                    key={key}
-                    sistema={key}
-                    config={config}
-                    stats={estadisticas.sistemas[key]}
-                    isSelected={selectedSistema === key}
-                    onClick={() => setSelectedSistema(key)}
-                  />
-                ))}
-              </div>
-
-              {/* Mapa a la izquierda, Ámbito y Poder a la derecha */}
-              <div className="grid gap-4 lg:grid-cols-2">
-                {/* Mapa de México */}
-                <AvanceMapa
-                  data={dataMapaConNombres}
-                  baseColor={SISTEMAS_CONFIG[selectedSistema].color}
-                />
-
-                {/* Gráficas de Ámbito y Poder apiladas */}
-                <div className="flex flex-col gap-4">
-                  {/* Por Ámbito */}
-                  <Card className="flex-1">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <Layers className="h-4 w-4" style={{ color: SISTEMAS_CONFIG[selectedSistema].color }} />
-                        Por Ámbito de Gobierno
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-1">
-                      {dataAmbito[selectedSistema] && (
-                        <div className="h-[220px]">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={dataAmbito[selectedSistema]}>
-                              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                              <XAxis dataKey="ambito" fontSize={12} />
-                              <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} fontSize={11} />
-                              <Tooltip content={<CustomAmbitoPoderTooltip />} />
-                              <Bar dataKey="count" fill={SISTEMAS_CONFIG[selectedSistema].color} radius={[4, 4, 0, 0]}>
-                                <LabelList dataKey="count" position="top" fontSize={11} formatter={(v) => `${v}%`} />
-                              </Bar>
-                            </BarChart>
-                          </ResponsiveContainer>
+              {/* Municipios Conectados por Sistema - 1/4 del espacio */}
+              <div className="lg:col-span-1">
+                <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-violet-500/20 dark:bg-violet-400/25">
+                    <MapPin className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                  </div>
+                  <span className="text-foreground">Municipios</span>
+                  <span className="text-xs font-semibold text-violet-600 dark:text-violet-400 ml-auto">
+                    {currentMunicipios?.municipiosRegistrados || 0}/{currentMunicipios?.totalCatalogo || (selectedEntidad ? 0 : TOTAL_MUNICIPIOS_CATALOGO)}
+                  </span>
+                </h4>
+                <div className="p-4 rounded-xl border border-border/50 bg-card/50 dark:bg-card/80 shadow-sm">
+                  {currentMunicipios ? (
+                    <div className="space-y-3">
+                      {/* Sistema 1 */}
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold" style={{ color: '#F29888' }}>S1</span>
+                          <span className="text-xs font-bold" style={{ color: '#F29888' }}>
+                            {currentMunicipios.s1 || 0}
+                          </span>
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  {/* Por Poder */}
-                  <Card className="flex-1">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <Gavel className="h-4 w-4" style={{ color: SISTEMAS_CONFIG[selectedSistema].color }} />
-                        Por Poder de Gobierno
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-1">
-                      {dataPoder[selectedSistema] && (
-                        <div className="h-[220px]">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={dataPoder[selectedSistema]}>
-                              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                              <XAxis dataKey="poder" fontSize={12} />
-                              <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} fontSize={11} />
-                              <Tooltip content={<CustomAmbitoPoderTooltip />} />
-                              <Bar dataKey="count" fill={SISTEMAS_CONFIG[selectedSistema].color} radius={[4, 4, 0, 0]}>
-                                <LabelList dataKey="count" position="top" fontSize={11} formatter={(v) => `${v}%`} />
-                              </Bar>
-                            </BarChart>
-                          </ResponsiveContainer>
+                        <div className="h-2.5 rounded-full overflow-hidden bg-muted/60 dark:bg-muted">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s1 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
+                              backgroundColor: '#F29888'
+                            }}
+                          />
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
+                      </div>
+
+                      {/* Sistema 2 */}
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold" style={{ color: '#B25FAC' }}>S2</span>
+                          <span className="text-xs font-bold" style={{ color: '#B25FAC' }}>
+                            {currentMunicipios.s2 || 0}
+                          </span>
+                        </div>
+                        <div className="h-2.5 rounded-full overflow-hidden bg-muted/60 dark:bg-muted">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s2 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
+                              backgroundColor: '#B25FAC'
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Sistema 3 */}
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold" style={{ color: '#9085DA' }}>S3</span>
+                          <span className="text-xs font-bold" style={{ color: '#9085DA' }}>
+                            {currentMunicipios.s3 || 0}
+                          </span>
+                        </div>
+                        <div className="h-2.5 rounded-full overflow-hidden bg-muted/60 dark:bg-muted">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s3 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
+                              backgroundColor: '#9085DA'
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Sistema 6 */}
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold" style={{ color: '#42A5CC' }}>S6</span>
+                          <span className="text-xs font-bold" style={{ color: '#42A5CC' }}>
+                            {currentMunicipios.s6 || 0}
+                          </span>
+                        </div>
+                        <div className="h-2.5 rounded-full overflow-hidden bg-muted/60 dark:bg-muted">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s6 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
+                              backgroundColor: '#42A5CC'
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-32 text-muted-foreground">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    </div>
+                  )}
                 </div>
               </div>
+            </div>
 
-              {/* Gráfica original de Entidad (la que usan para reportes) */}
-              <EntidadBarChart
-                data={data}
-                selectedColumn={selectedSistema}
-              />
-            </>
-          )}
+            {/* Solo mostrar ranking de entidades en vista nacional */}
+            {!selectedEntidad && (
+              <>
+                {/* Título separador para ranking */}
+                <div className="flex items-center gap-3 pt-4">
+                  <div className="h-px flex-1 bg-border" />
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50">
+                    <BarChart2 className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">Ranking de Entidades</span>
+                  </div>
+                  <div className="h-px flex-1 bg-border" />
+                </div>
 
-          {/* Detalle de conexión por sistema (solo en vista de entidad) */}
-          {selectedEntidad && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Detalle de Conexión</CardTitle>
-                <CardDescription>Información detallada de cada sistema</CardDescription>
-              </CardHeader>
-              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {/* Top entidades */}
+                  <div className="rounded-xl border border-green-500/30 dark:border-green-400/40 bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-700/10 p-4 shadow-sm">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="p-1.5 rounded-lg bg-green-500/20 dark:bg-green-400/25">
+                        <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                      </div>
+                      <h4 className="font-semibold text-green-700 dark:text-green-300">Mayor Avance</h4>
+                    </div>
+                    <div className="space-y-2">
+                      {topEntidades.map((entidad, index) => (
+                        <EntidadMiniCard
+                          key={entidad.id}
+                          nombre={`${index + 1}. ${entidad.nombre}`}
+                          porcentaje={entidad.promedio}
+                          color="#10b981"
+                          onClick={() => setSelectedEntidad(entidad.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Entidades que requieren atención */}
+                  <div className="rounded-xl border border-red-500/30 dark:border-red-400/40 bg-gradient-to-br from-red-500/10 to-red-600/5 dark:from-red-500/20 dark:to-red-700/10 p-4 shadow-sm">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="p-1.5 rounded-lg bg-red-500/20 dark:bg-red-400/25">
+                        <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                      </div>
+                      <h4 className="font-semibold text-red-700 dark:text-red-300">Requieren Atención</h4>
+                    </div>
+                    <div className="space-y-2">
+                      {entidadesAtencion.map((entidad, index) => (
+                        <EntidadMiniCard
+                          key={entidad.id}
+                          nombre={`${index + 1}. ${entidad.nombre}`}
+                          porcentaje={entidad.promedio}
+                          color="#ef4444"
+                          onClick={() => setSelectedEntidad(entidad.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Separador visual para análisis detallado */}
+                <div className="flex items-center gap-3 pt-4">
+                  <div className="h-px flex-1 bg-border" />
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50">
+                    <Layers className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">Análisis Detallado por Sistema</span>
+                  </div>
+                  <div className="h-px flex-1 bg-border" />
+                </div>
+
+                {/* Cards de filtro por sistema */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {Object.entries(SISTEMAS_CONFIG).map(([key, config]) => (
+                    <SistemaFilterCard
+                      key={key}
+                      sistema={key}
+                      config={config}
+                      stats={estadisticas.sistemas[key]}
+                      isSelected={selectedSistema === key}
+                      onClick={() => setSelectedSistema(key)}
+                    />
+                  ))}
+                </div>
+
+                {/* Mapa a la izquierda, Ámbito y Poder a la derecha */}
+                <div className="grid gap-4 lg:grid-cols-2">
+                  {/* Mapa de México */}
+                  <AvanceMapa
+                    data={dataMapaConNombres}
+                    baseColor={SISTEMAS_CONFIG[selectedSistema].color}
+                  />
+
+                  {/* Gráficas de Ámbito y Poder apiladas */}
+                  <div className="flex flex-col gap-4">
+                    {/* Por Ámbito */}
+                    <div className="rounded-xl border border-border/50 bg-card/50 dark:bg-card/80 p-4 flex-1 shadow-sm">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="p-1.5 rounded-lg" style={{ backgroundColor: `${SISTEMAS_CONFIG[selectedSistema].color}20` }}>
+                          <Layers className="h-4 w-4" style={{ color: SISTEMAS_CONFIG[selectedSistema].color }} />
+                        </div>
+                        <h4 className="font-semibold text-sm">Por Ámbito de Gobierno</h4>
+                      </div>
+                      {dataAmbito[selectedSistema] && (
+                        <div className="h-[200px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={dataAmbito[selectedSistema]}>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/50" />
+                              <XAxis dataKey="ambito" fontSize={12} className="fill-foreground" />
+                              <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} fontSize={11} className="fill-foreground" />
+                              <Tooltip content={<CustomAmbitoPoderTooltip />} />
+                              <Bar dataKey="count" fill={SISTEMAS_CONFIG[selectedSistema].color} radius={[4, 4, 0, 0]}>
+                                <LabelList dataKey="count" position="top" fontSize={11} formatter={(v) => `${v}%`} className="fill-foreground" />
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Por Poder */}
+                    <div className="rounded-xl border border-border/50 bg-card/50 dark:bg-card/80 p-4 flex-1 shadow-sm">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="p-1.5 rounded-lg" style={{ backgroundColor: `${SISTEMAS_CONFIG[selectedSistema].color}20` }}>
+                          <Gavel className="h-4 w-4" style={{ color: SISTEMAS_CONFIG[selectedSistema].color }} />
+                        </div>
+                        <h4 className="font-semibold text-sm">Por Poder de Gobierno</h4>
+                      </div>
+                      {dataPoder[selectedSistema] && (
+                        <div className="h-[200px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={dataPoder[selectedSistema]}>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/50" />
+                              <XAxis dataKey="poder" fontSize={12} className="fill-foreground" />
+                              <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} fontSize={11} className="fill-foreground" />
+                              <Tooltip content={<CustomAmbitoPoderTooltip />} />
+                              <Bar dataKey="count" fill={SISTEMAS_CONFIG[selectedSistema].color} radius={[4, 4, 0, 0]}>
+                                <LabelList dataKey="count" position="top" fontSize={11} formatter={(v) => `${v}%`} className="fill-foreground" />
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Gráfica original de Entidad (la que usan para reportes) */}
+                <EntidadBarChart
+                  data={data}
+                  selectedColumn={selectedSistema}
+                />
+              </>
+            )}
+
+            {/* Detalle de conexión por sistema (solo en vista de entidad) */}
+            {selectedEntidad && (
+              <>
+                {/* Separador visual para detalle */}
+                <div className="flex items-center gap-3 pt-4">
+                  <div className="h-px flex-1 bg-border" />
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50">
+                    <Layers className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">Detalle por Sistema</span>
+                  </div>
+                  <div className="h-px flex-1 bg-border" />
+                </div>
+
                 <div className="grid gap-4 md:grid-cols-2">
                   {Object.entries(SISTEMAS_CONFIG).map(([key, config]) => {
                     const stats = estadisticas.sistemas[key];
@@ -1011,7 +1028,7 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones 
                     return (
                       <div
                         key={key}
-                        className="p-4 rounded-xl border bg-card hover:shadow-md transition-shadow"
+                        className="p-4 rounded-xl border bg-muted/20 hover:shadow-md transition-shadow"
                         style={{ borderLeftColor: config.color, borderLeftWidth: 4 }}
                       >
                         <div className="flex items-start justify-between mb-3">
@@ -1068,11 +1085,11 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones 
                     );
                   })}
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </>
-      )}
+              </>
+            )}
+          </CardContent>
+        )}
+      </Card>
     </div>
   );
 }

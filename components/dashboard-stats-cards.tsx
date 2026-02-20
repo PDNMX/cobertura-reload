@@ -189,62 +189,62 @@ export function ResumenConexiones({
   return (
     <div className="grid gap-4 md:grid-cols-2 mb-4">
       {/* Card Entes Públicos */}
-      <Card className="border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-950/20">
+      <Card className="border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-700/10 border border-blue-500/20 dark:border-blue-400/30 shadow-sm">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-400">
+          <CardTitle className="text-sm font-semibold text-blue-700 dark:text-blue-300">
             Entes Públicos Conectados
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+            <span className="text-3xl font-bold text-blue-700 dark:text-blue-300">
               {entesConectados.toLocaleString()}
             </span>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-foreground/60">
               / {totalEntes.toLocaleString()}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-foreground/60 mt-1">
             Conectados en S1, S2 o S6
           </p>
-          <div className="mt-2 h-2 bg-blue-100 dark:bg-blue-950 rounded-full overflow-hidden">
+          <div className="mt-2 h-2.5 bg-blue-500/20 dark:bg-blue-400/25 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-500 rounded-full transition-all duration-500"
+              className="h-full bg-blue-500 dark:bg-blue-400 rounded-full transition-all duration-500"
               style={{ width: `${totalEntes > 0 ? (entesConectados / totalEntes) * 100 : 0}%` }}
             />
           </div>
-          <p className="text-right text-xs text-blue-600 dark:text-blue-400 mt-1">
+          <p className="text-right text-xs font-semibold text-blue-700 dark:text-blue-300 mt-1">
             {totalEntes > 0 ? ((entesConectados / totalEntes) * 100).toFixed(2) : 0}%
           </p>
         </CardContent>
       </Card>
 
       {/* Card OIC / Autoridades Resolutoras */}
-      <Card className="border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-50/50 to-transparent dark:from-amber-950/20">
+      <Card className="border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-500/10 to-amber-600/5 dark:from-amber-500/20 dark:to-amber-700/10 border border-amber-500/20 dark:border-amber-400/30 shadow-sm">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-amber-700 dark:text-amber-400">
+          <CardTitle className="text-sm font-semibold text-amber-700 dark:text-amber-300">
             Órganos Internos de Control / Autoridades Resolutoras Conectados
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-amber-600 dark:text-amber-400">
+            <span className="text-3xl font-bold text-amber-700 dark:text-amber-300">
               {oicConectados.toLocaleString()}
             </span>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-foreground/60">
               / {totalOIC.toLocaleString()}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-foreground/60 mt-1">
             Conectados en Sistema 3
           </p>
-          <div className="mt-2 h-2 bg-amber-100 dark:bg-amber-950 rounded-full overflow-hidden">
+          <div className="mt-2 h-2.5 bg-amber-500/20 dark:bg-amber-400/25 rounded-full overflow-hidden">
             <div
-              className="h-full bg-amber-500 rounded-full transition-all duration-500"
+              className="h-full bg-amber-500 dark:bg-amber-400 rounded-full transition-all duration-500"
               style={{ width: `${totalOIC > 0 ? (oicConectados / totalOIC) * 100 : 0}%` }}
             />
           </div>
-          <p className="text-right text-xs text-amber-600 dark:text-amber-400 mt-1">
+          <p className="text-right text-xs font-semibold text-amber-700 dark:text-amber-300 mt-1">
             {totalOIC > 0 ? ((oicConectados / totalOIC) * 100).toFixed(2) : 0}%
           </p>
         </CardContent>
