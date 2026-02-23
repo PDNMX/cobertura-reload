@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { EntidadInfo, getEntidadById } from "@/lib/entidades-slugs";
+import { EntidadInfo, getEntidadById, idToEntidad } from "@/lib/entidades-slugs";
 import Link from "next/link";
 
 interface EntidadPageClientProps {
@@ -643,6 +643,14 @@ export default function EntidadPageClient({ entidadInfo }: EntidadPageClientProp
             dataPoder={dataPoder}
             resumenConexiones={resumenConexiones}
             initialEntidadId={entidadInfo.id}
+            onEntidadChange={(id) => {
+              if (!id) {
+                router.push("/");
+              } else {
+                const entidad = idToEntidad.get(id);
+                if (entidad) router.push(`/${entidad.slug}`);
+              }
+            }}
           />
         </>
       )}

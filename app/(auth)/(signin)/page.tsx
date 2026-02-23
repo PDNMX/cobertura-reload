@@ -1,6 +1,7 @@
 // @ts-nocheck
 "use client";
 import { useEffect, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { CoberturaTable } from "@/components/tables/cobertura-table/table";
 import InfoAlert from "@/components/tables/cobertura-table/info-alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,8 +21,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { idToEntidad } from "@/lib/entidades-slugs";
 
 export default function AuthenticationPage() {
+  const router = useRouter();
   const [entes, setEntes] = useState([]);
   const [dataAmbito, setDataAmbito] = useState({});
   const [dataPoder, setDataPoder] = useState({});
@@ -652,6 +655,12 @@ export default function AuthenticationPage() {
                   dataAmbito={dataAmbito}
                   dataPoder={dataPoder}
                   resumenConexiones={resumenConexiones}
+                  onEntidadChange={(id) => {
+                    if (id) {
+                      const entidad = idToEntidad.get(id);
+                      if (entidad) router.push(`/${entidad.slug}`);
+                    }
+                  }}
                 />
               </TabsContent>
 

@@ -89,6 +89,8 @@ interface ResumenEntidadProps {
     oicConectados: number;
     totalOIC: number;
   };
+  initialEntidadId?: string;
+  onEntidadChange?: (id: string) => void;
 }
 
 // Función helper para formatear porcentaje (sin decimales si es 100% o 0%)
@@ -340,8 +342,8 @@ const TotalesIndicador = ({
   );
 };
 
-export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones }: ResumenEntidadProps) {
-  const [selectedEntidad, setSelectedEntidad] = useState<string>("");
+export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones, initialEntidadId = "", onEntidadChange }: ResumenEntidadProps) {
+  const [selectedEntidad, setSelectedEntidad] = useState<string>(initialEntidadId);
   const [selectedSistema, setSelectedSistema] = useState<string>("resultSistema1");
   const [municipiosData, setMunicipiosData] = useState(null);
   const [municipiosNacionales, setMunicipiosNacionales] = useState(null);
@@ -689,7 +691,10 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones 
               <Combobox
                 options={entidadesOptions}
                 value={selectedEntidad}
-                onChange={setSelectedEntidad}
+                onChange={(id) => {
+                  setSelectedEntidad(id);
+                  if (onEntidadChange) onEntidadChange(id);
+                }}
                 placeholder="Seleccionar entidad federativa..."
               />
             </div>
