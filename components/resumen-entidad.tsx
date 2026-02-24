@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -9,9 +9,10 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
 import { cn } from "@/lib/utils";
-import { MapPin, Search, Users, Building2, Scale, TrendingUp, CheckCircle2, XCircle, Loader2, Globe, ChevronRight, Layers, Gavel, BarChart2 } from "lucide-react";
+import { MapPin, Search, Users, Building2, Scale, TrendingUp, CheckCircle2, XCircle, Loader2, Globe, ChevronRight, Layers, Gavel, BarChart2, Download } from "lucide-react";
 import marcoGeoestadisticoInegi from "@/components/tables/cobertura-table/data-entidades";
 import {
   PieChart,
@@ -349,6 +350,10 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
   const [municipiosNacionales, setMunicipiosNacionales] = useState(null);
   const [loadingMunicipios, setLoadingMunicipios] = useState(false);
   const [entesConectadosEntidad, setEntesConectadosEntidad] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  // Ref para capturar la card principal
+  const cardRef = useRef<HTMLDivElement>(null);
 
   // Lista de entidades ordenadas alfabéticamente para el Combobox
   const entidadesOptions = useMemo(() => {
@@ -396,6 +401,62 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
     const found = marcoGeoestadisticoInegi.find((e) => e.id === selectedEntidad);
     return found?.nombre || "Entidad no encontrada";
   }, [selectedEntidad]);
+
+  // ── Descarga ──────────────────────────────────────────────────────────────
+
+  // Función para formatear la fecha de descarga
+  const getFormattedDate = () => {
+    const now = new Date();
+    return now.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  // Nombre de archivo base
+  const getFileName = (ext: string) => {
+    const entidad = selectedEntidad ? nombreEntidad : "Nacional";
+    const dateStr = new Date().toISOString().split("T")[0];
+    return `estadisticas-PDN-${entidad.replace(/\s+/g, "-")}-${dateStr}.${ext}`;
+  };
+
+  // Obtener color de fondo resuelto (no CSS var)
+  const getBackgroundColor = () => {
+    if (!cardRef.current) return "#ffffff";
+    const style = window.getComputedStyle(cardRef.current);
+    const bg = style.backgroundColor;
+    return bg === "rgba(0, 0, 0, 0)" || !bg ? "#ffffff" : bg;
+  };
+
+  // Descargar como PNG
+  const handleDownloadPNG = useCallback(async () => {
+    if (!cardRef.current) return;
+    setIsDownloading(true);
+    // Pequeña espera para que el watermark de fecha se renderice
+    await new Promise((r) => setTimeout(r, 100));
+    try {
+      const { toPng } = await import("html-to-image");
+      const bgColor = getBackgroundColor();
+      const dataUrl = await toPng(cardRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: bgColor,
+      });
+      const link = document.createElement("a");
+      link.download = getFileName("png");
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error("Error al descargar PNG:", err);
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [selectedEntidad, nombreEntidad]);
+
+  // ─────────────────────────────────────────────────────────────────────────
 
   // Cargar municipios nacionales al inicio
   useEffect(() => {
@@ -669,7 +730,7 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
   return (
     <div className="space-y-6">
       {/* Card principal con selector y estadísticas integradas */}
-      <Card className="border-t-4 border-t-primary">
+      <Card ref={cardRef} className="border-t-4 border-t-primary">
         <CardHeader className="pb-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -687,16 +748,34 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
                 </CardDescription>
               </div>
             </div>
-            <div className="w-full md:w-[350px]">
-              <Combobox
-                options={entidadesOptions}
-                value={selectedEntidad}
-                onChange={(id) => {
-                  setSelectedEntidad(id);
-                  if (onEntidadChange) onEntidadChange(id);
-                }}
-                placeholder="Seleccionar entidad federativa..."
-              />
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <div className="flex-1 md:w-[300px]">
+                <Combobox
+                  options={entidadesOptions}
+                  value={selectedEntidad}
+                  onChange={(id) => {
+                    setSelectedEntidad(id);
+                    if (onEntidadChange) onEntidadChange(id);
+                  }}
+                  placeholder="Seleccionar entidad federativa..."
+                />
+              </div>
+              {/* Botón de descarga PNG */}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isDownloading}
+                onClick={handleDownloadPNG}
+                className="shrink-0 gap-1.5"
+                title="Descargar como imagen PNG"
+              >
+                {isDownloading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+                <span className="hidden sm:inline text-xs">Descargar</span>
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -1091,6 +1170,13 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
                   })}
                 </div>
               </>
+            )}
+            {/* Marca de fecha de descarga - solo visible al exportar */}
+            {isDownloading && (
+              <div className="border-t pt-4 mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                <span>Plataforma Digital Nacional — Tablero de Interconexión</span>
+                <span>Generado el {getFormattedDate()}</span>
+              </div>
             )}
           </CardContent>
         )}
