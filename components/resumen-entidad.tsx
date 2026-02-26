@@ -358,7 +358,7 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
   // Lista de entidades ordenadas alfabéticamente para el Combobox
   const entidadesOptions = useMemo(() => {
     return [
-      { value: "", label: "Ver Resumen Nacional" },
+      { value: "", label: "Nacional" },
       ...marcoGeoestadisticoInegi
         .map((e) => ({ value: e.id, label: e.nombre }))
         .sort((a, b) => a.label.localeCompare(b.label))
