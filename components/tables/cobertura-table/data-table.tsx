@@ -34,7 +34,6 @@ import { Input } from "@/components/ui/input";
 
 import directus from "@/lib/directus";
 import { readItems } from "@directus/sdk";
-import * as XLSX from "xlsx";
 import { EntesTable } from "@/components/tables/cell-entes-table/table";
 import { TabsColumnsSistemas } from "@/components/charts/tabs-columns-sistemas";
 
@@ -290,79 +289,71 @@ export function DataTable<TData, TValue>({
         }));
       };
 
-      // Función de exportación para XLSX (datos procesados)
+      // Función de exportación para XLSX (datos procesados) — usa exceljs
       const exportToXLSX = async () => {
         const processedData = processDataForXLSX(respuestaDirectus);
+        const ExcelJS = (await import("exceljs")).default;
 
-        // Crear una nueva hoja de trabajo
-        const ws = XLSX.utils.json_to_sheet([]);
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Datos");
 
-        // Agregar el encabezado
-        const header = [
-          [
-            {
-              v: "Secretaría Ejecutiva del Sistema Nacional Anticorrupción",
-              s: { font: { bold: true, sz: 14 } },
-            },
-          ],
-          [
-            {
-              v: "PLATAFORMA DIGITAL NACIONAL",
-              s: { font: { bold: true, sz: 14 } },
-            },
-          ],
-          [""], // Espacio en blanco
-          [
-            {
-              v: "Tablero Estadístico de Interconexión Nacional",
-              s: { font: { bold: true, sz: 14 } },
-            },
-          ],
-          [""], // Espacio en blanco
-          [
-            { v: "Fecha de generación:", s: { font: { bold: true } } },
-            { v: new Date().toLocaleString() },
-          ],
-          [""], // Espacio en blanco
-          [""], // Espacio adicional antes de los datos
-        ];
+        // ── Encabezado institucional ────────────────────────────────────────
+        const r1 = worksheet.addRow(["Secretaría Ejecutiva del Sistema Nacional Anticorrupción"]);
+        r1.getCell(1).font = { bold: true, size: 14, name: "Calibri" };
 
-        // Añadir el encabezado y los datos
-        XLSX.utils.sheet_add_aoa(ws, header, { origin: "A1" });
-        XLSX.utils.sheet_add_json(ws, processedData, { origin: -1 });
+        const r2 = worksheet.addRow(["PLATAFORMA DIGITAL NACIONAL"]);
+        r2.getCell(1).font = { bold: true, size: 14, name: "Calibri" };
 
-        // Ajustar el ancho de las columnas
-        ws["!cols"] = [{ wch: 20 }, { wch: 30 }, { wch: 100 }];
+        worksheet.addRow([]);
 
-        // Aplicar estilos
-        const range = XLSX.utils.decode_range(ws["!ref"]);
-        for (let R = range.s.r; R <= range.e.r; ++R) {
-          for (let C = range.s.c; C <= range.e.c; ++C) {
-            const cellAddress = { c: C, r: R };
-            const cellRef = XLSX.utils.encode_cell(cellAddress);
-            if (!ws[cellRef]) continue;
+        const r4 = worksheet.addRow(["Tablero Estadístico de Interconexión Nacional"]);
+        r4.getCell(1).font = { bold: true, size: 14, name: "Calibri" };
 
-            ws[cellRef].s = {
-              font: { name: "Calibri", sz: 11 },
-              alignment: {
-                vertical: "center",
-                horizontal: "left",
-                wrapText: true,
-              },
-            };
+        worksheet.addRow([]);
 
-            if (R < 4) {
-              ws[cellRef].s.font.bold = true;
-            }
-          }
-        }
+        const r6 = worksheet.addRow(["Fecha de generación:", new Date().toLocaleString()]);
+        r6.getCell(1).font = { bold: true, name: "Calibri" };
+        r6.getCell(2).font = { name: "Calibri" };
 
-        // Crear el libro de trabajo y añadir la hoja
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Datos");
+        worksheet.addRow([]);
+        worksheet.addRow([]);
 
-        // Escribir el archivo Excel
-        XLSX.writeFileXLSX(wb, "tablero_cobertura.xlsx");
+        // ── Fila de columnas ────────────────────────────────────────────────
+        const columnNames = Object.keys(processedData[0] || {});
+        const headerRow = worksheet.addRow(columnNames);
+        headerRow.eachCell((cell) => {
+          cell.font = { bold: true, name: "Calibri", size: 11 };
+          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFD9E1F2" } };
+          cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+          cell.border = { bottom: { style: "thin" } };
+        });
+
+        // ── Filas de datos ──────────────────────────────────────────────────
+        processedData.forEach((rowData) => {
+          const row = worksheet.addRow(Object.values(rowData));
+          row.eachCell((cell) => {
+            cell.font = { name: "Calibri", size: 11 };
+            cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+          });
+        });
+
+        // ── Anchos de columna ───────────────────────────────────────────────
+        const colWidths = [8, 40, 22, 22, 20, 12, 12, 12, 12, 22, 22];
+        colWidths.forEach((width, i) => {
+          worksheet.getColumn(i + 1).width = width;
+        });
+
+        // ── Generar archivo y descargar ─────────────────────────────────────
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "tablero_cobertura.xlsx";
+        link.click();
+        URL.revokeObjectURL(url);
       };
 
       // Función de exportación para CSV (datos originales)

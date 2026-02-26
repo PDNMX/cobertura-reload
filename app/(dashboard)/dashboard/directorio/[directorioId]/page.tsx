@@ -6,11 +6,13 @@ import { DirectorioForm } from "@/components/forms/directorio-form"; // Cambiamo
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCurrentSession } from "@/hooks/useCurrentSession";
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import directus from "@/lib/directus";
 import { readItems, withToken } from "@directus/sdk";
 
-export default function Page({ params }) {
-  const { directorioId } = params; // Cambiamos enteId a directorioId
+export default function Page() {
+  const params = useParams();
+  const directorioId = params.directorioId as string;
   const { session, status } = useCurrentSession();
   
   const [directorio, setDirectorio] = useState([]);

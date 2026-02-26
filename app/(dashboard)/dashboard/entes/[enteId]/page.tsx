@@ -6,11 +6,13 @@ import { EnteForm } from "@/components/forms/ente-form";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCurrentSession } from "@/hooks/useCurrentSession";
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import directus from "@/lib/directus";
 import { readItems, withToken } from "@directus/sdk";
 
-export default function Page({ params }) {
-  const { enteId } = params;
+export default function Page() {
+  const params = useParams();
+  const enteId = params.enteId as string;
   const { session, status } = useCurrentSession();
   
   const [ente, setEnte] = useState([]);

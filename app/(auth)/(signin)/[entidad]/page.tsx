@@ -5,9 +5,9 @@ import { getEntidadBySlug, getAllSlugs, EntidadInfo } from "@/lib/entidades-slug
 import EntidadPageClient from "./EntidadPageClient";
 
 interface EntidadPageProps {
-  params: {
+  params: Promise<{
     entidad: string;
-  };
+  }>;
 }
 
 // Generar rutas estáticas para todas las entidades
@@ -20,7 +20,8 @@ export async function generateStaticParams() {
 
 // Generar metadata dinámica para SEO
 export async function generateMetadata({ params }: EntidadPageProps): Promise<Metadata> {
-  const entidadInfo = getEntidadBySlug(params.entidad);
+  const { entidad } = await params;
+  const entidadInfo = getEntidadBySlug(entidad);
 
   if (!entidadInfo) {
     return {
@@ -38,8 +39,9 @@ export async function generateMetadata({ params }: EntidadPageProps): Promise<Me
   };
 }
 
-export default function EntidadPage({ params }: EntidadPageProps) {
-  const entidadInfo = getEntidadBySlug(params.entidad);
+export default async function EntidadPage({ params }: EntidadPageProps) {
+  const { entidad } = await params;
+  const entidadInfo = getEntidadBySlug(entidad);
 
   // Si no existe la entidad, mostrar 404
   if (!entidadInfo) {

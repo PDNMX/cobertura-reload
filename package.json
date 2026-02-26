@@ -33,11 +33,12 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "eslint": "^8.0.0",
-    "eslint-config-next": "^14.2.4",
+    "eslint-config-next": "^15.5.12",
+    "exceljs": "^4.4.0",
     "html-to-image": "^1.11.13",
     "jspdf": "^4.2.0",
     "lucide-react": "^0.399.0",
-    "next": "^14.2.25",
+    "next": "^15.5.12",
     "next-auth": "^4.24.13",
     "next-themes": "^0.3.0",
     "postcss": "8.4.38",
@@ -51,10 +52,17 @@
     "tailwindcss": "^3.4.4",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "5.5.2",
-    "xlsx": "^0.18.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.14.1"
+  },
+  "overrides": {
+    "react-simple-maps": {
+      "d3-zoom": "^3.0.0",
+      "d3-transition": "^3.0.0",
+      "d3-interpolate": "^3.0.0",
+      "d3-color": "^3.1.0"
+    }
   }
 }
