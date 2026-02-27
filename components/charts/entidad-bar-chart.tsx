@@ -84,7 +84,10 @@ export const EntidadBarChart = ({ data, selectedColumn }: any) => {
             En la integración de sujetos obligados por entidad a la PDN
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-2 md:px-6">
+          {/* En móvil: scroll horizontal para que las 33 barras sean legibles */}
+          <div className="overflow-x-auto md:overflow-visible">
+            <div className="min-w-[700px] md:min-w-0">
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={datosConNombres} margin={{ bottom: 65, top: 25 }}>
               <CartesianGrid vertical={false} />
@@ -122,6 +125,8 @@ export const EntidadBarChart = ({ data, selectedColumn }: any) => {
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+            </div>
+          </div>
         </CardContent>
       </Card>
     );

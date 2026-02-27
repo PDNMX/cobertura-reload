@@ -112,15 +112,15 @@ const DonutChart = ({ conectados, total, color, nombre, shortName, descripcion }
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative w-28 h-28">
+      <div className="relative w-32 h-32">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={30}
-              outerRadius={42}
+              innerRadius={36}
+              outerRadius={50}
               paddingAngle={2}
               dataKey="value"
               startAngle={90}
@@ -133,7 +133,7 @@ const DonutChart = ({ conectados, total, color, nombre, shortName, descripcion }
           </PieChart>
         </ResponsiveContainer>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-lg font-bold" style={{ color }}>
+          <span className="text-sm font-bold leading-tight" style={{ color }}>
             {formatPorcentaje(porcentaje)}
           </span>
         </div>
@@ -198,48 +198,54 @@ const SistemaFilterCard = ({ sistema, config, stats, isSelected, onClick }) => {
           style={{ backgroundColor: config.color }}
         />
       )}
-      <div className="flex items-center justify-between">
+      {/* Móvil: layout vertical / Desktop: horizontal */}
+      <div className="flex items-center gap-2 mb-1 md:hidden">
+        <div
+          className={cn("p-2 rounded-xl transition-all", isSelected ? "shadow-md" : "")}
+          style={{ backgroundColor: isSelected ? `${config.color}25` : `${config.color}10` }}
+        >
+          <Icon className="h-4 w-4 transition-all" style={{ color: config.color }} />
+        </div>
+        <p
+          className={cn("font-bold text-sm transition-all flex-1 truncate", isSelected ? "" : "text-muted-foreground")}
+          style={{ color: isSelected ? config.color : undefined }}
+        >
+          {config.nombre}
+        </p>
+      </div>
+      <p
+        className={cn("text-2xl font-bold transition-all mb-1 md:hidden", !isSelected && "text-muted-foreground")}
+        style={{ color: isSelected ? config.color : undefined }}
+      >
+        {formatPorcentaje(porcentaje)}
+      </p>
+
+      {/* Desktop: layout original horizontal */}
+      <div className="hidden md:flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div
-            className={cn(
-              "p-2.5 rounded-xl transition-all",
-              isSelected ? "shadow-md" : ""
-            )}
-            style={{
-              backgroundColor: isSelected ? `${config.color}25` : `${config.color}10`,
-            }}
+            className={cn("p-2.5 rounded-xl transition-all", isSelected ? "shadow-md" : "")}
+            style={{ backgroundColor: isSelected ? `${config.color}25` : `${config.color}10` }}
           >
-            <Icon
-              className="h-5 w-5 transition-all"
-              style={{ color: config.color }}
-            />
+            <Icon className="h-5 w-5 transition-all" style={{ color: config.color }} />
           </div>
-          <div>
-            <p
-              className={cn(
-                "font-bold text-base transition-all",
-                isSelected ? "" : "text-muted-foreground"
-              )}
-              style={{ color: isSelected ? config.color : undefined }}
-            >
-              {config.nombre}
-            </p>
-          </div>
-        </div>
-        <div className="text-right">
           <p
-            className={cn(
-              "text-2xl font-bold transition-all",
-              !isSelected && "text-muted-foreground"
-            )}
+            className={cn("font-bold text-base transition-all", isSelected ? "" : "text-muted-foreground")}
             style={{ color: isSelected ? config.color : undefined }}
           >
-            {formatPorcentaje(porcentaje)}
+            {config.nombre}
           </p>
         </div>
+        <p
+          className={cn("text-2xl font-bold transition-all", !isSelected && "text-muted-foreground")}
+          style={{ color: isSelected ? config.color : undefined }}
+        >
+          {formatPorcentaje(porcentaje)}
+        </p>
       </div>
+
       {/* Barra de progreso */}
-      <div className="mt-3 h-1.5 rounded-full overflow-hidden bg-muted/50">
+      <div className="mt-2 h-1.5 rounded-full overflow-hidden bg-muted/50">
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{
@@ -278,10 +284,9 @@ const TotalesIndicador = ({
           <span className="text-xs font-semibold text-blue-700 dark:text-blue-200">Entes Públicos</span>
         </div>
         <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{totalEntes.toLocaleString()}</p>
-        <div className="flex items-center gap-1 mt-1">
-          <span className="text-xs text-blue-700 dark:text-blue-300 font-semibold">{entesConectados.toLocaleString()}</span>
-          <span className="text-xs text-foreground/60">conectados</span>
-          <span className="text-xs font-bold text-blue-700 dark:text-blue-300 ml-auto">{formatPorcentaje(porcentajeEntes)}</span>
+        <div className="mt-1">
+          <p className="text-xs font-bold text-blue-700 dark:text-blue-300">{formatPorcentaje(porcentajeEntes)}</p>
+          <p className="text-xs text-foreground/60">{entesConectados.toLocaleString()} conectados</p>
         </div>
         <div className="h-2 rounded-full overflow-hidden bg-blue-500/25 dark:bg-blue-400/30 mt-2">
           <div className="h-full rounded-full bg-blue-500 dark:bg-blue-400" style={{ width: `${Math.min(porcentajeEntes, 100)}%` }} />
@@ -297,10 +302,9 @@ const TotalesIndicador = ({
           <span className="text-xs font-semibold text-amber-700 dark:text-amber-200">OIC / Autoridades</span>
         </div>
         <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">{totalOIC.toLocaleString()}</p>
-        <div className="flex items-center gap-1 mt-1">
-          <span className="text-xs text-amber-700 dark:text-amber-300 font-semibold">{oicConectados.toLocaleString()}</span>
-          <span className="text-xs text-foreground/60">conectados</span>
-          <span className="text-xs font-bold text-amber-700 dark:text-amber-300 ml-auto">{formatPorcentaje(porcentajeOIC)}</span>
+        <div className="mt-1">
+          <p className="text-xs font-bold text-amber-700 dark:text-amber-300">{formatPorcentaje(porcentajeOIC)}</p>
+          <p className="text-xs text-foreground/60">{oicConectados.toLocaleString()} conectados</p>
         </div>
         <div className="h-2 rounded-full overflow-hidden bg-amber-500/25 dark:bg-amber-400/30 mt-2">
           <div className="h-full rounded-full bg-amber-500 dark:bg-amber-400" style={{ width: `${Math.min(porcentajeOIC, 100)}%` }} />
@@ -331,9 +335,9 @@ const TotalesIndicador = ({
           <span className="text-xs font-semibold text-violet-700 dark:text-violet-200">Municipios</span>
         </div>
         <p className="text-2xl font-bold text-violet-700 dark:text-violet-300">{totalMunicipios.toLocaleString()}</p>
-        <div className="flex items-center gap-1 mt-1">
-          <span className="text-xs text-violet-700 dark:text-violet-300 font-semibold">{municipiosRegistrados?.toLocaleString() || 0}</span>
-          <span className="text-xs text-foreground/60">registrados</span>
+        <div className="mt-1">
+          <p className="text-xs font-bold text-violet-700 dark:text-violet-300">{formatPorcentaje(porcentajeMunicipios)}</p>
+          <p className="text-xs text-foreground/60">{municipiosRegistrados?.toLocaleString() || 0} registrados</p>
         </div>
         <div className="h-2 rounded-full overflow-hidden bg-violet-500/25 dark:bg-violet-400/30 mt-2">
           <div className="h-full rounded-full bg-violet-500 dark:bg-violet-400" style={{ width: `${Math.min(porcentajeMunicipios, 100)}%` }} />
