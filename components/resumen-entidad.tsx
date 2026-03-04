@@ -448,11 +448,22 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
         cacheBust: true,
         pixelRatio: 2,
         backgroundColor: bgColor,
+        // Evita el bug de html-to-image que crashea al leer reglas CSS
+        // con fontFamily undefined (normalizeFontFamily). Las fuentes ya
+        // están cargadas en el navegador, así que la imagen se ve igual.
+        skipFonts: true,
       });
+      // Firefox no descarga data: URLs directamente — se convierte a blob: URL
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.download = getFileName("png");
-      link.href = dataUrl;
+      link.href = blobUrl;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
     } catch (err) {
       console.error("Error al descargar PNG:", err);
     } finally {
