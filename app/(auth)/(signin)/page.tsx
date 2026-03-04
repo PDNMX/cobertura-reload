@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { idToEntidad } from "@/lib/entidades-slugs";
+import { DescargaDatosNacionales } from "@/components/descarga-datos-nacionales";
 
 export default function AuthenticationPage() {
   const router = useRouter();
@@ -690,6 +691,8 @@ export default function AuthenticationPage() {
                     </div>
                   </div>
                 </Alert>
+
+                <DescargaDatosNacionales />
 
                 <div className="rounded-md border">
                   <CoberturaTable data={entes} showHeader={false} hideNameFilter={true} showInfoAlert={false} />

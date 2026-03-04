@@ -144,7 +144,7 @@ const InfoAlert = ({ variant = "button", className = "" }: InfoAlertProps) => {
                 </div>
                 <div className="flex-grow">
                   <h3 className="font-bold text-sm text-foreground">{info.title}</h3>
-                  <p className="text-xs text-foreground/70 mt-1 leading-relaxed">
+                  <p className="text-xs text-foreground/70 mt-1 leading-relaxed text-justify">
                     {info.description}
                   </p>
                 </div>

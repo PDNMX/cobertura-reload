@@ -62,6 +62,7 @@ export function DataTable<TData, TValue>({
     null
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingNacional, setIsLoadingNacional] = useState(false);
 
   const Table = React.forwardRef<
     HTMLTableElement,
@@ -1403,6 +1404,150 @@ export function DataTable<TData, TValue>({
       );
     }
   };
+  // Exportación nacional a XLSX con 3 hojas: Entes Públicos, OIC y Tribunales
+  const exportNacionalToXLSX = async () => {
+    setIsLoadingNacional(true);
+    try {
+      const [entesData, oicData, tribunalesData] = await Promise.all([
+        directus.request(
+          readItems("entes", {
+            filter: { controlOIC: { _eq: false } },
+            fields: ["*", "entidad.nombre", "municipio.nombre"],
+            sort: ["nombre"],
+            limit: -1,
+          })
+        ),
+        directus.request(
+          readItems("entes", {
+            filter: { controlOIC: { _eq: true } },
+            fields: ["*", "entidad.nombre", "municipio.nombre"],
+            sort: ["nombre"],
+            limit: -1,
+          })
+        ),
+        directus.request(
+          readItems("entes", {
+            filter: { controlTribunal: { _eq: true } },
+            fields: ["*", "entidad.nombre", "municipio.nombre"],
+            sort: ["nombre"],
+            limit: -1,
+          })
+        ),
+      ]);
+
+      const ExcelJS = (await import("exceljs")).default;
+      const workbook = new ExcelJS.Workbook();
+
+      const addInstitutionalHeader = (ws, sheetTitle) => {
+        const r1 = ws.addRow(["Secretaría Ejecutiva del Sistema Nacional Anticorrupción"]);
+        r1.getCell(1).font = { bold: true, size: 14, name: "Calibri" };
+        const r2 = ws.addRow(["PLATAFORMA DIGITAL NACIONAL"]);
+        r2.getCell(1).font = { bold: true, size: 14, name: "Calibri" };
+        ws.addRow([]);
+        const r4 = ws.addRow([sheetTitle]);
+        r4.getCell(1).font = { bold: true, size: 14, name: "Calibri" };
+        ws.addRow([]);
+        const r6 = ws.addRow(["Fecha de generación:", new Date().toLocaleString()]);
+        r6.getCell(1).font = { bold: true, name: "Calibri" };
+        r6.getCell(2).font = { name: "Calibri" };
+        ws.addRow([]);
+        ws.addRow([]);
+      };
+
+      const addSheet = (ws, rawData, columns, sheetTitle) => {
+        addInstitutionalHeader(ws, sheetTitle);
+        const headerRow = ws.addRow(columns.map((c) => c.label));
+        headerRow.eachCell((cell) => {
+          cell.font = { bold: true, name: "Calibri", size: 11 };
+          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFD9E1F2" } };
+          cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+          cell.border = { bottom: { style: "thin" } };
+        });
+        rawData.forEach((item) => {
+          const row = ws.addRow(columns.map((c) => c.accessor(item)));
+          row.eachCell((cell) => {
+            cell.font = { name: "Calibri", size: 11 };
+            cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+          });
+        });
+      };
+
+      // Hoja 1: Entes Públicos — S1, S2, S6
+      const ws1 = workbook.addWorksheet("Entes Públicos");
+      addSheet(
+        ws1,
+        entesData,
+        [
+          { label: "ID", accessor: (i) => i.id },
+          { label: "Nombre del Ente Público", accessor: (i) => i.nombre },
+          { label: "Ámbito de Gobierno", accessor: (i) => i.ambitoGobierno },
+          { label: "Poder de Gobierno", accessor: (i) => i.poderGobierno },
+          { label: "Sistema 1", accessor: (i) => (i.sistema1 ? "Sí" : "No") },
+          { label: "Sistema 2", accessor: (i) => (i.sistema2 ? "Sí" : "No") },
+          { label: "Sistema 6", accessor: (i) => (i.sistema6 ? "Sí" : "No") },
+          { label: "Entidad", accessor: (i) => i.entidad?.nombre || "N/A" },
+          { label: "Municipio", accessor: (i) => i.municipio?.nombre || "N/A" },
+        ],
+        "Entes Públicos — Tablero Estadístico de Interconexión Nacional"
+      );
+      [8, 40, 22, 20, 12, 12, 12, 22, 22].forEach((w, i) => { ws1.getColumn(i + 1).width = w; });
+
+      // Hoja 2: OIC — S3
+      const ws2 = workbook.addWorksheet("OIC");
+      addSheet(
+        ws2,
+        oicData,
+        [
+          { label: "ID", accessor: (i) => i.id },
+          { label: "Nombre del Ente Público", accessor: (i) => i.nombre },
+          { label: "Ámbito de Gobierno", accessor: (i) => i.ambitoGobierno },
+          { label: "Poder de Gobierno", accessor: (i) => i.poderGobierno },
+          { label: "Sistema 3", accessor: (i) => (i.sistema3 ? "Sí" : "No") },
+          { label: "Entidad", accessor: (i) => i.entidad?.nombre || "N/A" },
+          { label: "Municipio", accessor: (i) => i.municipio?.nombre || "N/A" },
+        ],
+        "OIC — Tablero Estadístico de Interconexión Nacional"
+      );
+      [8, 40, 22, 20, 12, 22, 22].forEach((w, i) => { ws2.getColumn(i + 1).width = w; });
+
+      // Hoja 3: Tribunales — S1, S2, S3, S6
+      const ws3 = workbook.addWorksheet("Tribunales");
+      addSheet(
+        ws3,
+        tribunalesData,
+        [
+          { label: "ID", accessor: (i) => i.id },
+          { label: "Nombre del Ente Público", accessor: (i) => i.nombre },
+          { label: "Ámbito de Gobierno", accessor: (i) => i.ambitoGobierno },
+          { label: "Poder de Gobierno", accessor: (i) => i.poderGobierno },
+          { label: "Sistema 1", accessor: (i) => (i.sistema1 ? "Sí" : "No") },
+          { label: "Sistema 2", accessor: (i) => (i.sistema2 ? "Sí" : "No") },
+          { label: "Sistema 3", accessor: (i) => (i.sistema3 ? "Sí" : "No") },
+          { label: "Sistema 6", accessor: (i) => (i.sistema6 ? "Sí" : "No") },
+          { label: "Entidad", accessor: (i) => i.entidad?.nombre || "N/A" },
+          { label: "Municipio", accessor: (i) => i.municipio?.nombre || "N/A" },
+        ],
+        "Tribunales — Tablero Estadístico de Interconexión Nacional"
+      );
+      [8, 40, 22, 20, 12, 12, 12, 12, 22, 22].forEach((w, i) => { ws3.getColumn(i + 1).width = w; });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "datos_nacionales.xlsx";
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error al exportar datos nacionales:", error);
+    } finally {
+      setIsLoadingNacional(false);
+    }
+  };
+
   // Función auxiliar para determinar el tipo de autoridad
   const getTipoAutoridad = (controlOIC, controlTribunal) => {
     if (!controlOIC && !controlTribunal) return "Sujeto Obligado";
@@ -1415,11 +1560,13 @@ export function DataTable<TData, TValue>({
     const headers = Object.keys(data[0]).join(",");
     const rows = data.map((row) =>
       Object.values(row)
-        .map((value) =>
-          typeof value === "string" && value.includes(",")
-            ? `"${value}"`
-            : value
-        )
+        .map((value) => {
+          if (value === null || value === undefined) return "";
+          if (typeof value === "object") return value.nombre || "";
+          if (typeof value === "string" && value.includes(","))
+            return `"${value}"`;
+          return value;
+        })
         .join(",")
     );
     return [headers, ...rows].join("\n");
