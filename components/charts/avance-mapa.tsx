@@ -92,7 +92,7 @@ export const AvanceMapa = ({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
             <CardTitle>Mapa de avance</CardTitle>
             <CardDescription>
@@ -100,7 +100,7 @@ export const AvanceMapa = ({
             </CardDescription>
           </div>
           <div
-            className="shrink-0 rounded-xl border-2 overflow-hidden min-w-[150px]"
+            className="w-full sm:w-auto sm:shrink-0 rounded-xl border-2 overflow-hidden sm:min-w-[150px]"
             style={{ borderColor: `${baseColor}50` }}
           >
             {/* Header del indicador */}
@@ -115,7 +115,7 @@ export const AvanceMapa = ({
             </div>
 
             {/* Número principal */}
-            <div className="px-3 pt-2 pb-1">
+            <div className="px-3 pt-2 pb-1 flex sm:block items-center gap-4">
               <div className="flex items-end gap-1 leading-none">
                 <span className="text-4xl font-black tabular-nums" style={{ color: baseColor }}>
                   {entidadesConectadas}
@@ -124,13 +124,13 @@ export const AvanceMapa = ({
                   / {TOTAL_ENTIDADES}
                 </span>
               </div>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
+              <p className="mt-0.5 text-[11px] text-muted-foreground sm:block">
                 32 entidades federativas y la Federación
               </p>
             </div>
 
             {/* Barra de progreso */}
-            <div className="px-3 pb-1">
+            <div className="px-3 pb-1 sm:pb-1">
               <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all duration-700"
