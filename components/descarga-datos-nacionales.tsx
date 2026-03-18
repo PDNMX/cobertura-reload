@@ -97,8 +97,8 @@ const SHEETS_CONFIG = [
       { label: "Sistema 1", get: (i) => (i.sistema1 ? "Sí" : "No") },
       { label: "Sistema 2", get: (i) => (i.sistema2 ? "Sí" : "No") },
       { label: "Sistema 6", get: (i) => (i.sistema6 ? "Sí" : "No") },
-      { label: "Entidad", get: (i) => i.entidad?.nombre || "N/A" },
-      { label: "Municipio", get: (i) => i.municipio?.nombre || "N/A" },
+      { label: "Entidad", get: (i) => i.entidad?.nombre || "NA" },
+      { label: "Municipio", get: (i) => i.municipio?.nombre || "NA" },
     ],
     widths: [8, 40, 18, 22, 20, 12, 12, 12, 22, 22],
   },
@@ -113,14 +113,11 @@ const SHEETS_CONFIG = [
       { label: "Tipo", get: (i) => (i.controlTribunal ? "Tribunal" : "OIC") },
       { label: "Ámbito de Gobierno", get: (i) => i.ambitoGobierno },
       { label: "Poder de Gobierno", get: (i) => i.poderGobierno },
-      { label: "Sistema 1", get: (i) => (i.sistema1 ? "Sí" : "No") },
-      { label: "Sistema 2", get: (i) => (i.sistema2 ? "Sí" : "No") },
       { label: "Sistema 3", get: (i) => (i.sistema3 ? "Sí" : "No") },
-      { label: "Sistema 6", get: (i) => (i.sistema6 ? "Sí" : "No") },
-      { label: "Entidad", get: (i) => i.entidad?.nombre || "N/A" },
-      { label: "Municipio", get: (i) => i.municipio?.nombre || "N/A" },
+      { label: "Entidad", get: (i) => i.entidad?.nombre || "NA" },
+      { label: "Municipio", get: (i) => i.municipio?.nombre || "NA" },
     ],
-    widths: [8, 40, 14, 22, 20, 12, 12, 12, 12, 22, 22],
+    widths: [8, 40, 14, 22, 20, 12, 22, 22],
   },
   {
     // Tribunales de forma independiente — se repiten respecto a la hoja anterior
@@ -136,8 +133,8 @@ const SHEETS_CONFIG = [
       { label: "Sistema 2", get: (i) => (i.sistema2 ? "Sí" : "No") },
       { label: "Sistema 3", get: (i) => (i.sistema3 ? "Sí" : "No") },
       { label: "Sistema 6", get: (i) => (i.sistema6 ? "Sí" : "No") },
-      { label: "Entidad", get: (i) => i.entidad?.nombre || "N/A" },
-      { label: "Municipio", get: (i) => i.municipio?.nombre || "N/A" },
+      { label: "Entidad", get: (i) => i.entidad?.nombre || "NA" },
+      { label: "Municipio", get: (i) => i.municipio?.nombre || "NA" },
     ],
     widths: [8, 40, 22, 20, 12, 12, 12, 12, 22, 22],
   },
@@ -189,33 +186,39 @@ export function DescargaDatosNacionales() {
     try {
       const [entesData, oicYTribunalesData] = await fetchNacionalData();
 
-      // Columnas unificadas para el CSV combinado
       const header = [
         "ID", "Nombre del Ente Público", "Tipo", "Ámbito de Gobierno",
         "Poder de Gobierno", "Sistema 1", "Sistema 2", "Sistema 3",
         "Sistema 6", "Entidad", "Municipio",
       ].join(",");
 
-      const toRow = (i, tipo) => [
-        i.id,
-        i.nombre,
-        tipo,
-        i.ambitoGobierno,
-        i.poderGobierno,
-        tipo !== "OIC" ? (i.sistema1 ? "Sí" : "No") : "",
-        tipo !== "OIC" ? (i.sistema2 ? "Sí" : "No") : "",
-        tipo !== "Ente Público" ? (i.sistema3 ? "Sí" : "No") : "",
-        tipo !== "OIC" ? (i.sistema6 ? "Sí" : "No") : "",
-        i.entidad?.nombre || "",
-        i.municipio?.nombre || "",
-      ].map(toCSVValue).join(",");
+      const toRow = (i, tipo) => {
+        const esTribunal   = tipo === "Tribunal";
+        const esEntePublico = tipo === "Ente Público";
+        const esOIC        = tipo === "OIC";
+        return [
+          i.id,
+          i.nombre,
+          tipo,
+          i.ambitoGobierno,
+          i.poderGobierno,
+          // S1: Ente Público y Tribunal → Sí/No; OIC → NA
+          esOIC       ? "NA" : (i.sistema1 ? "Sí" : "No"),
+          // S2: Ente Público y Tribunal → Sí/No; OIC → NA
+          esOIC       ? "NA" : (i.sistema2 ? "Sí" : "No"),
+          // S3: OIC y Tribunal → Sí/No; Ente Público → NA
+          esEntePublico ? "NA" : (i.sistema3 ? "Sí" : "No"),
+          // S6: Ente Público y Tribunal → Sí/No; OIC → NA
+          esOIC       ? "NA" : (i.sistema6 ? "Sí" : "No"),
+          i.entidad?.nombre  || "",
+          i.municipio?.nombre || "",
+        ].map(toCSVValue).join(",");
+      };
 
       const rows = [
         header,
-        ...entesData.map((i) => toRow(i, "Ente Público")),
-        ...oicYTribunalesData.map((i) =>
-          toRow(i, i.controlTribunal ? "Tribunal" : "OIC")
-        ),
+        ...entesData.map((i) => toRow(i, i.controlTribunal ? "Tribunal" : "Ente Público")),
+        ...oicYTribunalesData.map((i) => toRow(i, i.controlTribunal ? "Tribunal" : "OIC")),
       ].join("\n");
 
       // BOM para que Excel abra correctamente con UTF-8

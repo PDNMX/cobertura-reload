@@ -59,7 +59,7 @@ export const PoderBarChart = ({ data, tipoColumna }: any) => {
           {tipoColumna === "resultSistema3Tribunal" && " (excluyendo poder Legislativo)"}
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex items-center justify-center">
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={filteredData}>
             <CartesianGrid vertical={false} />

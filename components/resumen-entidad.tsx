@@ -355,6 +355,7 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
   const [loadingMunicipios, setLoadingMunicipios] = useState(false);
   const [entesConectadosEntidad, setEntesConectadosEntidad] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   // Ref para capturar la card principal
   const cardRef = useRef<HTMLDivElement>(null);
@@ -745,7 +746,13 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
   return (
     <div className="space-y-6">
       {/* Card principal con selector y estadísticas integradas */}
-      <Card ref={cardRef} className="border-t-4 border-t-primary">
+      <Card ref={cardRef} className="border-t-4 border-t-primary relative">
+        {isNavigating && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 rounded-xl bg-background/80 backdrop-blur-sm">
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            <p className="text-sm font-medium text-muted-foreground">Cargando información de la entidad…</p>
+          </div>
+        )}
         <CardHeader className="pb-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -769,8 +776,17 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
                   options={entidadesOptions}
                   value={selectedEntidad}
                   onChange={(id) => {
-                    setSelectedEntidad(id);
-                    if (onEntidadChange) onEntidadChange(id);
+                    if (onEntidadChange && id) {
+                      // Seleccionar una entidad → overlay de carga y navegar
+                      setIsNavigating(true);
+                      onEntidadChange(id);
+                    } else if (onEntidadChange && !id) {
+                      // Seleccionar "Nacional" → resetear vista y navegar a /
+                      setSelectedEntidad(id);
+                      onEntidadChange(id);
+                    } else {
+                      setSelectedEntidad(id);
+                    }
                   }}
                   placeholder="Seleccionar entidad federativa..."
                 />
@@ -983,7 +999,14 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
                           nombre={`${index + 1}. ${entidad.nombre}`}
                           porcentaje={entidad.promedio}
                           color="#10b981"
-                          onClick={() => setSelectedEntidad(entidad.id)}
+                          onClick={() => {
+                            if (onEntidadChange) {
+                              setIsNavigating(true);
+                              onEntidadChange(entidad.id);
+                            } else {
+                              setSelectedEntidad(entidad.id);
+                            }
+                          }}
                         />
                       ))}
                     </div>
@@ -1004,7 +1027,14 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
                           nombre={`${index + 1}. ${entidad.nombre}`}
                           porcentaje={entidad.promedio}
                           color="#ef4444"
-                          onClick={() => setSelectedEntidad(entidad.id)}
+                          onClick={() => {
+                            if (onEntidadChange) {
+                              setIsNavigating(true);
+                              onEntidadChange(entidad.id);
+                            } else {
+                              setSelectedEntidad(entidad.id);
+                            }
+                          }}
                         />
                       ))}
                     </div>
@@ -1054,7 +1084,7 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
                         <h4 className="font-semibold text-sm">Por Ámbito de Gobierno</h4>
                       </div>
                       {dataAmbito[selectedSistema] && (
-                        <div className="h-[200px]">
+                        <div className="h-[200px] flex items-center justify-center pt-14">
                           <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={dataAmbito[selectedSistema]}>
                               <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/50" />
@@ -1079,7 +1109,7 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
                         <h4 className="font-semibold text-sm">Por Poder de Gobierno</h4>
                       </div>
                       {dataPoder[selectedSistema] && (
-                        <div className="h-[200px]">
+                        <div className="h-[200px] flex items-center justify-center pt-14">
                           <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={dataPoder[selectedSistema]}>
                               <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/50" />
