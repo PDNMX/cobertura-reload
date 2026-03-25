@@ -43,7 +43,60 @@ import {
 } from "lucide-react";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
-const GOOGLE_FORM_URL = "#";
+const GOOGLE_FORM_URL = "https://forms.gle/NyEWrtFFiaeAkXzB8";
+
+/** Ventanas de captura trimestral — actualizar solo si cambian las fechas oficiales */
+const CAPTURE_PERIODS = [
+  {
+    id: "1T2026",
+    trimestre: "Primer Trimestre 2026",
+    periodoLabel: "enero — marzo 2026",
+    start: new Date(2026, 3, 1),            // 1 abr 2026
+    end:   new Date(2026, 3, 9, 23, 59, 59), // 9 abr 2026
+  },
+  {
+    id: "2T2026",
+    trimestre: "Segundo Trimestre 2026",
+    periodoLabel: "abril — junio 2026",
+    start: new Date(2026, 6, 19),            // 19 jul 2026
+    end:   new Date(2026, 6, 27, 23, 59, 59), // 27 jul 2026
+  },
+  {
+    id: "3T2026",
+    trimestre: "Tercer Trimestre 2026",
+    periodoLabel: "julio — septiembre 2026",
+    start: new Date(2026, 9, 1),             // 1 oct 2026
+    end:   new Date(2026, 9, 9, 23, 59, 59),  // 9 oct 2026
+  },
+  {
+    id: "4T2026",
+    trimestre: "Cuarto Trimestre 2026",
+    periodoLabel: "octubre — diciembre 2026",
+    start: new Date(2027, 0, 7),             // 7 ene 2027
+    end:   new Date(2027, 0, 15, 23, 59, 59), // 15 ene 2027
+  },
+];
+
+/** Período actualmente abierto (dentro de ventana), o null */
+function getActivePeriod() {
+  const now = new Date();
+  return CAPTURE_PERIODS.find(p => now >= p.start && now <= p.end) ?? null;
+}
+
+/** Próxima ventana futura más cercana, o null */
+function getNextPeriod() {
+  const now = new Date();
+  return CAPTURE_PERIODS.find(p => now < p.start) ?? null;
+}
+
+/** Formatea rango: "1 — 9 de abril de 2026" */
+function formatRange(start: Date, end: Date) {
+  const startDay = start.getDate();
+  const endStr = new Intl.DateTimeFormat("es-MX", {
+    day: "numeric", month: "long", year: "numeric",
+  }).format(end);
+  return `${startDay} — ${endStr}`;
+}
 
 const SISTEMAS = [
   { key: "sistema1", label: "Sistema 1", short: "S1", desc: "Evolución patrimonial, declaración de intereses y fiscal", icon: icoS1,    hex: "#F29888", totalKey: "totalSujetosObligados" },
@@ -222,67 +275,147 @@ export default function Page() {
         </div>
 
         {/* ══ 2. AVISOS ══════════════════════════════════════════════════════ */}
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        {(() => {
+          const active = getActivePeriod();
+          const next   = getNextPeriod();
+          const shown  = active ?? next;
 
-          {/* Actualización de Entes */}
-          <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/60">
-                  <RefreshCw className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                </div>
-                <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/60 dark:text-amber-300 border-amber-200 dark:border-amber-700 text-[11px]">
-                  Primer Trimestre 2026
-                </Badge>
-              </div>
-              <CardTitle className="text-sm leading-snug text-amber-900 dark:text-amber-100">
-                Actualización del listado de Entes Públicos
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
-                Período de reporte correspondiente a <strong>enero — marzo 2026</strong>. Podrás actualizar el listado dentro de las siguientes fechas:
-              </p>
-              <div className="flex items-center gap-2 rounded-lg border border-amber-200 dark:border-amber-700 bg-white/60 dark:bg-amber-900/20 px-3 py-2">
-                <CalendarDays className="h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
-                <span className="text-xs font-bold text-amber-800 dark:text-amber-200">1 — 9 de abril de 2026</span>
-              </div>
-            </CardContent>
-          </Card>
+          return (
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
 
-          {/* Formulario trimestral */}
-          <Card className="border-violet-200 bg-violet-50 dark:bg-violet-950/20 dark:border-violet-800 flex flex-col">
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-900/60">
-                  <ClipboardList className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+              {/* ── Card 1: Ventana de captura ── */}
+              <div className={`relative overflow-hidden rounded-2xl border p-5 flex flex-col gap-4 ${
+                active
+                  ? "border-green-200 dark:border-green-800 bg-gradient-to-br from-green-50 to-emerald-50/60 dark:from-green-950/30 dark:to-emerald-950/20"
+                  : "border-amber-200 dark:border-amber-800 bg-gradient-to-br from-amber-50 to-orange-50/60 dark:from-amber-950/30 dark:to-orange-950/20"
+              }`}>
+                {/* Icono decorativo de fondo */}
+                <CalendarDays className={`absolute right-4 top-4 h-20 w-20 opacity-[0.06] ${active ? "text-green-600" : "text-amber-600"}`} />
+
+                {/* Encabezado */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                    active ? "bg-green-100 dark:bg-green-900/50" : "bg-amber-100 dark:bg-amber-900/50"
+                  }`}>
+                    <CalendarDays className={`h-5 w-5 ${active ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}`} />
+                  </div>
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold border ${
+                    active
+                      ? "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700"
+                      : "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700"
+                  }`}>
+                    {active && <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />}
+                    {active ? "Ventana abierta" : "Próximamente"}
+                  </span>
                 </div>
-                <Badge className="bg-violet-100 text-violet-700 hover:bg-violet-100 dark:bg-violet-900/60 dark:text-violet-300 border-violet-200 dark:border-violet-700 text-[11px]">
-                  Formulario trimestral
-                </Badge>
+
+                {/* Cuerpo */}
+                <div className="space-y-1">
+                  <p className={`text-xs font-medium uppercase tracking-wider ${active ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}`}>
+                    {shown?.trimestre ?? "Sin período programado"}
+                  </p>
+                  <h3 className={`text-base font-bold leading-snug ${active ? "text-green-900 dark:text-green-100" : "text-amber-900 dark:text-amber-100"}`}>
+                    Actualización del padrón de Entes Públicos
+                  </h3>
+                  <p className={`text-xs leading-relaxed ${active ? "text-green-700 dark:text-green-300" : "text-amber-700 dark:text-amber-300"}`}>
+                    {shown
+                      ? <>Periodo de reporte: <strong>{shown.periodoLabel}</strong></>
+                      : "No hay un período de captura programado próximamente."}
+                  </p>
+                </div>
+
+                {/* Fecha destacada */}
+                {shown && (
+                  <div className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${
+                    active
+                      ? "border-green-200 dark:border-green-700 bg-white/70 dark:bg-green-900/20"
+                      : "border-amber-200 dark:border-amber-700 bg-white/70 dark:bg-amber-900/20"
+                  }`}>
+                    <div className={`h-8 w-1 rounded-full shrink-0 ${active ? "bg-green-500" : "bg-amber-500"}`} />
+                    <div>
+                      <p className={`text-[10px] uppercase tracking-wider font-medium mb-0.5 ${active ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}`}>
+                        {active ? "Ventana de captura" : "Próxima ventana"}
+                      </p>
+                      <p className={`text-sm font-bold ${active ? "text-green-900 dark:text-green-100" : "text-amber-900 dark:text-amber-100"}`}>
+                        {formatRange(shown.start, shown.end)}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
-              <CardTitle className="text-sm leading-snug text-violet-900 dark:text-violet-100">
-                Avance en la interconexión con los sistemas 1, 2, 3 y 6 de la PDN
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3 flex-1 justify-between">
-              <p className="text-xs text-violet-800 dark:text-violet-200 leading-relaxed">
-                Reporta el avance de tu entidad en la interconexión con los sistemas de la Plataforma Digital Nacional de manera trimestral.
-              </p>
-              <a href={GOOGLE_FORM_URL} target="_blank" rel="noopener noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-violet-600 hover:bg-violet-700 active:bg-violet-800 px-4 py-2 text-xs font-semibold text-white transition-colors">
-                Ir al formulario
-                <ArrowRight className="h-3.5 w-3.5" />
-              </a>
-            </CardContent>
-          </Card>
-        </div>
+
+              {/* ── Card 2: Formulario trimestral ── */}
+              <div className={`relative overflow-hidden rounded-2xl border p-5 flex flex-col gap-4 ${
+                active
+                  ? "border-violet-200 dark:border-violet-800 bg-gradient-to-br from-violet-50 to-purple-50/60 dark:from-violet-950/30 dark:to-purple-950/20"
+                  : "border-violet-200/70 dark:border-violet-800/50 bg-gradient-to-br from-violet-50/60 to-purple-50/30 dark:from-violet-950/20 dark:to-purple-950/10"
+              }`}>
+                {/* Icono decorativo de fondo */}
+                <ClipboardList className="absolute right-4 top-4 h-20 w-20 opacity-[0.06] text-violet-600" />
+
+                {/* Encabezado */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/50">
+                    <ClipboardList className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                  </div>
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold border ${
+                    active
+                      ? "bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-700"
+                      : "bg-muted text-muted-foreground border-border/60"
+                  }`}>
+                    {active ? "Disponible ahora" : shown ? "No disponible aún" : "Sin período"}
+                  </span>
+                </div>
+
+                {/* Cuerpo */}
+                <div className="space-y-1 flex-1">
+                  <p className="text-xs font-medium uppercase tracking-wider text-violet-600 dark:text-violet-400">
+                    Formulario trimestral · PDN
+                  </p>
+                  <h3 className="text-base font-bold leading-snug text-violet-900 dark:text-violet-100">
+                    Avance en la interconexión con los sistemas
+                  </h3>
+                  <p className="text-xs leading-relaxed text-violet-700 dark:text-violet-300">
+                    Reporta el avance de tu entidad en la interconexión con los sistemas 1, 2, 3 y 6 de la Plataforma Digital Nacional.
+                  </p>
+                </div>
+
+                {/* Acción */}
+                <div className="space-y-2">
+                  {active ? (
+                    <a
+                      href={GOOGLE_FORM_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-700 active:bg-violet-800 px-4 py-2.5 text-sm font-semibold text-white transition-colors shadow-sm shadow-violet-200 dark:shadow-none"
+                    >
+                      Ir al formulario
+                      <ArrowRight className="h-4 w-4" />
+                    </a>
+                  ) : (
+                    <>
+                      <div className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-100/80 dark:bg-violet-900/20 border border-violet-200/60 dark:border-violet-800/40 px-4 py-2.5 text-sm font-semibold text-violet-400 dark:text-violet-500 cursor-not-allowed select-none">
+                        Formulario no disponible aún
+                      </div>
+                      {next && (
+                        <p className="text-center text-[11px] text-violet-500 dark:text-violet-400">
+                          Disponible del {formatRange(next.start, next.end)}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          );
+        })()}
 
         {/* ══ 3. SEPARADOR ═══════════════════════════════════════════════════ */}
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-border" />
           <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-widest text-muted-foreground px-1">
-            <Activity className="h-3.5 w-3.5" /> Estadísticas · 1er Trimestre 2026
+            <Activity className="h-3.5 w-3.5" /> Estadísticas · {(getActivePeriod() ?? getNextPeriod())?.trimestre ?? "Último corte"}
           </span>
           <div className="h-px flex-1 bg-border" />
         </div>
