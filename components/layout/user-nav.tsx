@@ -46,7 +46,10 @@ export function UserNav() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+          <DropdownMenuItem
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="cursor-pointer text-destructive focus:text-destructive"
+          >
             Cerrar sesión
           </DropdownMenuItem>
         </DropdownMenuContent>

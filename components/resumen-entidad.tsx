@@ -13,6 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
 import { cn } from "@/lib/utils";
 import { MapPin, Search, Users, Building2, Scale, TrendingUp, CheckCircle2, XCircle, Loader2, Globe, ChevronRight, Layers, Gavel, BarChart2, Download } from "lucide-react";
+import Image from "next/image";
+import icoSO  from "@/components/tables/cobertura-table/icons-thead/sujetosObligados.svg";
+import icoOIC from "@/components/tables/cobertura-table/icons-thead/oic.svg";
 import marcoGeoestadisticoInegi from "@/components/tables/cobertura-table/data-entidades";
 import {
   PieChart,
@@ -180,69 +183,88 @@ const SistemaFilterCard = ({ sistema, config, stats, isSelected, onClick }) => {
   return (
     <div
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === "Enter" && onClick()}
+      title={`Ver análisis de ${config.nombre} — ${config.descripcion}`}
       className={cn(
-        "p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 relative overflow-hidden",
+        "p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 relative overflow-hidden select-none",
         isSelected
-          ? "shadow-xl scale-[1.02]"
-          : "border-border/50 hover:border-border hover:shadow-md bg-card/50"
+          ? "shadow-lg scale-[1.02]"
+          : "border-border/50 hover:border-border/80 hover:shadow-md hover:scale-[1.01] bg-card/50"
       )}
       style={{
         borderColor: isSelected ? config.color : undefined,
         backgroundColor: isSelected ? `${config.color}10` : undefined,
       }}
     >
-      {/* Barra de color en la parte superior cuando está seleccionado */}
+      {/* Barra de color en la parte superior */}
+      <div
+        className="absolute top-0 left-0 right-0 h-1 transition-opacity duration-200"
+        style={{ backgroundColor: config.color, opacity: isSelected ? 1 : 0.25 }}
+      />
+
+      {/* Indicador "Seleccionado" */}
       {isSelected && (
-        <div
-          className="absolute top-0 left-0 right-0 h-1"
-          style={{ backgroundColor: config.color }}
-        />
+        <span
+          className="absolute top-2 right-2 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+          style={{ backgroundColor: `${config.color}20`, color: config.color }}
+        >
+          Activo
+        </span>
       )}
-      {/* Móvil: layout vertical / Desktop: horizontal */}
+
+      {/* Móvil: layout vertical */}
       <div className="flex items-center gap-2 mb-1 md:hidden">
         <div
-          className={cn("p-2 rounded-xl transition-all", isSelected ? "shadow-md" : "")}
+          className="p-2 rounded-xl"
           style={{ backgroundColor: isSelected ? `${config.color}25` : `${config.color}10` }}
         >
-          <Icon className="h-4 w-4 transition-all" style={{ color: config.color }} />
+          <Icon className="h-4 w-4" style={{ color: config.color }} />
         </div>
         <p
-          className={cn("font-bold text-sm transition-all flex-1 truncate", isSelected ? "" : "text-muted-foreground")}
+          className={cn("font-bold text-sm flex-1 truncate", !isSelected && "text-muted-foreground")}
           style={{ color: isSelected ? config.color : undefined }}
         >
           {config.nombre}
         </p>
       </div>
       <p
-        className={cn("text-2xl font-bold transition-all mb-1 md:hidden", !isSelected && "text-muted-foreground")}
+        className={cn("text-2xl font-bold mb-1 md:hidden", !isSelected && "text-muted-foreground")}
         style={{ color: isSelected ? config.color : undefined }}
       >
         {formatPorcentaje(porcentaje)}
       </p>
 
-      {/* Desktop: layout original horizontal */}
+      {/* Desktop: layout horizontal */}
       <div className="hidden md:flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div
-            className={cn("p-2.5 rounded-xl transition-all", isSelected ? "shadow-md" : "")}
+            className="p-2.5 rounded-xl"
             style={{ backgroundColor: isSelected ? `${config.color}25` : `${config.color}10` }}
           >
-            <Icon className="h-5 w-5 transition-all" style={{ color: config.color }} />
+            <Icon className="h-5 w-5" style={{ color: config.color }} />
           </div>
-          <p
-            className={cn("font-bold text-base transition-all", isSelected ? "" : "text-muted-foreground")}
-            style={{ color: isSelected ? config.color : undefined }}
-          >
-            {config.nombre}
-          </p>
+          <div className="flex flex-col">
+            <p
+              className={cn("font-bold text-sm leading-tight", !isSelected && "text-muted-foreground")}
+              style={{ color: isSelected ? config.color : undefined }}
+            >
+              {config.nombre}
+            </p>
+            <p className="text-[10px] text-muted-foreground/70 leading-tight">{config.descripcion}</p>
+          </div>
         </div>
         <p
-          className={cn("text-2xl font-bold transition-all", !isSelected && "text-muted-foreground")}
+          className={cn("text-2xl font-bold tabular-nums", !isSelected && "text-muted-foreground")}
           style={{ color: isSelected ? config.color : undefined }}
         >
           {formatPorcentaje(porcentaje)}
         </p>
       </div>
+
+      {/* Descripción en móvil */}
+      <p className="text-[10px] text-muted-foreground/70 mb-1.5 md:hidden">{config.descripcion}</p>
 
       {/* Barra de progreso */}
       <div className="mt-2 h-1.5 rounded-full overflow-hidden bg-muted/50">
@@ -275,39 +297,39 @@ const TotalesIndicador = ({
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-      {/* Entes Públicos */}
-      <div className="bg-gradient-to-br from-blue-500/15 to-blue-600/5 dark:from-blue-500/25 dark:to-blue-700/15 rounded-xl p-4 border border-blue-500/30 dark:border-blue-400/40 shadow-sm">
+      {/* Entes Públicos / SO */}
+      <div className="rounded-xl p-4 border shadow-sm" style={{ borderColor: "#6f416830", backgroundColor: "#6f416808" }}>
         <div className="flex items-center gap-2 mb-2">
-          <div className="p-1.5 rounded-lg bg-blue-500/20 dark:bg-blue-400/25">
-            <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-300" />
+          <div className="p-1.5 rounded-lg" style={{ backgroundColor: "#6f416820" }}>
+            <Image src={icoSO} alt="SO" width={16} height={16} />
           </div>
-          <span className="text-xs font-semibold text-blue-700 dark:text-blue-200">Entes Públicos</span>
+          <span className="text-xs font-semibold" style={{ color: "#6f4168" }}>Entes Públicos</span>
         </div>
-        <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{totalEntes.toLocaleString()}</p>
+        <p className="text-2xl font-bold" style={{ color: "#6f4168" }}>{totalEntes.toLocaleString()}</p>
         <div className="mt-1">
-          <p className="text-xs font-bold text-blue-700 dark:text-blue-300">{formatPorcentaje(porcentajeEntes)}</p>
+          <p className="text-xs font-bold" style={{ color: "#6f4168" }}>{formatPorcentaje(porcentajeEntes)}</p>
           <p className="text-xs text-foreground/60">{entesConectados.toLocaleString()} conectados</p>
         </div>
-        <div className="h-2 rounded-full overflow-hidden bg-blue-500/25 dark:bg-blue-400/30 mt-2">
-          <div className="h-full rounded-full bg-blue-500 dark:bg-blue-400" style={{ width: `${Math.min(porcentajeEntes, 100)}%` }} />
+        <div className="h-2 rounded-full overflow-hidden mt-2" style={{ backgroundColor: "#6f416820" }}>
+          <div className="h-full rounded-full transition-all duration-300" style={{ width: `${Math.min(porcentajeEntes, 100)}%`, backgroundColor: "#6f4168" }} />
         </div>
       </div>
 
       {/* OIC */}
-      <div className="bg-gradient-to-br from-amber-500/15 to-amber-600/5 dark:from-amber-500/25 dark:to-amber-700/15 rounded-xl p-4 border border-amber-500/30 dark:border-amber-400/40 shadow-sm">
+      <div className="rounded-xl p-4 border shadow-sm" style={{ borderColor: "#c49a2a30", backgroundColor: "#c49a2a08" }}>
         <div className="flex items-center gap-2 mb-2">
-          <div className="p-1.5 rounded-lg bg-amber-500/20 dark:bg-amber-400/25">
-            <Scale className="h-4 w-4 text-amber-600 dark:text-amber-300" />
+          <div className="p-1.5 rounded-lg" style={{ backgroundColor: "#c49a2a20" }}>
+            <Image src={icoOIC} alt="OIC" width={16} height={16} />
           </div>
-          <span className="text-xs font-semibold text-amber-700 dark:text-amber-200">OIC / Autoridades</span>
+          <span className="text-xs font-semibold" style={{ color: "#c49a2a" }}>OIC / Autoridades</span>
         </div>
-        <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">{totalOIC.toLocaleString()}</p>
+        <p className="text-2xl font-bold" style={{ color: "#c49a2a" }}>{totalOIC.toLocaleString()}</p>
         <div className="mt-1">
-          <p className="text-xs font-bold text-amber-700 dark:text-amber-300">{formatPorcentaje(porcentajeOIC)}</p>
+          <p className="text-xs font-bold" style={{ color: "#c49a2a" }}>{formatPorcentaje(porcentajeOIC)}</p>
           <p className="text-xs text-foreground/60">{oicConectados.toLocaleString()} conectados</p>
         </div>
-        <div className="h-2 rounded-full overflow-hidden bg-amber-500/25 dark:bg-amber-400/30 mt-2">
-          <div className="h-full rounded-full bg-amber-500 dark:bg-amber-400" style={{ width: `${Math.min(porcentajeOIC, 100)}%` }} />
+        <div className="h-2 rounded-full overflow-hidden mt-2" style={{ backgroundColor: "#c49a2a20" }}>
+          <div className="h-full rounded-full transition-all duration-300" style={{ width: `${Math.min(porcentajeOIC, 100)}%`, backgroundColor: "#c49a2a" }} />
         </div>
       </div>
 
@@ -843,20 +865,20 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
             />
 
             {/* Gráficas de Donut por sistema y Municipios */}
-            <div className="grid gap-4 lg:grid-cols-4">
+            <div className="grid gap-4 lg:grid-cols-4 items-stretch">
               {/* Avance por Sistema - 3/4 del espacio */}
-              <div className="lg:col-span-3">
+              <div className="lg:col-span-3 flex flex-col">
                 <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
                   <div className="p-1.5 rounded-lg bg-primary/20 dark:bg-primary/25">
                     <TrendingUp className="h-4 w-4 text-primary" />
                   </div>
                   <span className="text-foreground">Avance por Sistema</span>
                 </h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-1">
                   {Object.entries(SISTEMAS_CONFIG).map(([key, config]) => {
                     const stats = estadisticas.sistemas[key];
                     return (
-                      <div key={key} className="flex flex-col items-center p-4 rounded-xl border border-border/50 bg-card/50 dark:bg-card/80 hover:bg-accent/30 dark:hover:bg-accent/20 transition-colors shadow-sm">
+                      <div key={key} className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/50 bg-card/50 dark:bg-card/80 hover:bg-accent/30 dark:hover:bg-accent/20 transition-colors shadow-sm">
                         <DonutChart
                           conectados={stats.conectados}
                           total={stats.total}
@@ -872,7 +894,7 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
               </div>
 
               {/* Municipios Conectados por Sistema - 1/4 del espacio */}
-              <div className="lg:col-span-1">
+              <div className="lg:col-span-1 flex flex-col">
                 <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
                   <div className="p-1.5 rounded-lg bg-violet-500/20 dark:bg-violet-400/25">
                     <MapPin className="h-4 w-4 text-violet-600 dark:text-violet-400" />
@@ -882,7 +904,7 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
                     {currentMunicipios?.municipiosRegistrados || 0}/{currentMunicipios?.totalCatalogo || (selectedEntidad ? 0 : TOTAL_MUNICIPIOS_CATALOGO)}
                   </span>
                 </h4>
-                <div className="p-4 rounded-xl border border-border/50 bg-card/50 dark:bg-card/80 shadow-sm">
+                <div className="flex-1 p-4 rounded-xl border border-border/50 bg-card/50 dark:bg-card/80 shadow-sm flex flex-col justify-between">
                   {currentMunicipios ? (
                     <div className="space-y-3">
                       {/* Sistema 1 */}
@@ -1046,9 +1068,16 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
                   <div className="h-px flex-1 bg-border" />
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50">
                     <Layers className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium">Análisis Detallado por Sistema</span>
+                    <span className="text-sm font-medium">Análisis por Sistema</span>
                   </div>
                   <div className="h-px flex-1 bg-border" />
+                </div>
+
+                {/* Instrucción */}
+                <div className="flex items-center gap-2 -mt-1">
+                  <p className="text-xs text-muted-foreground">
+                    Selecciona un sistema para ver el desglose de entes públicos que reportan a la PDN.
+                  </p>
                 </div>
 
                 {/* Cards de filtro por sistema */}

@@ -5,18 +5,18 @@ export const navItems: NavItem[] = [
     title: "Tablero Estatal",
     href: "/dashboard",
     icon: "dashboard",
-    label: "Dashboard",
+    label: "Resumen y estadísticas",
   },
   {
     title: "Entes Públicos",
     href: "/dashboard/entes",
     icon: "users",
-    label: "entes",
+    label: "Padrón de sujetos obligados",
   },
   {
     title: "Directorio",
     href: "/dashboard/directorio",
     icon: "notebook",
-    label: "directorio",
+    label: "Contactos y responsables",
   },
 ];
