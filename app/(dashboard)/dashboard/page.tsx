@@ -78,14 +78,12 @@ const CAPTURE_PERIODS = [
 ];
 
 /** Período actualmente abierto (dentro de ventana), o null */
-function getActivePeriod() {
-  const now = new Date();
+function getActivePeriod(now: Date) {
   return CAPTURE_PERIODS.find(p => now >= p.start && now <= p.end) ?? null;
 }
 
 /** Próxima ventana futura más cercana, o null */
-function getNextPeriod() {
-  const now = new Date();
+function getNextPeriod(now: Date) {
   return CAPTURE_PERIODS.find(p => now < p.start) ?? null;
 }
 
@@ -163,6 +161,7 @@ function Skeleton({ className = "" }: { className?: string }) {
 // ─── Página principal ─────────────────────────────────────────────────────────
 export default function Page() {
   const { session, status } = useCurrentSession();
+  const [serverNow, setServerNow] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({
     sistema1: 0, sistema2: 0, sistema3: 0, sistema6: 0,
@@ -172,6 +171,13 @@ export default function Page() {
     ejecutivo: 0, judicial: 0, legislativo: 0, autonomo: 0,
     ejecutivoMunicipal: 0, OIC: 0, OICM: 0, TJA: 0,
   });
+
+  useEffect(() => {
+    fetch("/api/server-time")
+      .then(r => r.json())
+      .then(({ now }) => setServerNow(new Date(now)))
+      .catch(() => setServerNow(new Date())); // fallback al cliente si falla
+  }, []);
 
   useEffect(() => {
     if (session?.forceLogout) {
@@ -276,8 +282,9 @@ export default function Page() {
 
         {/* ══ 2. AVISOS ══════════════════════════════════════════════════════ */}
         {(() => {
-          const active = getActivePeriod();
-          const next   = getNextPeriod();
+          const now    = serverNow ?? new Date();
+          const active = getActivePeriod(now);
+          const next   = getNextPeriod(now);
           const shown  = active ?? next;
 
           return (
@@ -415,7 +422,7 @@ export default function Page() {
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-border" />
           <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-widest text-muted-foreground px-1">
-            <Activity className="h-3.5 w-3.5" /> Estadísticas · {(getActivePeriod() ?? getNextPeriod())?.trimestre ?? "Último corte"}
+            <Activity className="h-3.5 w-3.5" /> Estadísticas · {(() => { const n = serverNow ?? new Date(); return (getActivePeriod(n) ?? getNextPeriod(n))?.trimestre ?? "Último corte"; })()}
           </span>
           <div className="h-px flex-1 bg-border" />
         </div>
