@@ -10,8 +10,9 @@ const TIPO_LABELS = {
   TJA: "Tribunal de Justicia Administrativa",
 };
 
-export default function Page({ searchParams }: { searchParams: { tipo?: string } }) {
-  const rawTipo = searchParams?.tipo?.toUpperCase();
+export default async function Page({ searchParams }: { searchParams: Promise<{ tipo?: string }> }) {
+  const { tipo } = await searchParams;
+  const rawTipo = tipo?.toUpperCase();
   const defaultTipo = (rawTipo === "OIC" || rawTipo === "TJA") ? rawTipo : "SO";
 
   const breadcrumbItems = [
