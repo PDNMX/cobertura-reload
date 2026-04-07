@@ -27,7 +27,7 @@ export function DashboardNav({ items, setOpen }: DashboardNavProps) {
       <div className="flex flex-col gap-1 flex-1">
         {items.map((item, index) => {
           const Icon = Icons[item.icon || "arrowRight"];
-          const isActive = path === item.href || (item.href !== "/dashboard" && path.startsWith(item.href));
+          const isActive = path === item.href || (item.href !== "/dashboard" && path.startsWith(item.href ?? ""));
           return (
             item.href && (
               <Link
