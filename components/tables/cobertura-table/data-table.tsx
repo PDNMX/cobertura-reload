@@ -58,9 +58,12 @@ export function DataTable<TData, TValue>({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hoveredColumnId, setHoveredColumnId] = useState<string | null>(null);
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
-  const [dialogContent, setDialogContent] = useState<React.ReactNode | null>(
-    null
-  );
+  const [dialogContent, setDialogContent] = useState<React.ReactNode | null>(null);
+  const [dialogActions, setDialogActions] = useState<React.ReactNode | null>(null);
+  const [dialogData, setDialogData] = useState<any[]>([]);
+  const [dialogColumnsShow, setDialogColumnsShow] = useState<object>({});
+  const [filterAmbito, setFilterAmbito] = useState("todos");
+  const [filterPoder, setFilterPoder] = useState("todos");
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingNacional, setIsLoadingNacional] = useState(false);
 
@@ -186,6 +189,11 @@ export function DataTable<TData, TValue>({
   const handleCellClick = async (cell: any) => {
     setIsLoading(true);
     setIsDialogOpen(true);
+    setDialogActions(null);
+    setDialogData([]);
+    setDialogContent(null);
+    setFilterAmbito("todos");
+    setFilterPoder("todos");
     if (cell.row) {
       const rowElement = cell.row.original;
       const entidad = rowElement.entidad;
@@ -263,65 +271,46 @@ export function DataTable<TData, TValue>({
       const columnasMostrar = columnVisibilityMap[tipoColumna] || {};
 
       const respuestaDirectus = await fetchDataCell(entidad, tipoColumna);
-      setDialogContent(
-        <EntesTable data={respuestaDirectus} columnsShow={columnasMostrar} />
-      );
       setIsLoading(false);
-      //setIsDialogOpen(true);
 
-      // Función para procesar los datos antes de exportar a XLSX
-      const processDataForXLSX = (data) => {
-        return data.map((item) => ({
-          ID: item.id,
-          "Nombre del Ente Público": item.nombre,
-          "Tipo de Autoridad": getTipoAutoridad(
-            item.controlOIC,
-            item.controlTribunal
-          ),
-          "Ambito de Gobierno": item.ambitoGobierno,
-          "Poder de Gobierno": item.poderGobierno,
-          "Sistema 1": item.sistema1 ? "Sí" : "No",
-          "Sistema 2": item.sistema2 ? "Sí" : "No",
-          "Sistema 3": item.sistema3 ? "Sí" : "No",
-          "Sistema 6": item.sistema6 ? "Sí" : "No",
-          Entidad: item.entidad?.nombre || "N/A",
-          Municipio: item.municipio?.nombre || "N/A",
-          // Añade aquí más campos si es necesario
-        }));
-      };
+      // ── Columnas dinámicas para export (según lo que se muestra) ──────────
+      const exportColumns = [
+        { label: "ID",                    accessor: (i) => i.id,                                     width: 8  },
+        { label: "Nombre del Ente Público", accessor: (i) => i.nombre,                               width: 42 },
+        { label: "Tipo de Autoridad",     accessor: (i) => getTipoAutoridad(i.controlOIC, i.controlTribunal), width: 24 },
+        { label: "Ámbito de Gobierno",    accessor: (i) => i.ambitoGobierno,                         width: 20 },
+        { label: "Poder de Gobierno",     accessor: (i) => i.poderGobierno,                          width: 20 },
+        ...(columnasMostrar.sistema1 ? [{ label: "Sistema 1", accessor: (i) => i.sistema1 ? "Sí" : "No", width: 13 }] : []),
+        ...(columnasMostrar.sistema2 ? [{ label: "Sistema 2", accessor: (i) => i.sistema2 ? "Sí" : "No", width: 13 }] : []),
+        ...(columnasMostrar.sistema3 ? [{ label: "Sistema 3", accessor: (i) => i.sistema3 ? "Sí" : "No", width: 13 }] : []),
+        ...(columnasMostrar.sistema6 ? [{ label: "Sistema 6", accessor: (i) => i.sistema6 ? "Sí" : "No", width: 13 }] : []),
+        { label: "Entidad",               accessor: (i) => i.entidad?.nombre  || "N/A",              width: 22 },
+        { label: "Municipio",             accessor: (i) => i.municipio?.nombre || "N/A",             width: 22 },
+      ];
 
-      // Función de exportación para XLSX (datos procesados) — usa exceljs
+      // ── XLSX ──────────────────────────────────────────────────────────────
       const exportToXLSX = async () => {
-        const processedData = processDataForXLSX(respuestaDirectus);
         const ExcelJS = (await import("exceljs")).default;
-
         const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Datos");
+        const ws = workbook.addWorksheet("Entes Públicos");
 
-        // ── Encabezado institucional ────────────────────────────────────────
-        const r1 = worksheet.addRow(["Secretaría Ejecutiva del Sistema Nacional Anticorrupción"]);
+        // Encabezado institucional (mismo patrón que export nacional)
+        const r1 = ws.addRow(["Secretaría Ejecutiva del Sistema Nacional Anticorrupción"]);
         r1.getCell(1).font = { bold: true, size: 14, name: "Calibri" };
-
-        const r2 = worksheet.addRow(["PLATAFORMA DIGITAL NACIONAL"]);
+        const r2 = ws.addRow(["PLATAFORMA DIGITAL NACIONAL"]);
         r2.getCell(1).font = { bold: true, size: 14, name: "Calibri" };
-
-        worksheet.addRow([]);
-
-        const r4 = worksheet.addRow(["Tablero Estadístico de Interconexión Nacional"]);
+        ws.addRow([]);
+        const r4 = ws.addRow(["Tablero Estadístico de Interconexión Nacional"]);
         r4.getCell(1).font = { bold: true, size: 14, name: "Calibri" };
-
-        worksheet.addRow([]);
-
-        const r6 = worksheet.addRow(["Fecha de generación:", new Date().toLocaleString()]);
+        ws.addRow([]);
+        const r6 = ws.addRow(["Fecha de generación:", new Date().toLocaleString()]);
         r6.getCell(1).font = { bold: true, name: "Calibri" };
         r6.getCell(2).font = { name: "Calibri" };
+        ws.addRow([]);
+        ws.addRow([]);
 
-        worksheet.addRow([]);
-        worksheet.addRow([]);
-
-        // ── Fila de columnas ────────────────────────────────────────────────
-        const columnNames = Object.keys(processedData[0] || {});
-        const headerRow = worksheet.addRow(columnNames);
+        // Encabezados de columnas
+        const headerRow = ws.addRow(exportColumns.map((c) => c.label));
         headerRow.eachCell((cell) => {
           cell.font = { bold: true, name: "Calibri", size: 11 };
           cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFD9E1F2" } };
@@ -329,61 +318,64 @@ export function DataTable<TData, TValue>({
           cell.border = { bottom: { style: "thin" } };
         });
 
-        // ── Filas de datos ──────────────────────────────────────────────────
-        processedData.forEach((rowData) => {
-          const row = worksheet.addRow(Object.values(rowData));
+        // Filas de datos
+        respuestaDirectus.forEach((item) => {
+          const row = ws.addRow(exportColumns.map((c) => c.accessor(item)));
           row.eachCell((cell) => {
             cell.font = { name: "Calibri", size: 11 };
             cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
           });
         });
 
-        // ── Anchos de columna ───────────────────────────────────────────────
-        const colWidths = [8, 40, 22, 22, 20, 12, 12, 12, 12, 22, 22];
-        colWidths.forEach((width, i) => {
-          worksheet.getColumn(i + 1).width = width;
-        });
+        // Anchos de columna
+        exportColumns.forEach((c, i) => { ws.getColumn(i + 1).width = c.width; });
 
-        // ── Generar archivo y descargar ─────────────────────────────────────
         const buffer = await workbook.xlsx.writeBuffer();
-        const blob = new Blob([buffer], {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
+        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = "tablero_cobertura.xlsx";
+        link.download = `entes_${entidad}_${tipoColumna}.xlsx`;
         link.click();
         URL.revokeObjectURL(url);
       };
 
-      // Función de exportación para CSV (datos originales)
+      // ── CSV (misma estructura que XLSX) ───────────────────────────────────
       const exportToCSV = () => {
-        const csvContent = convertToCSV(respuestaDirectus);
-        downloadFile(csvContent, "text/csv", "export_origin.csv");
+        const headers = exportColumns.map((c) => `"${c.label}"`).join(",");
+        const rows = respuestaDirectus.map((item) =>
+          exportColumns.map((c) => {
+            const val = c.accessor(item);
+            if (val === null || val === undefined) return "";
+            const str = String(val);
+            return str.includes(",") || str.includes('"') ? `"${str.replace(/"/g, '""')}"` : str;
+          }).join(",")
+        );
+        const csv = [headers, ...rows].join("\n");
+        downloadFile("\uFEFF" + csv, "text/csv;charset=utf-8", `entes_${entidad}_${tipoColumna}.csv`);
       };
 
-      // Función de exportación para JSON (datos originales)
+      // ── JSON ──────────────────────────────────────────────────────────────
       const exportToJSON = () => {
         const jsonContent = JSON.stringify(respuestaDirectus, null, 2);
-        downloadFile(jsonContent, "application/json", "export_origin.json");
+        downloadFile(jsonContent, "application/json", `entes_${entidad}_${tipoColumna}.json`);
       };
 
-      setDialogContent(
-        <>
-          <EntesTable data={respuestaDirectus} columnsShow={columnasMostrar} />
-          <div className="flex justify-end mt-4">
-            <Button onClick={exportToXLSX} className="mr-2">
-              <Download className="mr-2 h-4 w-4" /> XLSX
-            </Button>
-            <Button onClick={exportToCSV} className="mr-2">
-              <Download className="mr-2 h-4 w-4" /> CSV
-            </Button>
-            <Button onClick={exportToJSON}>
-              <Download className="mr-2 h-4 w-4" /> JSON
-            </Button>
-          </div>
-        </>
+      setDialogData(respuestaDirectus);
+      setDialogColumnsShow(columnasMostrar);
+      setDialogActions(
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground mr-1">Exportar:</span>
+          <Button size="sm" variant="outline" onClick={exportToXLSX} className="gap-1.5 h-8 text-xs">
+            <Download className="h-3.5 w-3.5" /> XLSX
+          </Button>
+          <Button size="sm" variant="outline" onClick={exportToCSV} className="gap-1.5 h-8 text-xs">
+            <Download className="h-3.5 w-3.5" /> CSV
+          </Button>
+          <Button size="sm" variant="outline" onClick={exportToJSON} className="gap-1.5 h-8 text-xs">
+            <Download className="h-3.5 w-3.5" /> JSON
+          </Button>
+        </div>
       );
     } else if (cell.column) {
       const tipoColumna = cell.column.id;
@@ -1734,29 +1726,93 @@ export function DataTable<TData, TValue>({
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) { setDialogData([]); setDialogContent(null); } }}>
         <DialogOverlay className="fixed inset-0 bg-black opacity-30" />
-        <DialogContent className="p-6 rounded-md shadow-lg max-w-5xl w-full bg-white dark:bg-gray-900">
-          <DialogHeader>
+        <DialogContent className="flex flex-col p-6 rounded-md shadow-lg max-w-5xl w-full max-h-[85vh] bg-white dark:bg-gray-900">
+          <DialogHeader className="shrink-0">
             <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
               Entes Públicos
             </DialogTitle>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
+          {/* Filtros — solo cuando hay datos de entes (no en gráficas) */}
+          {!isLoading && dialogData.length > 0 && (
+            <div className="shrink-0 flex flex-wrap items-center gap-3 py-3 border-b">
+              <span className="text-xs font-medium text-muted-foreground">Filtrar por:</span>
+
+              {/* Ámbito */}
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-muted-foreground">Ámbito:</span>
+                {["todos", "Federal", "Estatal", "Municipal"].map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setFilterAmbito(v)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${
+                      filterAmbito === v
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-transparent text-muted-foreground border-border hover:border-primary/50"
+                    }`}
+                  >
+                    {v === "todos" ? "Todos" : v}
+                  </button>
+                ))}
+              </div>
+
+              {/* Poder */}
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-muted-foreground">Poder:</span>
+                {["todos", "Ejecutivo", "Judicial", "Legislativo", "Autonomo"].map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setFilterPoder(v)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${
+                      filterPoder === v
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-transparent text-muted-foreground border-border hover:border-primary/50"
+                    }`}
+                  >
+                    {v === "todos" ? "Todos" : v === "Autonomo" ? "Autónomo" : v}
+                  </button>
+                ))}
+              </div>
+
+              {/* Conteo filtrado */}
+              <span className="ml-auto text-xs text-muted-foreground">
+                {dialogData.filter(
+                  (i) =>
+                    (filterAmbito === "todos" || i.ambitoGobierno === filterAmbito) &&
+                    (filterPoder  === "todos" || i.poderGobierno  === filterPoder)
+                ).length}{" "}
+                de {dialogData.length} entes
+              </span>
+            </div>
+          )}
+
+          <div className="flex-1 overflow-y-auto min-h-0 py-4">
             {isLoading ? (
               <div className="flex flex-row items-start gap-2">
                 Cargando datos...
                 <Loader2 className="animate-spin ml-1" />
               </div>
+            ) : dialogData.length > 0 ? (
+              <EntesTable
+                data={dialogData.filter(
+                  (i) =>
+                    (filterAmbito === "todos" || i.ambitoGobierno === filterAmbito) &&
+                    (filterPoder  === "todos" || i.poderGobierno  === filterPoder)
+                )}
+                columnsShow={dialogColumnsShow}
+              />
             ) : (
               <>{dialogContent}</>
             )}
           </div>
-          <DialogFooter>
+          <DialogFooter className="shrink-0 pt-3 border-t flex flex-row items-center justify-between gap-2 sm:justify-between">
+            <div>{!isLoading && dialogActions}</div>
             <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setIsDialogOpen(false)}
-              className="mt-4"
               disabled={isLoading}
             >
               Cerrar
