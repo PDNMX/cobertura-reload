@@ -147,11 +147,12 @@ export const EnteForm: React.FC<EnteFormProps> = ({ initialData, defaultTipo = "
   const form = useForm<EnteFormValues>({ resolver: zodResolver(formSchema), defaultValues });
 
   useEffect(() => {
-    if (initialData) {
+    if (initialData && !Array.isArray(initialData)) {
       for (const key in initialData) {
         if (formSchema.shape.hasOwnProperty(key)) form.setValue(key, initialData[key]);
       }
       setAmbito(initialData.ambitoGobierno);
+      setTipoEnte(getTipoFromData(initialData));
     } else {
       if (session?.user?.entidad) form.setValue("entidad", session.user.entidad);
     }
