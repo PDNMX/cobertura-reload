@@ -460,7 +460,7 @@ export default function Page() {
                       </Badge>
                       <Badge variant="outline" className="text-[10px] gap-1">
                         <CalendarDays className="h-2.5 w-2.5" />
-                        1T 2026 · En curso
+                        2T 2026 · En curso
                       </Badge>
                     </div>
                   </div>
@@ -687,7 +687,7 @@ export default function Page() {
           <Card className="lg:col-span-4">
             <CardHeader>
               <CardTitle>Avance por sistema</CardTitle>
-              <CardDescription>Último corte: 4T 2025 — 31 de diciembre de 2025</CardDescription>
+              <CardDescription>Último corte: 1T 2026 — 1 de enero de 2026 al 31 de marzo de 2026</CardDescription>
             </CardHeader>
             <CardContent>
               <Overview entidad={entidadId} />
