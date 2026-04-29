@@ -35,8 +35,6 @@ import { readItems } from "@directus/sdk";
 import { AvanceMapa } from "@/components/charts/avance-mapa";
 import { EntidadBarChart } from "@/components/charts/entidad-bar-chart";
 
-// Total de municipios según catálogo oficial
-const TOTAL_MUNICIPIOS_CATALOGO = 2475;
 
 const SISTEMAS_CONFIG = {
   resultSistema1: {
@@ -500,7 +498,12 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
   useEffect(() => {
     async function fetchMunicipiosNacionales() {
       try {
-        const [entesConMunicipio, s1Municipios, s2Municipios, s3Municipios, s6Municipios] = await Promise.all([
+        const [totalCatalogoResult, entesConMunicipio, s1Municipios, s2Municipios, s3Municipios, s6Municipios] = await Promise.all([
+          directus.request(
+            readItems("municipio", {
+              aggregate: { count: ["*"] },
+            })
+          ),
           directus.request(
             readItems("entes", {
               filter: { controlOIC: { _eq: false }, municipio: { _nnull: true } },
@@ -538,7 +541,7 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
         ]);
 
         setMunicipiosNacionales({
-          totalCatalogo: TOTAL_MUNICIPIOS_CATALOGO,
+          totalCatalogo: Number(totalCatalogoResult[0]?.count || 0),
           entesConMunicipio: Number(entesConMunicipio[0]?.count || 0),
           municipiosRegistrados: Number(entesConMunicipio[0]?.countDistinct?.municipio || 0),
           s1: Number(s1Municipios[0]?.countDistinct?.municipio || 0),
@@ -859,7 +862,7 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
                   ? estadisticas.sistemas.resultSistema3OIC.conectados
                   : resumenConexiones?.oicConectados || 0
               }
-              totalMunicipios={currentMunicipios?.totalCatalogo || (selectedEntidad ? 0 : TOTAL_MUNICIPIOS_CATALOGO)}
+              totalMunicipios={currentMunicipios?.totalCatalogo || 0}
               municipiosRegistrados={currentMunicipios?.municipiosRegistrados}
               coberturaPromedio={coberturaPromedio}
             />
@@ -901,7 +904,7 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
                   </div>
                   <span className="text-foreground">Municipios</span>
                   <span className="text-xs font-semibold text-violet-600 dark:text-violet-400 ml-auto">
-                    {currentMunicipios?.municipiosRegistrados || 0}/{currentMunicipios?.totalCatalogo || (selectedEntidad ? 0 : TOTAL_MUNICIPIOS_CATALOGO)}
+                    {currentMunicipios?.municipiosRegistrados || 0}/{currentMunicipios?.totalCatalogo || 0}
                   </span>
                 </h4>
                 <div className="flex-1 p-4 rounded-xl border border-border/50 bg-card/50 dark:bg-card/80 shadow-sm flex flex-col justify-between">
