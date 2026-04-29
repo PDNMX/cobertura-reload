@@ -32,13 +32,82 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
+import Image from "next/image";
 import directus from "@/lib/directus";
 import { readItems } from "@directus/sdk";
 import { EntesTable } from "@/components/tables/cell-entes-table/table";
 import { TabsColumnsSistemas } from "@/components/charts/tabs-columns-sistemas";
 
 import { ArrowUpDown, BarChart2 } from "lucide-react";
-import InfoAlert from "./info-alert"; // Importa el componente InfoAlert
+import InfoAlert from "./info-alert";
+import icoSO  from "@/components/tables/cobertura-table/icons-thead/sujetosObligados.svg";
+import icoOIC from "@/components/tables/cobertura-table/icons-thead/oic.svg";
+import icoTJA from "@/components/tables/cobertura-table/icons-thead/tribunal.svg";
+
+const TIPO_ENTE_CONFIG = [
+  {
+    key:    "SO",
+    label:  "Sujetos Obligados",
+    icon:   icoSO,
+    color:  "#6f4168",
+    bg:     "#6f416812",
+    border: "#6f416840",
+    filter: (i: any) => !i.controlOIC && !i.controlTribunal,
+  },
+  {
+    key:    "OIC",
+    label:  "Órganos Internos de Control",
+    icon:   icoOIC,
+    color:  "#c49a2a",
+    bg:     "#c49a2a12",
+    border: "#c49a2a40",
+    filter: (i: any) => !!i.controlOIC,
+  },
+  {
+    key:    "TJA",
+    label:  "Tribunales de Justicia Administrativa",
+    icon:   icoTJA,
+    color:  "#b5877a",
+    bg:     "#b5877a12",
+    border: "#b5877a40",
+    filter: (i: any) => !!i.controlTribunal,
+  },
+];
+
+// Columnas visibles por tipo de ente
+const COLUMNS_BY_TIPO: Record<string, object> = {
+  SO:  { sistema1: true,  sistema2: true,  sistema3: false, sistema6: true  },
+  OIC: { sistema1: false, sistema2: false, sistema3: true,  sistema6: false },
+  TJA: { sistema1: true,  sistema2: true,  sistema3: true,  sistema6: true  },
+};
+
+// Nombre amigable de cada columna para el título del dialog
+const NOMBRE_COLUMNA: Record<string, string> = {
+  nombreEntidad:          "Todos los entes",
+  resultSujetosObligados: "Sujetos Obligados",
+  resultOIC:              "OIC / Autoridades",
+  resultTribunal:         "Tribunales",
+  resultSistema1:         "Sistema 1",
+  resultSistema2:         "Sistema 2",
+  resultSistema3OIC:      "Sistema 3 — OIC",
+  resultSistema3Tribunal: "Sistema 3 — Tribunal",
+  resultSistema6:         "Sistema 6",
+  resultConexiones:       "Conexiones",
+};
+
+// Tipos de ente que incluye cada columna de la tabla principal
+const TIPOS_POR_COLUMNA: Record<string, string[]> = {
+  nombreEntidad:         ["SO", "OIC", "TJA"],
+  resultSujetosObligados:["SO", "TJA"],
+  resultOIC:             ["OIC", "TJA"],
+  resultTribunal:        ["TJA"],
+  resultSistema1:        ["SO", "TJA"],
+  resultSistema2:        ["SO", "TJA"],
+  resultSistema3OIC:     ["OIC", "TJA"],
+  resultSistema3Tribunal:["TJA"],
+  resultSistema6:        ["SO", "TJA"],
+  resultConexiones:      ["SO", "TJA"],
+};
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -64,6 +133,10 @@ export function DataTable<TData, TValue>({
   const [dialogColumnsShow, setDialogColumnsShow] = useState<object>({});
   const [filterAmbito, setFilterAmbito] = useState("todos");
   const [filterPoder, setFilterPoder] = useState("todos");
+  const [filterTipo, setFilterTipo] = useState<string>("SO");
+  const [dialogColumna, setDialogColumna] = useState<string>("");
+  const [dialogTitle, setDialogTitle] = useState<string>("Entes Públicos");
+  const [dialogSubtitle, setDialogSubtitle] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingNacional, setIsLoadingNacional] = useState(false);
 
@@ -194,10 +267,16 @@ export function DataTable<TData, TValue>({
     setDialogContent(null);
     setFilterAmbito("todos");
     setFilterPoder("todos");
+    setFilterTipo("SO");
+    const colId = cell.column?.id ?? "";
+    setDialogColumna(colId);
     if (cell.row) {
       const rowElement = cell.row.original;
       const entidad = rowElement.entidad;
       const tipoColumna = cell.column.id;
+      const nombreEntidad = rowElement.nombreEntidad ?? entidad;
+      setDialogTitle(nombreEntidad);
+      setDialogSubtitle(NOMBRE_COLUMNA[tipoColumna] ?? tipoColumna);
 
       const columnVisibilityMap = {
         resultSujetosObligados: {
@@ -363,6 +442,11 @@ export function DataTable<TData, TValue>({
 
       setDialogData(respuestaDirectus);
       setDialogColumnsShow(columnasMostrar);
+      // Auto-seleccionar el primer tipo que tenga datos
+      const primerTipo = TIPO_ENTE_CONFIG.find((cfg) =>
+        respuestaDirectus.some(cfg.filter)
+      );
+      if (primerTipo) setFilterTipo(primerTipo.key);
       setDialogActions(
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground mr-1">Exportar:</span>
@@ -1727,90 +1811,198 @@ export function DataTable<TData, TValue>({
       </ScrollArea>
 
       <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) { setDialogData([]); setDialogContent(null); } }}>
-        <DialogOverlay className="fixed inset-0 bg-black opacity-30" />
-        <DialogContent className="flex flex-col p-6 rounded-md shadow-lg max-w-5xl w-full max-h-[85vh] bg-white dark:bg-gray-900">
+        <DialogContent className="flex flex-col p-6 rounded-xl shadow-xl max-w-5xl w-full max-h-[85vh] bg-background border border-border">
           <DialogHeader className="shrink-0">
-            <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              Entes Públicos
-            </DialogTitle>
+            <div className="flex items-start justify-between gap-3">
+              {/* Título contextual */}
+              <div className="min-w-0">
+                <DialogTitle className="text-xl font-bold text-foreground leading-tight truncate">
+                  {dialogTitle}
+                </DialogTitle>
+                {dialogSubtitle && (
+                  <p className="text-sm text-muted-foreground mt-0.5">{dialogSubtitle}</p>
+                )}
+              </div>
+              {/* Pills de tipos incluidos */}
+              {!isLoading && dialogColumna && (TIPOS_POR_COLUMNA[dialogColumna] ?? []).length > 0 && (
+                <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
+                  <span className="text-[10px] text-muted-foreground">Incluye:</span>
+                  {(TIPOS_POR_COLUMNA[dialogColumna] ?? []).map((key) => {
+                    const cfg = TIPO_ENTE_CONFIG.find((c) => c.key === key);
+                    if (!cfg) return null;
+                    return (
+                      <span
+                        key={key}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                        style={{ backgroundColor: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}
+                        title={cfg.label}
+                      >
+                        <Image src={cfg.icon} alt={key} width={11} height={11} className="shrink-0" />
+                        {key}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </DialogHeader>
 
-          {/* Filtros — solo cuando hay datos de entes (no en gráficas) */}
-          {!isLoading && dialogData.length > 0 && (
-            <div className="shrink-0 flex flex-wrap items-center gap-3 py-3 border-b">
-              <span className="text-xs font-medium text-muted-foreground">Filtrar por:</span>
+          {/* Contenido de entes (click en celda de fila) */}
+          {!isLoading && dialogData.length > 0 && (() => {
+            const esColumnaEntidad = dialogColumna === "nombreEntidad";
 
-              {/* Ámbito */}
-              <div className="flex items-center gap-1">
-                <span className="text-xs text-muted-foreground">Ámbito:</span>
-                {["todos", "Federal", "Estatal", "Municipal"].map((v) => (
-                  <button
-                    key={v}
-                    onClick={() => setFilterAmbito(v)}
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${
-                      filterAmbito === v
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-transparent text-muted-foreground border-border hover:border-primary/50"
-                    }`}
-                  >
-                    {v === "todos" ? "Todos" : v}
-                  </button>
-                ))}
-              </div>
+            // Grupos para las cards (solo aplica en columna entidad)
+            const grupos = TIPO_ENTE_CONFIG.map((cfg) => ({
+              ...cfg,
+              total: dialogData.filter(cfg.filter).length,
+            }));
+            const grupoActivo = grupos.find((g) => g.key === filterTipo);
 
-              {/* Poder */}
-              <div className="flex items-center gap-1">
-                <span className="text-xs text-muted-foreground">Poder:</span>
-                {["todos", "Ejecutivo", "Judicial", "Legislativo", "Autonomo"].map((v) => (
-                  <button
-                    key={v}
-                    onClick={() => setFilterPoder(v)}
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${
-                      filterPoder === v
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-transparent text-muted-foreground border-border hover:border-primary/50"
-                    }`}
-                  >
-                    {v === "todos" ? "Todos" : v === "Autonomo" ? "Autónomo" : v}
-                  </button>
-                ))}
-              </div>
+            // Datos base: si es columna entidad filtra por tipo, si no usa todos
+            const porTipo = esColumnaEntidad && grupoActivo
+              ? dialogData.filter(grupoActivo.filter)
+              : dialogData;
 
-              {/* Conteo filtrado */}
-              <span className="ml-auto text-xs text-muted-foreground">
-                {dialogData.filter(
-                  (i) =>
-                    (filterAmbito === "todos" || i.ambitoGobierno === filterAmbito) &&
-                    (filterPoder  === "todos" || i.poderGobierno  === filterPoder)
-                ).length}{" "}
-                de {dialogData.length} entes
-              </span>
+            const baseFiltered = porTipo.filter(
+              (i) =>
+                (filterAmbito === "todos" || i.ambitoGobierno === filterAmbito) &&
+                (filterPoder  === "todos" || i.poderGobierno  === filterPoder)
+            );
+
+            const columnsShow = esColumnaEntidad
+              ? (COLUMNS_BY_TIPO[filterTipo] ?? dialogColumnsShow)
+              : dialogColumnsShow;
+
+            return (
+              <>
+                {/* ── Cards de tipo — solo en columna Entidad Federativa ── */}
+                {esColumnaEntidad && (
+                  <div className="shrink-0 pt-2 pb-3 border-b space-y-2.5">
+                    {/* Resumen total + desglose */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        Total: <span className="font-bold text-foreground">{dialogData.length}</span> entes registrados
+                      </span>
+                      <div className="flex items-center gap-3">
+                        {grupos.map((g) => (
+                          <span key={g.key} className="flex items-center gap-1 text-[11px]">
+                            <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: g.color }} />
+                            <span className="text-muted-foreground">{g.key}:</span>
+                            <span className="font-bold text-foreground">{g.total}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Cards */}
+                    <div className="grid grid-cols-3 gap-2">
+                      {grupos.map((g) => {
+                        const isActive = filterTipo === g.key;
+                        const isDisabled = g.total === 0;
+                        return (
+                          <button
+                            key={g.key}
+                            onClick={() => { setFilterTipo(g.key); setFilterAmbito("todos"); setFilterPoder("todos"); }}
+                            disabled={isDisabled}
+                            className={`relative overflow-hidden flex flex-col gap-2 px-3 pt-4 pb-3 rounded-xl border-2 text-left transition-all duration-200
+                              ${isDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer hover:shadow-md hover:scale-[1.02]"}
+                            `}
+                            style={{
+                              borderColor: g.color,
+                              backgroundColor: isActive ? g.bg : "hsl(var(--card))",
+                            }}
+                          >
+                            <div className="absolute top-0 left-0 right-0 h-1.5 rounded-t-xl" style={{ backgroundColor: g.color, opacity: isActive ? 1 : 0.4 }} />
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5">
+                                <Image src={g.icon} alt={g.key} width={18} height={18} className="shrink-0" />
+                                <span className="text-xs font-bold" style={{ color: g.color }}>{g.key}</span>
+                              </div>
+                              {isActive && (
+                                <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full text-white" style={{ backgroundColor: g.color }}>
+                                  Activo
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-muted-foreground leading-tight line-clamp-2">{g.label}</p>
+                            <span className="text-xl font-black tabular-nums leading-none" style={{ color: g.color }}>
+                              {g.total}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Filtros Ámbito / Poder ────────────────────────────── */}
+                <div className="shrink-0 flex flex-wrap items-center gap-x-4 gap-y-1.5 py-2 border-b">
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <span className="text-xs text-muted-foreground">Ámbito:</span>
+                    {["todos", "Federal", "Estatal", "Municipal"].map((v) => (
+                      <button
+                        key={v}
+                        aria-pressed={filterAmbito === v}
+                        onClick={() => setFilterAmbito(v)}
+                        className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${filterAmbito === v ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"}`}
+                      >
+                        {v === "todos" ? "Todos" : v}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <span className="text-xs text-muted-foreground">Poder:</span>
+                    {["todos", "Ejecutivo", "Judicial", "Legislativo", "Autonomo"].map((v) => (
+                      <button
+                        key={v}
+                        aria-pressed={filterPoder === v}
+                        onClick={() => setFilterPoder(v)}
+                        className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${filterPoder === v ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"}`}
+                      >
+                        {v === "todos" ? "Todos" : v === "Autonomo" ? "Autónomo" : v}
+                      </button>
+                    ))}
+                  </div>
+                  <span className="ml-auto text-[11px] text-muted-foreground tabular-nums">
+                    {baseFiltered.length} de {esColumnaEntidad ? (grupoActivo?.total ?? dialogData.length) : dialogData.length}
+                  </span>
+                </div>
+
+                {/* ── Tabla ────────────────────────────────────────────── */}
+                <div className="flex-1 overflow-y-auto min-h-0 pt-2">
+                  {baseFiltered.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-10">Sin resultados con los filtros aplicados.</p>
+                  ) : (
+                    <EntesTable data={baseFiltered} columnsShow={columnsShow} />
+                  )}
+                </div>
+              </>
+            );
+          })()}
+
+          {/* Contenido de gráficas (click en encabezado de columna) */}
+          {!isLoading && dialogData.length === 0 && (
+            <div className="flex-1 overflow-y-auto min-h-0 py-4">
+              {isLoading ? (
+                <div className="flex flex-row items-start gap-2">
+                  Cargando datos...
+                  <Loader2 className="animate-spin ml-1" />
+                </div>
+              ) : (
+                <>{dialogContent}</>
+              )}
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto min-h-0 py-4">
-            {isLoading ? (
-              <div className="flex flex-row items-start gap-2">
-                Cargando datos...
-                <Loader2 className="animate-spin ml-1" />
-              </div>
-            ) : dialogData.length > 0 ? (
-              <EntesTable
-                data={dialogData.filter(
-                  (i) =>
-                    (filterAmbito === "todos" || i.ambitoGobierno === filterAmbito) &&
-                    (filterPoder  === "todos" || i.poderGobierno  === filterPoder)
-                )}
-                columnsShow={dialogColumnsShow}
-              />
-            ) : (
-              <>{dialogContent}</>
-            )}
-          </div>
+          {isLoading && (
+            <div className="flex-1 flex items-start gap-2 py-4">
+              Cargando datos...
+              <Loader2 className="animate-spin ml-1" />
+            </div>
+          )}
           <DialogFooter className="shrink-0 pt-3 border-t flex flex-row items-center justify-between gap-2 sm:justify-between">
             <div>{!isLoading && dialogActions}</div>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => setIsDialogOpen(false)}
               disabled={isLoading}
