@@ -1813,31 +1813,28 @@ export function DataTable<TData, TValue>({
       <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) { setDialogData([]); setDialogContent(null); } }}>
         <DialogContent className="flex flex-col p-6 rounded-xl shadow-xl max-w-5xl w-full max-h-[85vh] bg-background border border-border">
           <DialogHeader className="shrink-0">
-            <div className="flex items-start justify-between gap-3">
-              {/* Título contextual */}
-              <div className="min-w-0">
-                <DialogTitle className="text-xl font-bold text-foreground leading-tight truncate">
-                  {dialogTitle}
-                </DialogTitle>
-                {dialogSubtitle && (
-                  <p className="text-sm text-muted-foreground mt-0.5">{dialogSubtitle}</p>
-                )}
-              </div>
-              {/* Pills de tipos incluidos */}
+            <DialogTitle className="text-xl font-bold text-foreground leading-tight">
+              {dialogTitle}
+            </DialogTitle>
+            <div className="flex items-center gap-3 mt-1">
+              {dialogSubtitle && (
+                <p className="text-sm text-muted-foreground">{dialogSubtitle}</p>
+              )}
+              {/* Pills de tipos incluidos — debajo del título */}
               {!isLoading && dialogColumna && (TIPOS_POR_COLUMNA[dialogColumna] ?? []).length > 0 && (
-                <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
-                  <span className="text-[10px] text-muted-foreground">Incluye:</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-muted-foreground">Incluye:</span>
                   {(TIPOS_POR_COLUMNA[dialogColumna] ?? []).map((key) => {
                     const cfg = TIPO_ENTE_CONFIG.find((c) => c.key === key);
                     if (!cfg) return null;
                     return (
                       <span
                         key={key}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
                         style={{ backgroundColor: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}
                         title={cfg.label}
                       >
-                        <Image src={cfg.icon} alt={key} width={11} height={11} className="shrink-0" />
+                        <Image src={cfg.icon} alt={key} width={12} height={12} className="shrink-0" />
                         {key}
                       </span>
                     );
