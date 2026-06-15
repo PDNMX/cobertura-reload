@@ -14,8 +14,9 @@ import { Combobox } from "@/components/ui/combobox";
 import { cn } from "@/lib/utils";
 import { MapPin, Search, Users, Building2, Scale, TrendingUp, CheckCircle2, XCircle, Loader2, Globe, ChevronRight, Layers, Gavel, BarChart2, Download } from "lucide-react";
 import Image from "next/image";
-import icoSO  from "@/components/tables/cobertura-table/icons-thead/sujetosObligados.svg";
-import icoOIC from "@/components/tables/cobertura-table/icons-thead/oic.svg";
+import icoSO       from "@/components/tables/cobertura-table/icons-thead/sujetosObligados.svg";
+import icoOIC      from "@/components/tables/cobertura-table/icons-thead/oic.svg";
+import icoTribunal from "@/components/tables/cobertura-table/icons-thead/tribunal.svg";
 import marcoGeoestadisticoInegi from "@/components/tables/cobertura-table/data-entidades";
 import {
   PieChart,
@@ -90,6 +91,8 @@ interface ResumenEntidadProps {
     totalEntes: number;
     oicConectados: number;
     totalOIC: number;
+    tribunalConectados: number;
+    totalTribunal: number;
   };
   initialEntidadId?: string;
   onEntidadChange?: (id: string) => void;
@@ -283,15 +286,15 @@ const SistemaFilterCard = ({ sistema, config, stats, isSelected, onClick }) => {
 const TotalesIndicador = ({
   totalEntes,
   totalOIC,
+  totalTribunal,
   entesConectados,
   oicConectados,
-  totalMunicipios,
-  municipiosRegistrados,
-  coberturaPromedio
+  tribunalConectados,
+  coberturaPromedio,
 }) => {
-  const porcentajeEntes = totalEntes > 0 ? (entesConectados / totalEntes) * 100 : 0;
-  const porcentajeOIC = totalOIC > 0 ? (oicConectados / totalOIC) * 100 : 0;
-  const porcentajeMunicipios = totalMunicipios > 0 ? (municipiosRegistrados / totalMunicipios) * 100 : 0;
+  const porcentajeEntes    = totalEntes    > 0 ? (entesConectados    / totalEntes)    * 100 : 0;
+  const porcentajeOIC      = totalOIC      > 0 ? (oicConectados      / totalOIC)      * 100 : 0;
+  const porcentajeTribunal = totalTribunal > 0 ? (tribunalConectados / totalTribunal) * 100 : 0;
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -313,7 +316,7 @@ const TotalesIndicador = ({
         </div>
       </div>
 
-      {/* OIC */}
+      {/* OIC — solo OIC puro (sin TJA) */}
       <div className="rounded-xl p-4 border shadow-sm" style={{ borderColor: "#c49a2a30", backgroundColor: "#c49a2a08" }}>
         <div className="flex items-center gap-2 mb-2">
           <div className="p-1.5 rounded-lg" style={{ backgroundColor: "#c49a2a20" }}>
@@ -331,6 +334,24 @@ const TotalesIndicador = ({
         </div>
       </div>
 
+      {/* Tribunales de Justicia Administrativa */}
+      <div className="rounded-xl p-4 border shadow-sm" style={{ borderColor: "#b5877a30", backgroundColor: "#b5877a08" }}>
+        <div className="flex items-center gap-2 mb-2">
+          <div className="p-1.5 rounded-lg" style={{ backgroundColor: "#b5877a20" }}>
+            <Image src={icoTribunal} alt="TJA" width={16} height={16} />
+          </div>
+          <span className="text-xs font-semibold" style={{ color: "#b5877a" }}>Tribunales de Justicia Administrativa</span>
+        </div>
+        <p className="text-2xl font-bold" style={{ color: "#b5877a" }}>{totalTribunal.toLocaleString()}</p>
+        <div className="mt-1">
+          <p className="text-xs font-bold" style={{ color: "#b5877a" }}>{formatPorcentaje(porcentajeTribunal)}</p>
+          <p className="text-xs text-foreground/60">{tribunalConectados.toLocaleString()} conectados</p>
+        </div>
+        <div className="h-2 rounded-full overflow-hidden mt-2" style={{ backgroundColor: "#b5877a20" }}>
+          <div className="h-full rounded-full transition-all duration-300" style={{ width: `${Math.min(porcentajeTribunal, 100)}%`, backgroundColor: "#b5877a" }} />
+        </div>
+      </div>
+
       {/* Cobertura Promedio */}
       <div className="bg-gradient-to-br from-emerald-500/15 to-emerald-600/5 dark:from-emerald-500/25 dark:to-emerald-700/15 rounded-xl p-4 border border-emerald-500/30 dark:border-emerald-400/40 shadow-sm">
         <div className="flex items-center gap-2 mb-2">
@@ -343,24 +364,6 @@ const TotalesIndicador = ({
         <p className="text-xs text-foreground/60 mt-1">Promedio S1, S2 y S6</p>
         <div className="h-2 rounded-full overflow-hidden bg-emerald-500/25 dark:bg-emerald-400/30 mt-2">
           <div className="h-full rounded-full bg-emerald-500 dark:bg-emerald-400" style={{ width: `${Math.min(coberturaPromedio, 100)}%` }} />
-        </div>
-      </div>
-
-      {/* Municipios */}
-      <div className="bg-gradient-to-br from-violet-500/15 to-violet-600/5 dark:from-violet-500/25 dark:to-violet-700/15 rounded-xl p-4 border border-violet-500/30 dark:border-violet-400/40 shadow-sm">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="p-1.5 rounded-lg bg-violet-500/20 dark:bg-violet-400/25">
-            <MapPin className="h-4 w-4 text-violet-600 dark:text-violet-300" />
-          </div>
-          <span className="text-xs font-semibold text-violet-700 dark:text-violet-200">Municipios</span>
-        </div>
-        <p className="text-2xl font-bold text-violet-700 dark:text-violet-300">{totalMunicipios.toLocaleString()}</p>
-        <div className="mt-1">
-          <p className="text-xs font-bold text-violet-700 dark:text-violet-300">{formatPorcentaje(porcentajeMunicipios)}</p>
-          <p className="text-xs text-foreground/60">{municipiosRegistrados?.toLocaleString() || 0} registrados</p>
-        </div>
-        <div className="h-2 rounded-full overflow-hidden bg-violet-500/25 dark:bg-violet-400/30 mt-2">
-          <div className="h-full rounded-full bg-violet-500 dark:bg-violet-400" style={{ width: `${Math.min(porcentajeMunicipios, 100)}%` }} />
         </div>
       </div>
     </div>
@@ -391,25 +394,36 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
   }, []);
 
   // Estadísticas nacionales
+  // Las queries ya son categorías limpias; no se restan valores
   const statsNacionales = useMemo(() => {
     if (data.length === 0) return null;
 
-    const totalEntes = data.reduce((acc, e) => acc + (e.resultSujetosObligados || 0), 0);
-    const totalOIC = data.reduce((acc, e) => acc + (e.resultOIC || 0), 0);
-    const s1 = data.reduce((acc, e) => acc + (e.resultSistema1 || 0), 0);
-    const s2 = data.reduce((acc, e) => acc + (e.resultSistema2 || 0), 0);
-    const s3 = data.reduce((acc, e) => acc + (e.resultSistema3OIC || 0), 0);
-    const s6 = data.reduce((acc, e) => acc + (e.resultSistema6 || 0), 0);
+    const totalEntes    = data.reduce((acc, e) => acc + (e.resultSujetosObligados || 0), 0);
+    // resultOIC incluye controlOIC:true OR controlTribunal:true → totalOIC = OIC + TJA
+    const totalOIC      = data.reduce((acc, e) => acc + (e.resultOIC              || 0), 0);
+    // resultTribunal = solo TJA (subconjunto de OIC, sirve para la card TJA)
+    const totalTribunal = data.reduce((acc, e) => acc + (e.resultTribunal         || 0), 0);
+
+    const s1         = data.reduce((acc, e) => acc + (e.resultSistema1         || 0), 0);
+    const s2         = data.reduce((acc, e) => acc + (e.resultSistema2         || 0), 0);
+    // resultSistema3OIC ya cuenta OIC + TJA conectados; denominador = totalOIC (ya los incluye)
+    const s3OIC      = data.reduce((acc, e) => acc + (e.resultSistema3OIC      || 0), 0);
+    const s3Tribunal = data.reduce((acc, e) => acc + (e.resultSistema3Tribunal || 0), 0);
+    const s6         = data.reduce((acc, e) => acc + (e.resultSistema6         || 0), 0);
 
     return {
       totalEntes,
-      totalOIC,
+      totalOIC,      // OIC + TJA
+      totalTribunal, // TJA (subconjunto para la card TJA)
+      oicConectados:      s3OIC,     // OIC incluye TJA → todo s3OIC
+      tribunalConectados: s3Tribunal,
       totalEntidades: data.length,
       sistemas: {
-        resultSistema1: { conectados: s1, total: totalEntes, porcentaje: totalEntes > 0 ? (s1 / totalEntes) * 100 : 0 },
-        resultSistema2: { conectados: s2, total: totalEntes, porcentaje: totalEntes > 0 ? (s2 / totalEntes) * 100 : 0 },
-        resultSistema3OIC: { conectados: s3, total: totalOIC, porcentaje: totalOIC > 0 ? (s3 / totalOIC) * 100 : 0 },
-        resultSistema6: { conectados: s6, total: totalEntes, porcentaje: totalEntes > 0 ? (s6 / totalEntes) * 100 : 0 },
+        resultSistema1:    { conectados: s1,    total: totalEntes, porcentaje: totalEntes > 0 ? (s1    / totalEntes) * 100 : 0 },
+        resultSistema2:    { conectados: s2,    total: totalEntes, porcentaje: totalEntes > 0 ? (s2    / totalEntes) * 100 : 0 },
+        // Donut S3: denominador = totalOIC (ya incluye TJA, sin double-count)
+        resultSistema3OIC: { conectados: s3OIC, total: totalOIC,   porcentaje: totalOIC   > 0 ? (s3OIC / totalOIC)   * 100 : 0 },
+        resultSistema6:    { conectados: s6,    total: totalEntes, porcentaje: totalEntes > 0 ? (s6    / totalEntes) * 100 : 0 },
       },
     };
   }, [data]);
@@ -498,7 +512,7 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
   useEffect(() => {
     async function fetchMunicipiosNacionales() {
       try {
-        const [totalCatalogoResult, entesConMunicipio, s1Municipios, s2Municipios, s3Municipios, s6Municipios] = await Promise.all([
+        const [totalCatalogoResult, entesConMunicipio, s1Municipios, s2Municipios, s3Municipios, s6Municipios, municipiosConectadosResult] = await Promise.all([
           directus.request(
             readItems("municipio", {
               aggregate: { count: ["*"] },
@@ -538,12 +552,28 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
               aggregate: { countDistinct: ["municipio"] },
             })
           ),
+          // Municipios distintos con al menos un ente conectado a S1, S2 o S6
+          directus.request(
+            readItems("entes", {
+              filter: {
+                controlOIC: { _eq: false },
+                municipio: { _nnull: true },
+                _or: [
+                  { sistema1: { _eq: true } },
+                  { sistema2: { _eq: true } },
+                  { sistema6: { _eq: true } },
+                ],
+              },
+              aggregate: { countDistinct: ["municipio"] },
+            })
+          ),
         ]);
 
         setMunicipiosNacionales({
           totalCatalogo: Number(totalCatalogoResult[0]?.count || 0),
           entesConMunicipio: Number(entesConMunicipio[0]?.count || 0),
           municipiosRegistrados: Number(entesConMunicipio[0]?.countDistinct?.municipio || 0),
+          municipiosConectados: Number(municipiosConectadosResult[0]?.countDistinct?.municipio || 0),
           s1: Number(s1Municipios[0]?.countDistinct?.municipio || 0),
           s2: Number(s2Municipios[0]?.countDistinct?.municipio || 0),
           s3: Number(s3Municipios[0]?.countDistinct?.municipio || 0),
@@ -585,7 +615,7 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
 
         const totalCatalogo = Number(catalogoMunicipios[0]?.count || 0);
 
-        const [entesConMunicipio, s1Municipios, s2Municipios, s3Municipios, s6Municipios] = await Promise.all([
+        const [entesConMunicipio, s1Municipios, s2Municipios, s3Municipios, s6Municipios, municipiosConectadosResult, entesConectadosResult] = await Promise.all([
           directus.request(
             readItems("entes", {
               filter: { entidad: { _eq: selectedEntidad }, controlOIC: { _eq: false }, municipio: { _nnull: true } },
@@ -621,28 +651,44 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
               aggregate: { countDistinct: ["municipio"] },
             })
           ),
+          // Municipios distintos con al menos un ente conectado a S1, S2 o S6
+          directus.request(
+            readItems("entes", {
+              filter: {
+                entidad: { _eq: selectedEntidad },
+                controlOIC: { _eq: false },
+                municipio: { _nnull: true },
+                _or: [
+                  { sistema1: { _eq: true } },
+                  { sistema2: { _eq: true } },
+                  { sistema6: { _eq: true } },
+                ],
+              },
+              aggregate: { countDistinct: ["municipio"] },
+            })
+          ),
+          // Entes conectados de la entidad
+          directus.request(
+            readItems("entes", {
+              filter: {
+                entidad: { _eq: selectedEntidad },
+                controlOIC: { _eq: false },
+                _or: [
+                  { sistema1: { _eq: true } },
+                  { sistema2: { _eq: true } },
+                  { sistema6: { _eq: true } },
+                ],
+              },
+              aggregate: { count: ["*"] },
+            })
+          ),
         ]);
-
-        // Query adicional para entes conectados de la entidad
-        const entesConectadosResult = await directus.request(
-          readItems("entes", {
-            filter: {
-              entidad: { _eq: selectedEntidad },
-              controlOIC: { _eq: false },
-              _or: [
-                { sistema1: { _eq: true } },
-                { sistema2: { _eq: true } },
-                { sistema6: { _eq: true } },
-              ],
-            },
-            aggregate: { count: ["*"] },
-          })
-        );
 
         const result = {
           totalCatalogo,
           entesConMunicipio: Number(entesConMunicipio[0]?.count || 0),
           municipiosRegistrados: Number(entesConMunicipio[0]?.countDistinct?.municipio || 0),
+          municipiosConectados: Number(municipiosConectadosResult[0]?.countDistinct?.municipio || 0),
           s1: Number(s1Municipios[0]?.countDistinct?.municipio || 0),
           s2: Number(s2Municipios[0]?.countDistinct?.municipio || 0),
           s3: Number(s3Municipios[0]?.countDistinct?.municipio || 0),
@@ -668,17 +714,27 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
   const estadisticasEntidad = useMemo(() => {
     if (!entidadData) return null;
 
-    const totalEntes = entidadData.resultSujetosObligados || 0;
-    const totalOIC = entidadData.resultOIC || 0;
+    const totalEntes    = entidadData.resultSujetosObligados || 0;
+    // resultOIC incluye OIC + TJA; totalTribunal es subconjunto para la card TJA
+    const totalOIC      = entidadData.resultOIC      || 0;
+    const totalTribunal = entidadData.resultTribunal  || 0;
+
+    // resultSistema3OIC cuenta OIC + TJA conectados en S3; denominador = totalOIC (sin double-count)
+    const s3OIC      = entidadData.resultSistema3OIC      || 0;
+    const s3Tribunal = entidadData.resultSistema3Tribunal || 0;
 
     return {
       totalEntes,
-      totalOIC,
+      totalOIC,      // OIC + TJA
+      totalTribunal, // TJA (subconjunto)
+      oicConectados:      s3OIC,     // OIC incluye TJA → todo s3OIC
+      tribunalConectados: s3Tribunal,
       sistemas: {
-        resultSistema1: { conectados: entidadData.resultSistema1 || 0, total: totalEntes, porcentaje: totalEntes > 0 ? ((entidadData.resultSistema1 || 0) / totalEntes) * 100 : 0 },
-        resultSistema2: { conectados: entidadData.resultSistema2 || 0, total: totalEntes, porcentaje: totalEntes > 0 ? ((entidadData.resultSistema2 || 0) / totalEntes) * 100 : 0 },
-        resultSistema3OIC: { conectados: entidadData.resultSistema3OIC || 0, total: totalOIC, porcentaje: totalOIC > 0 ? ((entidadData.resultSistema3OIC || 0) / totalOIC) * 100 : 0 },
-        resultSistema6: { conectados: entidadData.resultSistema6 || 0, total: totalEntes, porcentaje: totalEntes > 0 ? ((entidadData.resultSistema6 || 0) / totalEntes) * 100 : 0 },
+        resultSistema1:    { conectados: entidadData.resultSistema1 || 0, total: totalEntes, porcentaje: totalEntes > 0 ? ((entidadData.resultSistema1 || 0) / totalEntes) * 100 : 0 },
+        resultSistema2:    { conectados: entidadData.resultSistema2 || 0, total: totalEntes, porcentaje: totalEntes > 0 ? ((entidadData.resultSistema2 || 0) / totalEntes) * 100 : 0 },
+        // Donut S3: denominador = totalOIC (ya incluye TJA, sin double-count)
+        resultSistema3OIC: { conectados: s3OIC,                           total: totalOIC,   porcentaje: totalOIC   > 0 ? (s3OIC                     / totalOIC)   * 100 : 0 },
+        resultSistema6:    { conectados: entidadData.resultSistema6 || 0, total: totalEntes, porcentaje: totalEntes > 0 ? ((entidadData.resultSistema6 || 0) / totalEntes) * 100 : 0 },
       },
     };
   }, [entidadData]);
@@ -852,6 +908,7 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
             <TotalesIndicador
               totalEntes={estadisticas.totalEntes}
               totalOIC={estadisticas.totalOIC}
+              totalTribunal={estadisticas.totalTribunal}
               entesConectados={
                 selectedEntidad
                   ? currentMunicipios?.entesConectados || 0
@@ -859,140 +916,169 @@ export function ResumenEntidad({ data, dataAmbito, dataPoder, resumenConexiones,
               }
               oicConectados={
                 selectedEntidad
-                  ? estadisticas.sistemas.resultSistema3OIC.conectados
+                  ? estadisticas.oicConectados
                   : resumenConexiones?.oicConectados || 0
               }
-              totalMunicipios={currentMunicipios?.totalCatalogo || 0}
-              municipiosRegistrados={currentMunicipios?.municipiosRegistrados}
+              tribunalConectados={
+                selectedEntidad
+                  ? estadisticas.tribunalConectados
+                  : resumenConexiones?.tribunalConectados || 0
+              }
               coberturaPromedio={coberturaPromedio}
             />
 
-            {/* Gráficas de Donut por sistema y Municipios */}
-            <div className="grid gap-4 lg:grid-cols-4 items-stretch">
-              {/* Avance por Sistema - 3/4 del espacio */}
-              <div className="lg:col-span-3 flex flex-col">
-                <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-primary/20 dark:bg-primary/25">
-                    <TrendingUp className="h-4 w-4 text-primary" />
-                  </div>
-                  <span className="text-foreground">Avance por Sistema</span>
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-1">
-                  {Object.entries(SISTEMAS_CONFIG).map(([key, config]) => {
-                    const stats = estadisticas.sistemas[key];
-                    return (
-                      <div key={key} className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/50 bg-card/50 dark:bg-card/80 hover:bg-accent/30 dark:hover:bg-accent/20 transition-colors shadow-sm">
-                        <DonutChart
-                          conectados={stats.conectados}
-                          total={stats.total}
-                          color={config.color}
-                          nombre={config.nombre}
-                          shortName={config.shortName}
-                          descripcion={config.descripcion}
-                        />
-                      </div>
-                    );
-                  })}
+            {/* Avance por Sistema — donuts a ancho completo */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-primary/20 dark:bg-primary/25">
+                  <TrendingUp className="h-4 w-4 text-primary" />
                 </div>
+                <span className="text-foreground">Avance por Sistema</span>
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {Object.entries(SISTEMAS_CONFIG).map(([key, config]) => {
+                  const stats = estadisticas.sistemas[key];
+                  return (
+                    <div key={key} className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/50 bg-card/50 dark:bg-card/80 hover:bg-accent/30 dark:hover:bg-accent/20 transition-colors shadow-sm">
+                      <DonutChart
+                        conectados={stats.conectados}
+                        total={stats.total}
+                        color={config.color}
+                        nombre={config.nombre}
+                        shortName={config.shortName}
+                        descripcion={config.descripcion}
+                      />
+                    </div>
+                  );
+                })}
               </div>
+            </div>
 
-              {/* Municipios Conectados por Sistema - 1/4 del espacio */}
-              <div className="lg:col-span-1 flex flex-col">
-                <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-violet-500/20 dark:bg-violet-400/25">
-                    <MapPin className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-                  </div>
-                  <span className="text-foreground">Municipios</span>
-                  <span className="text-xs font-semibold text-violet-600 dark:text-violet-400 ml-auto">
-                    {currentMunicipios?.municipiosRegistrados || 0}/{currentMunicipios?.totalCatalogo || 0}
-                  </span>
-                </h4>
-                <div className="flex-1 p-4 rounded-xl border border-border/50 bg-card/50 dark:bg-card/80 shadow-sm flex flex-col justify-between">
-                  {currentMunicipios ? (
-                    <div className="space-y-3">
-                      {/* Sistema 1 */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold" style={{ color: '#F29888' }}>S1</span>
-                          <span className="text-xs font-bold" style={{ color: '#F29888' }}>
-                            {currentMunicipios.s1 || 0}
-                          </span>
-                        </div>
-                        <div className="h-2.5 rounded-full overflow-hidden bg-muted/60 dark:bg-muted">
-                          <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{
-                              width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s1 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
-                              backgroundColor: '#F29888'
-                            }}
-                          />
-                        </div>
+            {/* Avance por Municipios */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-primary/20 dark:bg-primary/25">
+                  <MapPin className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-foreground">Avance por Municipios</span>
+              </h4>
+
+              {currentMunicipios ? (() => {
+                const total        = currentMunicipios.totalCatalogo       || 0;
+                const asignados    = currentMunicipios.municipiosRegistrados || 0;
+                const soConectados = currentMunicipios.municipiosConectados  || 0;
+                const oicConectados = currentMunicipios.s3                  || 0;
+                const pctAsignados = total > 0 ? (asignados    / total) * 100 : 0;
+                const pctSO        = total > 0 ? (soConectados / total) * 100 : 0;
+                const pctOIC       = total > 0 ? (oicConectados / total) * 100 : 0;
+
+                const sistemas = [
+                  { key: "s1", label: "Sistema 1", sub: "Declaraciones Patrimoniales",  color: "#F29888", tipo: "SO"  },
+                  { key: "s2", label: "Sistema 2", sub: "Servidores en Contrataciones", color: "#B25FAC", tipo: "SO"  },
+                  { key: "s3", label: "Sistema 3", sub: "Servidores Sancionados",        color: "#9085DA", tipo: "OIC" },
+                  { key: "s6", label: "Sistema 6", sub: "Contrataciones Públicas",       color: "#42A5CC", tipo: "SO"  },
+                ];
+
+                return (
+                  <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+
+                    {/* ── Zona 1: resumen de universo ── */}
+                    <div className="flex items-center justify-between px-6 py-4 bg-muted/40 border-b border-border">
+                      <div>
+                        <p className="text-xl font-bold text-foreground">{total.toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground">municipios en el catálogo nacional</p>
                       </div>
-
-                      {/* Sistema 2 */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold" style={{ color: '#B25FAC' }}>S2</span>
-                          <span className="text-xs font-bold" style={{ color: '#B25FAC' }}>
-                            {currentMunicipios.s2 || 0}
-                          </span>
-                        </div>
-                        <div className="h-2.5 rounded-full overflow-hidden bg-muted/60 dark:bg-muted">
-                          <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{
-                              width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s2 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
-                              backgroundColor: '#B25FAC'
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Sistema 3 */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold" style={{ color: '#9085DA' }}>S3</span>
-                          <span className="text-xs font-bold" style={{ color: '#9085DA' }}>
-                            {currentMunicipios.s3 || 0}
-                          </span>
-                        </div>
-                        <div className="h-2.5 rounded-full overflow-hidden bg-muted/60 dark:bg-muted">
-                          <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{
-                              width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s3 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
-                              backgroundColor: '#9085DA'
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Sistema 6 */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold" style={{ color: '#42A5CC' }}>S6</span>
-                          <span className="text-xs font-bold" style={{ color: '#42A5CC' }}>
-                            {currentMunicipios.s6 || 0}
-                          </span>
-                        </div>
-                        <div className="h-2.5 rounded-full overflow-hidden bg-muted/60 dark:bg-muted">
-                          <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{
-                              width: `${currentMunicipios.totalCatalogo > 0 ? ((currentMunicipios.s6 || 0) / currentMunicipios.totalCatalogo) * 100 : 0}%`,
-                              backgroundColor: '#42A5CC'
-                            }}
-                          />
+                      <div className="text-right border-l border-border pl-6">
+                        <p className="text-base font-semibold text-foreground">{asignados.toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground">con entes asignados</p>
+                        <div className="h-1 w-24 rounded-full overflow-hidden bg-muted mt-1.5 ml-auto">
+                          <div className="h-full rounded-full bg-foreground/25 transition-all duration-500" style={{ width: `${Math.min(pctAsignados, 100)}%` }} />
                         </div>
                       </div>
                     </div>
-                  ) : (
-                    <div className="flex items-center justify-center h-32 text-muted-foreground">
-                      <Loader2 className="h-5 w-5 animate-spin" />
+
+                    {/* ── Zona 2: SO vs OIC ── */}
+                    <div className="grid grid-cols-2 divide-x divide-border">
+                      {/* SO */}
+                      <div className="p-5" style={{ backgroundColor: "#6f416806" }}>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Image src={icoSO} alt="SO" width={14} height={14} />
+                          <span className="text-xs font-semibold" style={{ color: "#6f4168" }}>Sujetos Obligados</span>
+                        </div>
+                        <p className="text-3xl font-bold" style={{ color: "#6f4168" }}>{soConectados.toLocaleString()}</p>
+                        <p className="text-xs mt-0.5" style={{ color: "#6f416880" }}>municipios conectados</p>
+                        <div className="h-2 rounded-full overflow-hidden mt-3" style={{ backgroundColor: "#6f416820" }}>
+                          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(pctSO, 100)}%`, backgroundColor: "#6f4168" }} />
+                        </div>
+                        <div className="flex items-center justify-between mt-1.5">
+                          <p className="text-xs" style={{ color: "#6f416899" }}>S1, S2 o S6</p>
+                          <p className="text-xs font-bold" style={{ color: "#6f4168" }}>{formatPorcentaje(pctSO)}</p>
+                        </div>
+                      </div>
+
+                      {/* OIC */}
+                      <div className="p-5" style={{ backgroundColor: "#c49a2a06" }}>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Image src={icoOIC} alt="OIC" width={14} height={14} />
+                          <span className="text-xs font-semibold" style={{ color: "#c49a2a" }}>OIC / Autoridades</span>
+                        </div>
+                        <p className="text-3xl font-bold" style={{ color: "#c49a2a" }}>{oicConectados.toLocaleString()}</p>
+                        <p className="text-xs mt-0.5" style={{ color: "#c49a2a80" }}>municipios conectados</p>
+                        <div className="h-2 rounded-full overflow-hidden mt-3" style={{ backgroundColor: "#c49a2a20" }}>
+                          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(pctOIC, 100)}%`, backgroundColor: "#c49a2a" }} />
+                        </div>
+                        <div className="flex items-center justify-between mt-1.5">
+                          <p className="text-xs" style={{ color: "#c49a2a99" }}>S3 — Servidores Sancionados</p>
+                          <p className="text-xs font-bold" style={{ color: "#c49a2a" }}>{formatPorcentaje(pctOIC)}</p>
+                        </div>
+                      </div>
                     </div>
-                  )}
+
+                    {/* ── Zona 3: barras por sistema ── */}
+                    <div className="px-6 py-4 border-t border-border space-y-3">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+                        Conectividad por sistema
+                      </p>
+                      {sistemas.map(({ key, label, sub, color, tipo }) => {
+                        const val = currentMunicipios[key] || 0;
+                        const pct = total > 0 ? (val / total) * 100 : 0;
+                        return (
+                          <div key={key} className="flex items-center gap-4">
+                            {/* Etiqueta izquierda */}
+                            <div className="w-44 shrink-0">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-bold" style={{ color }}>{label}</span>
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                                  style={{ backgroundColor: color + "20", color }}
+                                >{tipo}</span>
+                              </div>
+                              <p className="text-xs text-muted-foreground truncate">{sub}</p>
+                            </div>
+                            {/* Barra */}
+                            <div className="flex-1 h-2.5 rounded-full overflow-hidden bg-muted/60">
+                              <div
+                                className="h-full rounded-full transition-all duration-500"
+                                style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: color }}
+                              />
+                            </div>
+                            {/* Valores derecha */}
+                            <div className="w-28 text-right shrink-0">
+                              <span className="text-sm font-bold tabular-nums" style={{ color }}>{val.toLocaleString()}</span>
+                              <span className="text-xs text-muted-foreground ml-1.5">{formatPorcentaje(pct)}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                  </div>
+                );
+              })() : (
+                <div className="rounded-xl border border-border bg-card shadow-sm flex items-center justify-center h-40 gap-2 text-muted-foreground">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span className="text-sm">Cargando datos de municipios...</span>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Solo mostrar ranking de entidades en vista nacional */}

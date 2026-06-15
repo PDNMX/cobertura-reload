@@ -47,6 +47,7 @@ export default function AuthenticationPage() {
               groupBy: ["entidad"],
             })
           ),
+          // OIC incluye controlOIC:true y controlTribunal:true (TJA forma parte del grupo OIC)
           resultOIC: directus.request(
             readItems("entes", {
               filter: {
@@ -115,265 +116,55 @@ export default function AuthenticationPage() {
 
         // Queries por ámbito de gobierno
         const ambitoQueries = {
-          totalFederal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Federal" }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          totalEstatal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Estatal" }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          totalMunicipal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Municipal" }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          totalOICFederal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Federal" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          totalOICEstatal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Estatal" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          totalOICMunicipal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Municipal" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s1Federal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Federal" }, sistema1: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s1Estatal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Estatal" }, sistema1: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s1Municipal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Municipal" }, sistema1: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s2Federal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Federal" }, sistema2: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s2Estatal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Estatal" }, sistema2: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s2Municipal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Municipal" }, sistema2: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s3Federal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Federal" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s3Estatal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Estatal" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s3Municipal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Municipal" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s6Federal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Federal" }, sistema6: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s6Estatal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Estatal" }, sistema6: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s6Municipal: directus.request(
-            readItems("entes", {
-              filter: { ambitoGobierno: { _eq: "Municipal" }, sistema6: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
+          totalFederal: directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Federal"  }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          totalEstatal: directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Estatal"  }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          totalMunicipal: directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Municipal" }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          totalOICFederal:   directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Federal"  }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] }, aggregate: { count: ["*"] } })),
+          totalOICEstatal:   directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Estatal"  }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] }, aggregate: { count: ["*"] } })),
+          totalOICMunicipal: directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Municipal" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] }, aggregate: { count: ["*"] } })),
+          s1Federal:  directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Federal"  }, sistema1: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s1Estatal:  directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Estatal"  }, sistema1: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s1Municipal: directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Municipal" }, sistema1: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s2Federal:  directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Federal"  }, sistema2: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s2Estatal:  directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Estatal"  }, sistema2: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s2Municipal: directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Municipal" }, sistema2: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s3Federal:  directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Federal"  }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] }, aggregate: { count: ["*"] } })),
+          s3Estatal:  directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Estatal"  }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] }, aggregate: { count: ["*"] } })),
+          s3Municipal: directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Municipal" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] }, aggregate: { count: ["*"] } })),
+          s6Federal:  directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Federal"  }, sistema6: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s6Estatal:  directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Estatal"  }, sistema6: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s6Municipal: directus.request(readItems("entes", { filter: { ambitoGobierno: { _eq: "Municipal" }, sistema6: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
         };
 
         // Queries por poder de gobierno
         const poderQueries = {
-          totalEjecutivo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Ejecutivo" }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          totalJudicial: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Judicial" }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          totalLegislativo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Legislativo" }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          totalAutonomo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Autonomo" }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          totalOICEjecutivo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Ejecutivo" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          totalOICJudicial: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Judicial" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          totalOICLegislativo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Legislativo" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          totalOICAutonomo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Autonomo" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s1Ejecutivo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Ejecutivo" }, sistema1: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s1Judicial: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Judicial" }, sistema1: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s1Legislativo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Legislativo" }, sistema1: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s1Autonomo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Autonomo" }, sistema1: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s2Ejecutivo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Ejecutivo" }, sistema2: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s2Judicial: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Judicial" }, sistema2: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s2Legislativo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Legislativo" }, sistema2: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s2Autonomo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Autonomo" }, sistema2: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s3Ejecutivo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Ejecutivo" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s3Judicial: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Judicial" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s3Legislativo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Legislativo" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s3Autonomo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Autonomo" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s6Ejecutivo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Ejecutivo" }, sistema6: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s6Judicial: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Judicial" }, sistema6: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s6Legislativo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Legislativo" }, sistema6: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
-          s6Autonomo: directus.request(
-            readItems("entes", {
-              filter: { poderGobierno: { _eq: "Autonomo" }, sistema6: { _eq: true }, controlOIC: { _eq: false } },
-              aggregate: { count: ["*"] },
-            })
-          ),
+          totalEjecutivo:   directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Ejecutivo"  }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          totalJudicial:    directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Judicial"   }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          totalLegislativo: directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Legislativo" }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          totalAutonomo:    directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Autonomo"   }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          totalOICEjecutivo:   directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Ejecutivo"  }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] }, aggregate: { count: ["*"] } })),
+          totalOICJudicial:    directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Judicial"   }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] }, aggregate: { count: ["*"] } })),
+          totalOICLegislativo: directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Legislativo" }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] }, aggregate: { count: ["*"] } })),
+          totalOICAutonomo:    directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Autonomo"   }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] }, aggregate: { count: ["*"] } })),
+          s1Ejecutivo:   directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Ejecutivo"  }, sistema1: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s1Judicial:    directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Judicial"   }, sistema1: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s1Legislativo: directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Legislativo" }, sistema1: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s1Autonomo:    directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Autonomo"   }, sistema1: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s2Ejecutivo:   directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Ejecutivo"  }, sistema2: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s2Judicial:    directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Judicial"   }, sistema2: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s2Legislativo: directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Legislativo" }, sistema2: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s2Autonomo:    directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Autonomo"   }, sistema2: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s3Ejecutivo:   directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Ejecutivo"  }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] }, aggregate: { count: ["*"] } })),
+          s3Judicial:    directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Judicial"   }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] }, aggregate: { count: ["*"] } })),
+          s3Legislativo: directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Legislativo" }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] }, aggregate: { count: ["*"] } })),
+          s3Autonomo:    directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Autonomo"   }, sistema3: { _eq: true }, _or: [{ controlOIC: { _eq: true } }, { controlTribunal: { _eq: true } }] }, aggregate: { count: ["*"] } })),
+          s6Ejecutivo:   directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Ejecutivo"  }, sistema6: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s6Judicial:    directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Judicial"   }, sistema6: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s6Legislativo: directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Legislativo" }, sistema6: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
+          s6Autonomo:    directus.request(readItems("entes", { filter: { poderGobierno: { _eq: "Autonomo"   }, sistema6: { _eq: true }, controlOIC: { _eq: false } }, aggregate: { count: ["*"] } })),
         };
 
-        // Query para contar entes conectados en al menos uno de S1, S2 o S6
+        // Entes conectados en al menos uno de S1, S2 o S6 (controlOIC: false — igual que antes)
         const entesConectadosQuery = directus.request(
           readItems("entes", {
             filter: {
@@ -539,20 +330,30 @@ export default function AuthenticationPage() {
     fetchAllData();
   }, []);
 
-  // Calcular resumen de Entes Públicos vs OIC
+  // Calcular resumen de Entes Públicos, OIC y TJA
+  // Las queries ya devuelven categorías limpias (SO puro, OIC puro, TJA puro)
   const resumenConexiones = useMemo(() => {
     if (entes.length === 0) {
-      return { entesConectados: 0, totalEntes: 0, oicConectados: 0, totalOIC: 0 };
+      return {
+        entesConectados: 0,    totalEntes: 0,
+        oicConectados: 0,      totalOIC: 0,
+        tribunalConectados: 0, totalTribunal: 0,
+      };
     }
 
-    const totalEntes = entes.reduce((acc, e) => acc + (e.resultSujetosObligados || 0), 0);
-    const totalOIC = entes.reduce((acc, e) => acc + (e.resultOIC || 0), 0);
+    const totalEntes         = entes.reduce((acc, e) => acc + (e.resultSujetosObligados  || 0), 0);
+    const totalOIC           = entes.reduce((acc, e) => acc + (e.resultOIC               || 0), 0);
+    const totalTribunal      = entes.reduce((acc, e) => acc + (e.resultTribunal          || 0), 0);
+    // resultOIC ya incluye OIC + TJA; resultSistema3OIC es el total conectado en S3 (ambos tipos)
+    const s3OIC              = entes.reduce((acc, e) => acc + (e.resultSistema3OIC       || 0), 0);
+    const tribunalConectados = entes.reduce((acc, e) => acc + (e.resultSistema3Tribunal  || 0), 0);
+    const oicConectados      = s3OIC; // OIC incluye TJA → conectados = todo s3OIC
 
-    // OIC conectados en S3
-    const oicConectados = entes.reduce((acc, e) => acc + (e.resultSistema3OIC || 0), 0);
-
-    // entesConectadosCount viene de la query directa (controlOIC=false AND (S1 OR S2 OR S6))
-    return { entesConectados: entesConectadosCount, totalEntes, oicConectados, totalOIC };
+    return {
+      entesConectados: entesConectadosCount, totalEntes,
+      oicConectados,   totalOIC,
+      tribunalConectados, totalTribunal,
+    };
   }, [entes, entesConectadosCount]);
 
   return (
