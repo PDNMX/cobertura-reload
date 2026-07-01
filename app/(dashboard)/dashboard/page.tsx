@@ -43,7 +43,7 @@ import {
 } from "lucide-react";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
-const GOOGLE_FORM_URL = "https://forms.gle/NyEWrtFFiaeAkXzB8";
+const GOOGLE_FORM_URL_DEFAULT = "https://forms.gle/NyEWrtFFiaeAkXzB8";
 
 /** Ventanas de captura trimestral — actualizar solo si cambian las fechas oficiales */
 const CAPTURE_PERIODS = [
@@ -51,29 +51,33 @@ const CAPTURE_PERIODS = [
     id: "1T2026",
     trimestre: "Primer Trimestre 2026",
     periodoLabel: "enero — marzo 2026",
-    start: new Date(2026, 3, 1),            // 1 abr 2026
-    end:   new Date(2026, 3, 9, 23, 59, 59), // 9 abr 2026
+    start:   new Date(2026, 3, 1),             // 1 abr 2026
+    end:     new Date(2026, 3, 9, 23, 59, 59), // 9 abr 2026
+    formUrl: GOOGLE_FORM_URL_DEFAULT,
   },
   {
     id: "2T2026",
     trimestre: "Segundo Trimestre 2026",
     periodoLabel: "abril — junio 2026",
-    start: new Date(2026, 6, 19),            // 19 jul 2026
-    end:   new Date(2026, 6, 27, 23, 59, 59), // 27 jul 2026
+    start:   new Date(2026, 6, 1),             // 1 jul 2026
+    end:     new Date(2026, 6, 9, 23, 59, 59), // 9 jul 2026
+    formUrl: "https://forms.gle/t1GGoQPZGuBG1i448",
   },
   {
     id: "3T2026",
     trimestre: "Tercer Trimestre 2026",
     periodoLabel: "julio — septiembre 2026",
-    start: new Date(2026, 9, 1),             // 1 oct 2026
-    end:   new Date(2026, 9, 9, 23, 59, 59),  // 9 oct 2026
+    start:   new Date(2026, 9, 1),             // 1 oct 2026
+    end:     new Date(2026, 9, 9, 23, 59, 59), // 9 oct 2026
+    formUrl: GOOGLE_FORM_URL_DEFAULT,
   },
   {
     id: "4T2026",
     trimestre: "Cuarto Trimestre 2026",
     periodoLabel: "octubre — diciembre 2026",
-    start: new Date(2027, 0, 7),             // 7 ene 2027
-    end:   new Date(2027, 0, 15, 23, 59, 59), // 15 ene 2027
+    start:   new Date(2027, 0, 7),              // 7 ene 2027
+    end:     new Date(2027, 0, 15, 23, 59, 59), // 15 ene 2027
+    formUrl: GOOGLE_FORM_URL_DEFAULT,
   },
 ];
 
@@ -391,7 +395,7 @@ export default function Page() {
                 <div className="space-y-2">
                   {active ? (
                     <a
-                      href={GOOGLE_FORM_URL}
+                      href={active.formUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-700 active:bg-violet-800 px-4 py-2.5 text-sm font-semibold text-white transition-colors shadow-sm shadow-violet-200 dark:shadow-none"
