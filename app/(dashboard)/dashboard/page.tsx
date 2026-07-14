@@ -691,7 +691,7 @@ export default function Page() {
           <Card className="lg:col-span-4">
             <CardHeader>
               <CardTitle>Avance por sistema</CardTitle>
-              <CardDescription>Último corte: 1T 2026 — 1 de enero al 31 de marzo de 2026</CardDescription>
+              <CardDescription>Último corte: 2T 2026 — 1 de abril al 30 de junio de 2026</CardDescription>
             </CardHeader>
             <CardContent>
               <Overview entidad={entidadId} />
