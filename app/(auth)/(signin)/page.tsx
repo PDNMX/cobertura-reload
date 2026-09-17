@@ -9,7 +9,7 @@ import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { ResumenConexiones } from "@/components/dashboard-stats-cards";
 import directus from "@/lib/directus";
-import { Loader2, Table2, LayoutDashboard, Radio, X, Info, AlertCircle, ExternalLink } from "lucide-react";
+import { Loader2, Table2, LayoutDashboard, Radio, X, Info, AlertCircle, ExternalLink, History } from "lucide-react";
 import { ResumenEntidad } from "@/components/resumen-entidad";
 import { readItems } from "@directus/sdk";
 import {
@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { idToEntidad } from "@/lib/entidades-slugs";
 import { DescargaDatosNacionales } from "@/components/descarga-datos-nacionales";
+import { HistoricoCharts } from "@/components/charts/historico-charts";
 
 export default function AuthenticationPage() {
   const router = useRouter();
@@ -445,6 +446,13 @@ export default function AuthenticationPage() {
                     <Table2 className="h-4 w-4" />
                     Tabla de Datos
                   </TabsTrigger>
+                  <TabsTrigger
+                    value="historico"
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm gap-2"
+                  >
+                    <History className="h-4 w-4" />
+                    Histórico
+                  </TabsTrigger>
                 </TabsList>
               </div>
 
@@ -498,6 +506,16 @@ export default function AuthenticationPage() {
                 <div className="rounded-md border">
                   <CoberturaTable data={entes} showHeader={false} hideNameFilter={true} showInfoAlert={false} />
                 </div>
+              </TabsContent>
+              {/* Tab: Histórico */}
+              <TabsContent value="historico" className="space-y-4">
+                <div>
+                  <h3 className="text-base font-semibold">Evolución Histórica de la Interconexión</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Seguimiento del avance de conexión a los sistemas de la PDN desde el 1T 2024 hasta el trimestre más reciente.
+                  </p>
+                </div>
+                <HistoricoCharts />
               </TabsContent>
             </Tabs>
           </>
