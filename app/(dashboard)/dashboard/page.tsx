@@ -69,7 +69,7 @@ const CAPTURE_PERIODS = [
     periodoLabel: "julio — septiembre 2026",
     start:   new Date(2026, 9, 1),             // 1 oct 2026
     end:     new Date(2026, 9, 9, 23, 59, 59), // 9 oct 2026
-    formUrl: GOOGLE_FORM_URL_DEFAULT,
+    formUrl: "https://forms.gle/sM8mNj5Ghcat3mk46",
   },
   {
     id: "4T2026",
