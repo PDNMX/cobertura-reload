@@ -172,12 +172,13 @@ function BloqueMetricas({ trimesters }: { trimesters: TrimData[] }) {
 
   const [currentId, setCurrentId] = useState(latestId);
   const [compareId, setCompareId] = useState(prevId);
+  const [comparing, setComparing] = useState(false);
 
-  const currTrm  = trimesters.find((t) => t.id === currentId) ?? trimesters[trimesters.length - 1];
-  const cmpTrm   = trimesters.find((t) => t.id === compareId);
+  const currTrm = trimesters.find((t) => t.id === currentId) ?? trimesters[trimesters.length - 1];
+  const cmpTrm  = trimesters.find((t) => t.id === compareId);
 
   const curr    = useMemo(() => calcNacional(currTrm), [currTrm]);
-  const cmpData = useMemo(() => cmpTrm ? calcNacional(cmpTrm) : null, [cmpTrm]);
+  const cmpData = useMemo(() => (comparing && cmpTrm) ? calcNacional(cmpTrm) : null, [comparing, cmpTrm]);
 
   function Delta({ sistema }: { sistema: keyof typeof COLORS }) {
     if (!cmpData) return null;
@@ -214,11 +215,136 @@ function BloqueMetricas({ trimesters }: { trimesters: TrimData[] }) {
     <div className="rounded-xl border bg-card overflow-hidden">
       <div className="h-1 w-full bg-gradient-to-r from-[#F29888] via-[#B25FAC] to-[#42A5CC]" />
       <div className="p-5 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <SectionHeader
+            icon={<BarChart2 className="h-4 w-4 text-muted-foreground" />}
+            title="Resumen de cobertura nacional"
+            desc="Porcentaje de entes públicos conectados a cada sistema de la PDN."
+          />
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Select value={currentId} onValueChange={setCurrentId}>
+              <SelectTrigger className="w-[130px] h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {trimesters.map((t) => <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <button
+              onClick={() => setComparing((v) => !v)}
+              className={`flex items-center gap-1.5 h-8 px-3 rounded-lg border text-xs font-semibold transition-all duration-200 ${
+                comparing
+                  ? "bg-primary/15 border-primary/60 text-primary"
+                  : "bg-muted/60 border-muted-foreground/20 text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              <ArrowLeftRight className="h-3.5 w-3.5" />
+              Comparar
+            </button>
+          </div>
+        </div>
+
+        {/* Selector de comparación — aparece solo cuando está activo */}
+        {comparing && (
+          <div className="flex items-center gap-2 rounded-lg bg-muted/40 border border-border/50 px-4 py-2.5">
+            <ArrowLeftRight className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+            <span className="text-xs text-muted-foreground">Comparar con</span>
+            <Select value={compareId} onValueChange={setCompareId}>
+              <SelectTrigger className="w-[140px] h-7 text-xs ml-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {trimesters.filter((t) => t.id !== currentId).map((t) => (
+                  <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {SISTEMAS.map(({ key, label, desc, color, universo }) => {
+            const total      = universo === "SO" ? curr.totalSO : curr.totalOIC;
+            const conectados = curr[`${key}n` as keyof typeof curr] as number;
+            const porcentaje = curr[key];
+            return (
+              <div key={key} className="rounded-xl border bg-background p-4 space-y-3 hover:shadow-sm transition-shadow">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: color }} />
+                  <span className="text-xs font-bold text-foreground">{label}</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-tight">{desc}</p>
+                <div>
+                  <p className="text-4xl font-black tracking-tight tabular-nums">{porcentaje}<span className="text-lg font-semibold text-muted-foreground">%</span></p>
+                  <ProgressBar value={porcentaje} color={color} />
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    <span className="font-semibold text-foreground">{fmt(conectados)}</span> de {fmt(total)}{" "}
+                    {universo === "SO" ? "entes SO" : "OIC / TJA"}
+                  </p>
+                </div>
+                {comparing && (
+                  <div className="pt-2 border-t border-border/60">
+                    <Delta sistema={key} />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Bloque: Comparación nacional por sistema ──────────────────────────────────
+
+function BloqueComparacion({ trimesters }: { trimesters: TrimData[] }) {
+  const latestId = trimesters[trimesters.length - 1]?.id ?? "";
+  const prevId   = trimesters[trimesters.length - 2]?.id ?? "";
+
+  const [currentId, setCurrentId] = useState(latestId);
+  const [compareId, setCompareId] = useState(prevId);
+
+  const currTrm = trimesters.find((t) => t.id === currentId) ?? trimesters[trimesters.length - 1];
+  const cmpTrm  = trimesters.find((t) => t.id === compareId);
+
+  const curr    = useMemo(() => calcNacional(currTrm), [currTrm]);
+  const cmpData = useMemo(() => cmpTrm ? calcNacional(cmpTrm) : null, [cmpTrm]);
+
+  function Delta({ sistema }: { sistema: keyof typeof COLORS }) {
+    if (!cmpData) return null;
+    const diff   = parseFloat((curr[sistema] - cmpData[sistema]).toFixed(1));
+    const before = cmpData[sistema];
+    const label  = cmpTrm?.label ?? "";
+    if (diff > 0) return (
+      <div className="space-y-0.5">
+        <span className="flex items-center gap-1 text-emerald-600 text-xs font-semibold">
+          <TrendingUp className="h-3.5 w-3.5" /> Subió {diff}% desde el {label}
+        </span>
+        <p className="text-xs text-muted-foreground">Antes: {before}%</p>
+      </div>
+    );
+    if (diff < 0) return (
+      <div className="space-y-0.5">
+        <span className="flex items-center gap-1 text-rose-500 text-xs font-semibold">
+          <TrendingDown className="h-3.5 w-3.5" /> Bajó {Math.abs(diff)}% desde el {label}
+        </span>
+        <p className="text-xs text-muted-foreground">Antes: {before}%</p>
+      </div>
+    );
+    return (
+      <div className="space-y-0.5">
+        <span className="flex items-center gap-1 text-muted-foreground text-xs font-medium">
+          <Minus className="h-3.5 w-3.5" /> Sin cambio respecto al {label}
+        </span>
+        <p className="text-xs text-muted-foreground">Antes: {before}%</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border bg-card p-5 space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <SectionHeader
           icon={<BarChart2 className="h-4 w-4 text-muted-foreground" />}
-          title="Resumen de cobertura nacional"
-          desc="Porcentaje de entes públicos conectados a cada sistema de la PDN. Selecciona el trimestre que quieres ver y con cuál compararlo."
+          title="Comparación por sistema"
+          desc="Compara dos trimestres para ver el cambio en cobertura de cada sistema a nivel nacional."
         />
         <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap flex-shrink-0">
           <div className="flex flex-col gap-1">
@@ -226,9 +352,7 @@ function BloqueMetricas({ trimesters }: { trimesters: TrimData[] }) {
             <Select value={currentId} onValueChange={setCurrentId}>
               <SelectTrigger className="w-[130px] h-8 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {trimesters.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>
-                ))}
+                {trimesters.map((t) => <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -237,9 +361,7 @@ function BloqueMetricas({ trimesters }: { trimesters: TrimData[] }) {
             <Select value={compareId} onValueChange={setCompareId}>
               <SelectTrigger className="w-[130px] h-8 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {trimesters.filter((t) => t.id !== currentId).map((t) => (
-                  <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>
-                ))}
+                {trimesters.filter((t) => t.id !== currentId).map((t) => <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -258,7 +380,6 @@ function BloqueMetricas({ trimesters }: { trimesters: TrimData[] }) {
                 <span className="text-xs font-bold text-foreground">{label}</span>
               </div>
               <p className="text-xs text-muted-foreground leading-tight">{desc}</p>
-
               <div>
                 <p className="text-4xl font-black tracking-tight tabular-nums">{porcentaje}<span className="text-lg font-semibold text-muted-foreground">%</span></p>
                 <ProgressBar value={porcentaje} color={color} />
@@ -267,14 +388,12 @@ function BloqueMetricas({ trimesters }: { trimesters: TrimData[] }) {
                   {universo === "SO" ? "entes SO" : "OIC / TJA"}
                 </p>
               </div>
-
               <div className="pt-2 border-t border-border/60">
                 <Delta sistema={key} />
               </div>
             </div>
           );
         })}
-      </div>
       </div>
     </div>
   );
@@ -1193,7 +1312,6 @@ function BloqueRadar({ trimesters }: { trimesters: TrimData[] }) {
 const CHART_MENU = [
   { id: "evolucion",    label: "Evolución",      icon: TrendingUp,    desc: "Tendencia trimestral" },
   { id: "variacion",    label: "Variación",      icon: ArrowLeftRight, desc: "Cambios entre periodos" },
-  { id: "heatmap",      label: "Mapa de calor",  icon: LayoutGrid,    desc: "Todos los estados" },
   { id: "ranking",      label: "Ranking",        icon: MapPin,        desc: "Por entidad" },
   { id: "distribucion", label: "Distribución",   icon: PieChartIcon,  desc: "Por nivel" },
   { id: "radar",        label: "Perfil",         icon: Activity,      desc: "Comparación" },
@@ -1240,7 +1358,7 @@ export function HistoricoCharts() {
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1">
           Explorar análisis
         </p>
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-6 gap-2">
           {CHART_MENU.map(({ id, label, icon: Icon, desc }) => {
             const isActive = selected === id;
             return (
@@ -1269,7 +1387,6 @@ export function HistoricoCharts() {
       >
         {selected === "evolucion"    && <BloqueEvolucion      trimesters={trimesters} />}
         {selected === "variacion"    && <BloqueVariacion      trimesters={trimesters} />}
-        {selected === "heatmap"      && <BloqueHeatmap        trimesters={trimesters} />}
         {selected === "ranking"      && <BloqueRanking        trimesters={trimesters} />}
         {selected === "distribucion" && <BloquePieDistribucion trimesters={trimesters} />}
         {selected === "radar"        && <BloqueRadar          trimesters={trimesters} />}
